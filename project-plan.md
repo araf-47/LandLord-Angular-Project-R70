@@ -42,8 +42,22 @@ This is called out again at the point it matters below.
 - `MockDataService` — in-memory fake backend so pages list/add/edit without a real API
 - Build verified clean, dev server smoke-tested
 
-**Not done:** BariVara.com app, visual/brand design, real backend, monthly billing
-automation, real cross-system sync, testing, deployment.
+**Done (draft 2.0, since draft 1):**
+- LandLord app pushed past initial scaffold: monthly per-tenant billing ledger
+  (`period`-keyed invoices, never overwritten), centralized bill generation +
+  payment application in `MockDataService`, a landlord-wide Ledger (cash book) with
+  property/date filters, tenant financial summary (Total Due / Total Paid /
+  Maintenance Cost) with full billing/payment/maintenance history per tenant, and
+  navigation fixes (tab sub-nav) for previously undiscoverable sibling routes
+- **BariVara.com app scaffolded** — separate Angular 22 project
+  `BariVara-Angular-Project-R70/`, same conventions as the LandLord app. Full route
+  structure for guest browsing, auth (shared pattern), tenant area, apartment-owner
+  area, and landlord-linked area. Own `MockDataService`, seeded so its
+  landlord-linked listing narratively matches a vacant unit in the LandLord app's
+  seed data. Build verified clean, dev server smoke-tested.
+
+**Not done:** visual/brand design pass (Phase 4), real cross-app connection beyond
+shared conventions (Phase 3), real backend, testing, deployment.
 
 ## 4. Part 1 — Frontend (both apps)
 
@@ -58,29 +72,32 @@ automation, real cross-system sync, testing, deployment.
 1.8. Mock data service for a working demo without a backend
 1.9. Build verification
 
-### Phase 2 — BariVara.com app decision + scaffold
-2.1. **Decision needed:** separate Angular project (e.g. `BariVara-Angular-Project-R70/`
-     sibling folder) vs. a second route-root inside the existing project. Recommended:
-     separate project — it's a genuinely separate public site with a different
-     audience, and this matches how it'll actually be deployed (own domain).
+*(Since Phase 1 "done": monthly billing ledger, cash-book Ledger page, tenant
+financial summary, maintenance-cost tracking, and nav fixes were added — this app is
+now functionally deeper than a route scaffold.)*
+
+### Phase 2 — BariVara.com app decision + scaffold ✅ DONE
+2.1. ~~Decision needed~~ **Decided: separate Angular project**,
+     `BariVara-Angular-Project-R70/`, sibling to the LandLord app.
 2.2. `ng new` scaffold for the BariVara app (same Angular version/config conventions
-     as LandLord app)
+     as LandLord app) ✅
 2.3. Map `BariVara_activity_v2.drawio` to a full page/route list (guest browse,
      login/signup reusing the login pattern, favorites, booking, three role
-     dashboards: Tenant / Apartment Owner / LandLord-linked)
+     dashboards: Tenant / Apartment Owner / LandLord-linked) ✅
 2.4. Build routing: guest area, auth area (mirrors LandLord's), tenant dashboard,
-     apartment-owner dashboard, landlord-linked dashboard
-2.5. Guest pages: homepage, search/filter listings, listing detail
+     apartment-owner dashboard, landlord-linked dashboard ✅
+2.5. Guest pages: homepage, search/filter listings, listing detail ✅
 2.6. Tenant-role pages: search, favorites, booking request, notifications, messages,
-     profile
+     profile ✅
 2.7. Apartment-owner-role pages: add property/unit, post ad (manual or auto-fill),
-     manage listings, requests inbox, messages
+     manage listings, requests inbox, messages ✅
 2.8. LandLord-linked dashboard: read-only synced-ads view + "manage in LandLord core"
-     redirect stub
+     redirect stub ✅
 2.9. Own local `MockDataService` for BariVara, field-for-field matching the LandLord
      one where concepts overlap (unit, rent, status, applicant, request) — so the two
-     mock stores are structurally identical even though not runtime-linked yet
-2.10. Build verification for the BariVara app
+     mock stores are structurally identical even though not runtime-linked yet ✅
+2.10. Build verification for the BariVara app ✅ (clean build, dev server smoke-tested
+      on a representative route per area)
 
 ### Phase 3 — Frontend "connection" between the two apps
 3.1. Shared TypeScript contract file(s) for cross-app data shapes (Unit, Listing,
