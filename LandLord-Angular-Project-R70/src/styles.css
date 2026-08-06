@@ -98,6 +98,33 @@ a {
   border-top: 1px solid #1f2937;
 }
 
+/* Sub-nav tabs for feature areas with multiple sibling views (e.g. Payments) */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+}
+
+.tabs a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tabs a:hover {
+  color: var(--text);
+}
+
+.tabs a.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
 .main-area {
   flex: 1;
   display: flex;
