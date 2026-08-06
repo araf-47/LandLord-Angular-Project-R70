@@ -65,19 +65,7 @@ export class ReceivePaymentComponent {
   save(): void {
     if (!this.tenantId || !this.amount) return;
 
-    const due = this.totalDue();
-    const fullyPaid = this.amount >= due;
-    let remaining = this.amount;
-
-    this.data.invoices.update((list) =>
-      list.map((i) => {
-        if (i.tenantId !== this.tenantId || i.status === 'paid' || remaining <= 0) return i;
-        const applied = Math.min(remaining, i.balance);
-        remaining -= applied;
-        const newBalance = i.balance - applied;
-        return { ...i, balance: newBalance, status: newBalance === 0 ? 'paid' : 'partial' };
-      })
-    );
+    this.data.applyPaymentToTenant(this.tenantId, this.amount);
 
     this.data.payments.update((list) => [
       ...list,

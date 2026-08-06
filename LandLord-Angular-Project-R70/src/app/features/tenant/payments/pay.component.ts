@@ -60,30 +60,19 @@ export class TenantPayComponent {
   payOnline(): void {
     if (!this.amount) return;
     // Simulated gateway — always succeeds in this frontend-only build.
-    this.applyPayment('confirmed');
+    this.data.applyPaymentToTenant(CURRENT_TENANT_ID, this.amount);
+    this.recordPayment('confirmed');
     this.result.set('Payment successful. Balance updated.');
   }
 
   payCash(): void {
     if (!this.amount) return;
-    this.applyPayment('pending');
+    // Balance only clears once the landlord confirms the cash arrived — see pending-cash.component.ts.
+    this.recordPayment('pending');
     this.result.set('Saved as pending — awaiting landlord confirmation.');
   }
 
-  private applyPayment(status: 'confirmed' | 'pending'): void {
-    let remaining = this.amount;
-    if (status === 'confirmed') {
-      this.data.invoices.update((list) =>
-        list.map((i) => {
-          if (i.tenantId !== CURRENT_TENANT_ID || i.status === 'paid' || remaining <= 0) return i;
-          const applied = Math.min(remaining, i.balance);
-          remaining -= applied;
-          const newBalance = i.balance - applied;
-          return { ...i, balance: newBalance, status: newBalance === 0 ? 'paid' : 'partial' };
-        })
-      );
-    }
-
+  private recordPayment(status: 'confirmed' | 'pending'): void {
     this.data.payments.update((list) => [
       ...list,
       {

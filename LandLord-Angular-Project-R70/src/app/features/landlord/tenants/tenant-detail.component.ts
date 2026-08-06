@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { MockDataService, periodLabel } from '../../../core/mock-data.service';
 
 @Component({
   selector: 'app-tenant-detail',
@@ -37,6 +37,27 @@ import { MockDataService } from '../../../core/mock-data.service';
           }
         </div>
       }
+
+      <div class="card">
+        <h3>Billing history</h3>
+        <table>
+          <thead><tr><th>Month</th><th>Rent</th><th>Utilities</th><th>Rolled over</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>
+            @for (i of billingHistory(); track i.id) {
+              <tr>
+                <td>{{ monthLabel(i.period) }}</td>
+                <td>{{ i.rent }}</td>
+                <td>{{ i.utilities }}</td>
+                <td>{{ i.prevUnpaidRolled }}</td>
+                <td>{{ i.amount }}</td>
+                <td><span class="badge" [class.badge-unpaid]="i.status !== 'paid'" [class.badge-paid]="i.status === 'paid'">{{ i.status }}</span></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="hint-text">No bills yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   `,
 })
@@ -49,10 +70,15 @@ export class TenantDetailComponent {
 
   readonly tenant = computed(() => this.data.tenants().find((t) => t.id === this.tenantId));
   readonly agreement = computed(() => this.data.agreements().find((a) => a.tenantId === this.tenantId));
+  readonly billingHistory = computed(() => this.data.invoicesForTenant(this.tenantId));
 
   constructor() {
     const a = this.agreement();
     if (a) this.termsDraft = a.terms;
+  }
+
+  monthLabel(period: string): string {
+    return periodLabel(period);
   }
 
   unitLabel(): string {

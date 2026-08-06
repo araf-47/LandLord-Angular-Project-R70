@@ -40,8 +40,15 @@ export class PendingCashComponent {
   }
 
   confirm(paymentId: string, received: boolean): void {
+    const payment = this.data.payments().find((p) => p.id === paymentId);
+
     this.data.payments.update((list) =>
       list.map((p) => (p.id === paymentId ? { ...p, status: received ? 'confirmed' : 'rejected' } : p))
     );
+
+    // The invoice only clears once the landlord confirms the cash actually arrived.
+    if (received && payment) {
+      this.data.applyPaymentToTenant(payment.tenantId, payment.amount);
+    }
   }
 }
