@@ -56,8 +56,56 @@ This is called out again at the point it matters below.
   landlord-linked listing narratively matches a vacant unit in the LandLord app's
   seed data. Build verified clean, dev server smoke-tested.
 
+**Done (since BariVara scaffold, still Phase 2 polish):**
+- BariVara homepage rebuilt to commerce-marketplace style against a real reference
+  (`pics/rental-site-demo.png`) — hero, District/Area/Property-Type search bar,
+  recent-listings grid. `district`, `area`, `propertyType` added as real (not
+  cosmetic) fields on `Listing`/`OwnerProperty`, wired through every place a listing
+  gets created or edited, and into matching filters on `/browse`
+- Auth pages (BariVara) got a way back to the homepage — were previously a dead end
+- Full review pass across both apps (see §3a) — 3 correctness issues found and fixed:
+  BariVara's duplicate-booking bug (booked-state was derived from a local signal
+  instead of real data), the one shared-concept field that had drifted between the
+  two apps (`MarketplaceRequest` lacked `tenantId`; `BookingRequest` already had it —
+  fixed on the LandLord side before Phase 3 locks the contract in), and LandLord's
+  dead Repost/Pause buttons on ad-management
+
 **Not done:** visual/brand design pass (Phase 4), real cross-app connection beyond
-shared conventions (Phase 3), real backend, testing, deployment.
+shared conventions (Phase 3), real backend, testing, deployment. See §3a for a
+tracked backlog of smaller gaps found during review but deliberately not fixed yet.
+
+## 3a. Known gaps — reviewed, tracked, not yet fixed
+
+Found during a full review pass across both apps (2026-08-07). Not blocking Phase 3;
+listed here so they're not lost, with a note on which phase naturally absorbs each.
+
+- **No property edit or delete, either app.** Add-only. (Candidate: fold into
+  whichever phase does the properties/units backend, Phase 8 — or do as a quick
+  frontend-only add before then if it starts to hurt demoing.)
+- **BariVara owner side has no unit-management page.** LandLord has "Manage units"
+  per property (list/add/edit); BariVara can only add one unit bundled into property
+  creation, no way to add a second unit or edit rent later. (Phase 4 or earlier —
+  frontend-only fix, doesn't need backend.)
+- **No "start a new conversation" anywhere.** Messaging only works by replying
+  inside conversations that already exist in seed data — no compose/new-thread entry
+  point from a listing, tenant record, or applicant profile. (Natural fit: Phase 12,
+  when messaging gets wired to a real backend anyway — but could be done sooner if
+  it undermines demos.)
+- **Single hardcoded demo user per role.** `CURRENT_TENANT_ID` / `CURRENT_OWNER_ID`
+  mean login always lands on the same mock person regardless of email typed — can't
+  demo "two different tenants" without editing code. (Resolved naturally by Phase 7,
+  real auth.)
+- **No data persistence across page reload.** In-memory signals reset on F5. Known
+  demo trap — mention before any live walkthrough. (Resolved by Phase 6/8+, real
+  backend.)
+- **LandLord's "Send" chat stub (Marketplace & Leads → request detail) and
+  BariVara's equivalent are still decorative — no handler.** Left as-is because
+  fixing it properly means building "start a new conversation" first (see above),
+  not just wiring a button.
+- **No images anywhere.** Every listing card shows a gray "No photo" placeholder.
+  More noticeable now that the homepage is commerce-styled and implies real photos.
+  (Needs object storage — Phase 8.4/11.4, or a placeholder-image service as a cheap
+  frontend-only stopgap if it bothers you before then.)
 
 ## 4. Part 1 — Frontend (both apps)
 
@@ -100,6 +148,8 @@ now functionally deeper than a route scaffold.)*
       on a representative route per area)
 
 ### Phase 3 — Frontend "connection" between the two apps
+*(Not started. One piece of prep already done: `MarketplaceRequest`/`BookingRequest`
+field drift was caught and fixed during the pre-Phase-3 review — see §3a.)*
 3.1. Shared TypeScript contract file(s) for cross-app data shapes (Unit, Listing,
      BookingRequest, etc.) — copied into both projects, kept in sync by hand for now
 3.2. Seed both mock data sets so a manual demo walkthrough tells one coherent story
