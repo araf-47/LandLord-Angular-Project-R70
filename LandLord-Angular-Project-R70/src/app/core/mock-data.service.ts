@@ -260,6 +260,13 @@ export class MockDataService {
       .sort((a, b) => b.period.localeCompare(a.period));
   }
 
+  /** A tenant's payment attempts (confirmed, pending, rejected), most recent first. */
+  paymentsForTenant(tenantId: string): PaymentRecord[] {
+    return this.payments()
+      .filter((p) => p.tenantId === tenantId)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }
+
   /** Every period that has bills, plus the current one, newest first — drives the month picker. */
   knownPeriods(): string[] {
     const periods = new Set(this.invoices().map((i) => i.period));

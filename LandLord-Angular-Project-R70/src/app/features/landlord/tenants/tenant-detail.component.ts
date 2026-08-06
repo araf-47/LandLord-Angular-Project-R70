@@ -58,6 +58,29 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
           </tbody>
         </table>
       </div>
+
+      <div class="card">
+        <h3>Payment history</h3>
+        <table>
+          <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+          <tbody>
+            @for (p of paymentHistory(); track p.id) {
+              <tr>
+                <td>{{ p.date }}</td>
+                <td>{{ p.amount }}</td>
+                <td>{{ p.method }}</td>
+                <td>
+                  <span class="badge" [class.badge-paid]="p.status === 'confirmed'" [class.badge-pending]="p.status === 'pending'" [class.badge-unpaid]="p.status === 'rejected'">
+                    {{ p.status }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="hint-text">No payments yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   `,
 })
@@ -71,6 +94,7 @@ export class TenantDetailComponent {
   readonly tenant = computed(() => this.data.tenants().find((t) => t.id === this.tenantId));
   readonly agreement = computed(() => this.data.agreements().find((a) => a.tenantId === this.tenantId));
   readonly billingHistory = computed(() => this.data.invoicesForTenant(this.tenantId));
+  readonly paymentHistory = computed(() => this.data.paymentsForTenant(this.tenantId));
 
   constructor() {
     const a = this.agreement();
