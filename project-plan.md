@@ -70,9 +70,24 @@ This is called out again at the point it matters below.
   fixed on the LandLord side before Phase 3 locks the contract in), and LandLord's
   dead Repost/Pause buttons on ad-management
 
-**Not done:** visual/brand design pass (Phase 4), real cross-app connection beyond
-shared conventions (Phase 3), real backend, testing, deployment. See §3a for a
-tracked backlog of smaller gaps found during review but deliberately not fixed yet.
+**Phase 3 review (self-audit before Phase 4):** found and fixed 3 issues — LandLord's
+`Unit` gained `propertyType` (the `VacancyAdSync` contract required it but nothing on
+the LandLord side could actually supply it), the two "go look at the other app's
+listings" links now consistently land on `/browse` instead of one going to a bare
+homepage, and Repost/Pause on ad-management now says plainly that it doesn't affect
+BariVara's copy of the data (two separate mock worlds until Phase 15).
+
+**Done (Phase 3, cross-app connection):**
+- Shared contract file (`shared-contracts.ts`) in both projects, boundary DTOs
+  defined for the future real sync
+- Both apps run on fixed dev ports (LandLord 4200, BariVara 4201) and link to each
+  other's dev URL from three previously-dead stubs
+- Both READMEs rewritten with real run instructions and mock-vs-real documentation
+- Seed data and login pattern checked against each other — no drift found
+
+**Not done:** visual/brand design pass (Phase 4), real backend, testing, deployment.
+See §3a for a tracked backlog of smaller gaps found during review but deliberately
+not fixed yet.
 
 ## 3a. Known gaps — reviewed, tracked, not yet fixed
 
@@ -147,20 +162,26 @@ now functionally deeper than a route scaffold.)*
 2.10. Build verification for the BariVara app ✅ (clean build, dev server smoke-tested
       on a representative route per area)
 
-### Phase 3 — Frontend "connection" between the two apps
-*(Not started. One piece of prep already done: `MarketplaceRequest`/`BookingRequest`
-field drift was caught and fixed during the pre-Phase-3 review — see §3a.)*
-3.1. Shared TypeScript contract file(s) for cross-app data shapes (Unit, Listing,
-     BookingRequest, etc.) — copied into both projects, kept in sync by hand for now
-3.2. Seed both mock data sets so a manual demo walkthrough tells one coherent story
-     (e.g. the same unit ID/number appears vacant in LandLord and listed on BariVara)
-3.3. Shared login pattern: BariVara's login/signup pages visually and structurally
-     match LandLord's (per the diagram note "same pattern as LandLord core Login")
-3.4. Cross-app navigation stubs: LandLord's "Auto-post ad to BariVara.com" and
-     BariVara's "Redirect to LandLord core → Marketplace & Leads" become real links
-     once both apps have known dev URLs (still two separate mock worlds underneath)
-3.5. Document in each repo's README which pieces are demo-only vs. will need the
-     real backend sync from Part 2
+### Phase 3 — Frontend "connection" between the two apps ✅ DONE
+3.1. `src/app/core/shared-contracts.ts` added to both projects, hand-kept in sync.
+     Moved the concepts already identical (`Conversation`, `AppNotification`) there;
+     added the boundary-crossing DTOs Phase 15 will actually need
+     (`VacancyAdSync`, `BookingRequestSync`, `UnitStatusSync`) so that phase maps
+     onto an already-defined wire shape instead of inventing one under pressure ✅
+3.2. Seed data checked — already told one coherent story from the original scaffold
+     (LandLord's vacant unit A-102/Green View Apartments/৳14,000 matches BariVara's
+     landlord-linked listing exactly); no drift found ✅
+3.3. Login pattern checked — both apps' login/signup are structurally identical
+     (same form, error handling, layout), differences are only the expected
+     per-app role sets; no drift found ✅
+3.4. Cross-app navigation is real now: BariVara fixed to port 4201, LandLord stays
+     on default 4200, so `npm start` in both runs them side by side with no flags.
+     `cross-app.config.ts` in each holds the other's dev URL. Three stubs now real
+     links (open the other app's dev site in a new tab): LandLord's ad-management
+     "Live on BariVara.com", tenant browse-transfer's "Search all listings on
+     BariVara.com", BariVara's landlord-linked "Redirect to LandLord core" ✅
+3.5. Both READMEs rewritten from ng-new boilerplate: what the app is, how to run it
+     alongside the other one, what's mock vs. real, pointer to §3a known gaps ✅
 
 ### Phase 4 — Visual design pass (both apps)
 4.1. Decide brand direction (colors, type, logo) — needs your input, or a Figma

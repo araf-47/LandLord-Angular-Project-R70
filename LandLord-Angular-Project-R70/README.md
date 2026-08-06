@@ -1,59 +1,52 @@
-# LandLordAngularProjectR70
+# LandLord
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.7.
+Property-management frontend. Two roles: **Landlord** (owner) and **Tenant** —
+properties/units, tenant lifecycle, rental agreements, monthly billing, a cash-book
+ledger, expenses, maintenance, and messaging.
 
-## Development server
+Angular 22, standalone components, no backend. See `../project-plan.md` (repo root)
+for the full roadmap and current phase.
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Running it
 
 ```bash
-ng generate component component-name
+npm install
+npm start        # http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Fixed to port 4200 so it can run alongside the [BariVara app](../BariVara-Angular-Project-R70)
+(port 4201) without a flag — several pages link to the other app's dev URL
+(`src/app/core/cross-app.config.ts`).
 
-```bash
-ng generate --help
-```
+Demo login: any email/password works. Pick a role from the dropdown (Landlord /
+Tenant) — there's no real auth yet, see below.
 
-## Building
+## What's mock vs. what's real
 
-To build the project run:
+Everything in this app runs on `src/app/core/mock-data.service.ts` — an in-memory
+signal-based store, no backend, no network calls. That means:
 
-```bash
-ng build
-```
+- **Resets on page reload.** Refreshing mid-demo loses all state back to seed data.
+- **`AuthService` is a stub.** Login accepts any credentials and just remembers the
+  role you picked in the dropdown; there's no real account system yet.
+- **Bill generation, payment application, and the ledger are all real logic** —
+  just running against in-memory data instead of a database. The business rules
+  (oldest-unpaid-month-first payment application, rollover balances, etc.) are
+  meant to carry over unchanged once a backend exists.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Connection to BariVara
 
-## Running unit tests
+This app and BariVara are genuinely separate deployments with no shared server —
+see `project-plan.md` Part 1 Phase 3 for what "connected" means before there's a
+real backend. In short: same field shapes for the concepts that cross the
+boundary (`src/app/core/shared-contracts.ts`, hand-kept in sync with BariVara's
+copy), consistent seed data (the vacant unit here matches BariVara's
+landlord-linked listing), and dev-only links between the two running apps. Real,
+live sync — a vacated unit actually appearing on BariVara — is Phase 15, once both
+apps share a backend.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Known gaps
 
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Tracked in `project-plan.md` §3a — things found during review that aren't blocking
+but aren't fixed yet (no property edit/delete, no way to start a new conversation,
+single hardcoded demo tenant, etc.).

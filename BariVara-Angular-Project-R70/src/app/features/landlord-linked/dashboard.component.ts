@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { LANDLORD_CORE_DEV_URL } from '../../core/cross-app.config';
 import { MockDataService } from '../../core/mock-data.service';
 
 @Component({
@@ -26,15 +27,18 @@ import { MockDataService } from '../../core/mock-data.service';
     <div class="card">
       <h3>Manage requests, chat, tenants, or anything else?</h3>
       <p>These are managed from LandLord core's Marketplace &amp; Leads module, not here.</p>
-      <button class="btn btn-primary" disabled>Redirect to LandLord core → Marketplace &amp; Leads</button>
+      <a class="btn btn-primary" [href]="landlordCoreUrl + '/landlord/marketplace/requests'" target="_blank" rel="noopener">
+        Redirect to LandLord core → Marketplace &amp; Leads
+      </a>
       <p class="hint-text" style="margin-top:0.5rem;">
-        Stub for now — becomes a real link once both apps are deployed (Part 1 Phase 3 caveat: no live link between two frontend-only mock apps).
+        Opens the LandLord dev site in a new tab — separate mock data until Phase 15's real sync (Part 1 Phase 3 caveat: no live link between two frontend-only mock apps yet).
       </p>
     </div>
   `,
 })
 export class LandlordLinkedDashboardComponent {
   private readonly data = inject(MockDataService);
+  protected readonly landlordCoreUrl = LANDLORD_CORE_DEV_URL;
 
   syncedListings() {
     return this.data.listings().filter((l) => l.source === 'landlord-linked');

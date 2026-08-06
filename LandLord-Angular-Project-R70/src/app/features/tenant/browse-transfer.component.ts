@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { BARIVARA_DEV_URL } from '../../core/cross-app.config';
 import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data.service';
 
 @Component({
@@ -31,12 +32,14 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data
     <div class="card">
       <h3>Looking outside this property?</h3>
       <p>Global search redirects to the BariVara.com marketplace.</p>
-      <button class="btn" disabled>Search all listings on BariVara.com (coming soon)</button>
+      <a class="btn" [href]="bariVaraUrl + '/browse'" target="_blank" rel="noopener">Search all listings on BariVara.com</a>
+      <p class="hint-text" style="margin-top:0.5rem;">Opens the BariVara dev site in a new tab — separate mock data until Phase 15's real sync.</p>
     </div>
   `,
 })
 export class TenantBrowseTransferComponent {
   private readonly data = inject(MockDataService);
+  protected readonly bariVaraUrl = BARIVARA_DEV_URL;
   readonly requested = signal(false);
 
   vacantUnits() {

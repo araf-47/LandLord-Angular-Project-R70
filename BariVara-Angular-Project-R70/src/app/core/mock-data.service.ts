@@ -1,4 +1,7 @@
 import { Injectable, signal } from '@angular/core';
+import { AppNotification, Conversation } from './shared-contracts';
+
+export type { AppNotification, Conversation };
 
 export interface OwnerProperty {
   id: string;
@@ -65,19 +68,6 @@ export interface BookingRequest {
   tenantId: string;
   applicantName: string;
   status: 'pending' | 'approved' | 'rejected';
-}
-
-export interface Conversation {
-  id: string;
-  withName: string;
-  messages: { from: string; text: string; date: string }[];
-}
-
-export interface AppNotification {
-  id: string;
-  title: string;
-  body: string;
-  read: boolean;
 }
 
 export interface TenantProfile {

@@ -1,4 +1,7 @@
 import { Injectable, signal } from '@angular/core';
+import { AppNotification, Conversation } from './shared-contracts';
+
+export type { AppNotification, Conversation };
 
 export interface Property {
   id: string;
@@ -6,12 +9,17 @@ export interface Property {
   address: string;
 }
 
+/** Matches BariVara's PropertyType — needed here so a vacant unit's VacancyAdSync
+ *  payload (shared-contracts.ts) has somewhere to actually get this value from. */
+export type PropertyType = 'apartment' | 'room' | 'office';
+
 export interface Unit {
   id: string;
   propertyId: string;
   unitNumber: string;
   rent: number;
   status: 'vacant' | 'occupied';
+  propertyType: PropertyType;
   /** Vacant units auto-post to BariVara; the landlord can pause that listing without changing occupancy. */
   adPaused?: boolean;
 }
@@ -92,12 +100,6 @@ export interface MaintenanceTicket {
   status: 'pending' | 'resolved';
 }
 
-export interface Conversation {
-  id: string;
-  withName: string;
-  messages: { from: string; text: string; date: string }[];
-}
-
 export interface MarketplaceRequest {
   id: string;
   unitId: string;
@@ -107,13 +109,6 @@ export interface MarketplaceRequest {
    *  LandLord TenantRecord unless/until approved. */
   tenantId?: string;
   status: 'pending' | 'approved' | 'rejected';
-}
-
-export interface AppNotification {
-  id: string;
-  title: string;
-  body: string;
-  read: boolean;
 }
 
 let idCounter = 1000;
@@ -208,8 +203,8 @@ export class MockDataService {
   ]);
 
   readonly units = signal<Unit[]>([
-    { id: 'u-1', propertyId: 'p-1', unitNumber: 'A-101', rent: 15000, status: 'occupied' },
-    { id: 'u-2', propertyId: 'p-1', unitNumber: 'A-102', rent: 14000, status: 'vacant' },
+    { id: 'u-1', propertyId: 'p-1', unitNumber: 'A-101', rent: 15000, status: 'occupied', propertyType: 'apartment' },
+    { id: 'u-2', propertyId: 'p-1', unitNumber: 'A-102', rent: 14000, status: 'vacant', propertyType: 'apartment' },
   ]);
 
   readonly tenants = signal<TenantRecord[]>([
