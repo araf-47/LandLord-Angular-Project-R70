@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CURRENT_OWNER_ID, MockDataService, nextId } from '../../../core/mock-data.service';
+import { AREAS_BY_DISTRICT, CURRENT_OWNER_ID, DISTRICTS, MockDataService, nextId } from '../../../core/mock-data.service';
 
 @Component({
   selector: 'app-owner-property-form',
@@ -19,6 +19,24 @@ import { CURRENT_OWNER_ID, MockDataService, nextId } from '../../../core/mock-da
         <div class="field">
           <label for="address">Address</label>
           <input id="address" name="address" [(ngModel)]="address" required />
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="district">District</label>
+            <select id="district" name="district" [ngModel]="district()" (ngModelChange)="onDistrictChange($event)">
+              @for (d of districts; track d) {
+                <option [value]="d">{{ d }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="area">Area</label>
+            <select id="area" name="area" [(ngModel)]="area">
+              @for (a of areas(); track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+          </div>
         </div>
       </div>
 
@@ -51,6 +69,16 @@ export class OwnerPropertyFormComponent {
   private readonly data = inject(MockDataService);
   private readonly router = inject(Router);
 
+  readonly districts = DISTRICTS;
+  readonly district = signal(DISTRICTS[0]);
+  readonly areas = () => AREAS_BY_DISTRICT[this.district()] ?? [];
+  area = this.areas()[0] ?? '';
+
+  onDistrictChange(value: string): void {
+    this.district.set(value);
+    this.area = this.areas()[0] ?? '';
+  }
+
   name = '';
   address = '';
   unitNumber = '';
@@ -61,7 +89,10 @@ export class OwnerPropertyFormComponent {
     if (!this.name || !this.address || !this.unitNumber || this.rent == null) return;
 
     const propertyId = nextId('op');
-    this.data.ownerProperties.update((list) => [...list, { id: propertyId, ownerId: CURRENT_OWNER_ID, name: this.name, address: this.address }]);
+    this.data.ownerProperties.update((list) => [
+      ...list,
+      { id: propertyId, ownerId: CURRENT_OWNER_ID, name: this.name, address: this.address, district: this.district(), area: this.area },
+    ]);
     this.data.ownerUnits.update((list) => [...list, { id: nextId('ou'), propertyId, unitNumber: this.unitNumber, rent: this.rent! }]);
 
     this.router.navigateByUrl('/owner/properties');

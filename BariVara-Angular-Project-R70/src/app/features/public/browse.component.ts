@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MockDataService } from '../../core/mock-data.service';
+import { AREAS_BY_DISTRICT, DISTRICTS, MockDataService, PROPERTY_TYPES } from '../../core/mock-data.service';
 
 @Component({
   selector: 'app-browse',
@@ -11,8 +11,26 @@ import { MockDataService } from '../../core/mock-data.service';
     <div class="public-content">
       <h1>Browse listings</h1>
 
-      <div class="search-bar" style="margin-bottom:1.5rem;">
-        <input [ngModel]="query()" (ngModelChange)="query.set($event)" name="query" placeholder="Search by location or title" />
+      <div class="search-bar" style="flex-wrap:wrap; margin-bottom:1.5rem;">
+        <input [ngModel]="query()" (ngModelChange)="query.set($event)" name="query" placeholder="Search by title" />
+        <select [ngModel]="district()" (ngModelChange)="onDistrictChange($event)" name="district">
+          <option value="">All districts</option>
+          @for (d of districts; track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+        <select [ngModel]="area()" (ngModelChange)="area.set($event)" name="area">
+          <option value="">All areas</option>
+          @for (a of areas(); track a) {
+            <option [value]="a">{{ a }}</option>
+          }
+        </select>
+        <select [ngModel]="propertyType()" (ngModelChange)="propertyType.set($event)" name="propertyType">
+          <option value="">All property types</option>
+          @for (t of propertyTypes; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
         <select [ngModel]="sourceFilter()" (ngModelChange)="sourceFilter.set($event)" name="source">
           <option value="">All sources</option>
           <option value="owner">Owner-posted</option>
@@ -26,7 +44,7 @@ import { MockDataService } from '../../core/mock-data.service';
             <div class="listing-card-image">No photo</div>
             <div class="listing-card-body">
               <div class="listing-card-title">{{ l.title }}</div>
-              <p>{{ l.address }}</p>
+              <p>{{ l.area }}, {{ l.district }}</p>
               <span class="badge" [class.badge-owner]="l.source === 'owner'" [class.badge-landlord-linked]="l.source === 'landlord-linked'">
                 {{ l.source === 'owner' ? 'Owner-posted' : 'LandLord-linked' }}
               </span>
@@ -43,15 +61,32 @@ import { MockDataService } from '../../core/mock-data.service';
 export class BrowseComponent {
   protected readonly data = inject(MockDataService);
 
-  readonly query = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('q') ?? '');
+  readonly districts = DISTRICTS;
+  readonly propertyTypes = PROPERTY_TYPES;
+
+  private readonly initialParams = inject(ActivatedRoute).snapshot.queryParamMap;
+  readonly query = signal(this.initialParams.get('q') ?? '');
+  readonly district = signal(this.initialParams.get('district') ?? '');
+  readonly area = signal(this.initialParams.get('area') ?? '');
+  readonly propertyType = signal(this.initialParams.get('propertyType') ?? '');
   readonly sourceFilter = signal('');
+
+  readonly areas = computed(() => (this.district() ? AREAS_BY_DISTRICT[this.district()] ?? [] : []));
+
+  onDistrictChange(value: string): void {
+    this.district.set(value);
+    this.area.set('');
+  }
 
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();
     return this.data.listings().filter((l) => {
       const matchesQuery = !q || l.title.toLowerCase().includes(q) || l.address.toLowerCase().includes(q);
+      const matchesDistrict = !this.district() || l.district === this.district();
+      const matchesArea = !this.area() || l.area === this.area();
+      const matchesType = !this.propertyType() || l.propertyType === this.propertyType();
       const matchesSource = !this.sourceFilter() || l.source === this.sourceFilter();
-      return matchesQuery && matchesSource && l.status === 'active';
+      return matchesQuery && matchesDistrict && matchesArea && matchesType && matchesSource && l.status === 'active';
     });
   });
 }

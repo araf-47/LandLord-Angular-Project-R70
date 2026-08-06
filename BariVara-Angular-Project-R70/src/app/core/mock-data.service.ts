@@ -5,6 +5,8 @@ export interface OwnerProperty {
   ownerId: string;
   name: string;
   address: string;
+  district: string;
+  area: string;
 }
 
 export interface OwnerUnit {
@@ -16,6 +18,8 @@ export interface OwnerUnit {
 
 /** A marketplace ad. Mirrors the LandLord app's Unit shape where concepts overlap
  *  (unitNumber, rent, status) — see project-plan.md Phase 2.9. */
+export type PropertyType = 'apartment' | 'room' | 'office';
+
 export interface Listing {
   id: string;
   ownerId: string;
@@ -25,9 +29,28 @@ export interface Listing {
   source: 'owner' | 'landlord-linked';
   title: string;
   address: string;
+  district: string;
+  area: string;
+  propertyType: PropertyType;
   rent: number;
   status: 'active' | 'paused' | 'taken';
 }
+
+export const DISTRICTS = ['Dhaka', 'Chattogram', 'Sylhet', 'Khulna', 'Rajshahi'];
+
+export const AREAS_BY_DISTRICT: Record<string, string[]> = {
+  Dhaka: ['Dhanmondi', 'Banani', 'Gulshan', 'Mirpur', 'Bashundhara R/A', 'Mogbazar', 'Uttara'],
+  Chattogram: ['Agrabad', 'Nasirabad', 'Khulshi'],
+  Sylhet: ['Zindabazar', 'Shahjalal Upashahar'],
+  Khulna: ['Sonadanga', 'Khalishpur'],
+  Rajshahi: ['Shaheb Bazar', 'Uposhohor'],
+};
+
+export const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
+  { value: 'apartment', label: 'Flat / Apartment' },
+  { value: 'room', label: 'Room / Sublet' },
+  { value: 'office', label: 'Office Space' },
+];
 
 export interface Favorite {
   id: string;
@@ -104,7 +127,7 @@ export class MockDataService {
   });
 
   readonly ownerProperties = signal<OwnerProperty[]>([
-    { id: 'op-1', ownerId: CURRENT_OWNER_ID, name: 'Lakeview Residence', address: 'Road 5, Banani, Dhaka' },
+    { id: 'op-1', ownerId: CURRENT_OWNER_ID, name: 'Lakeview Residence', address: 'Road 5, Banani, Dhaka', district: 'Dhaka', area: 'Banani' },
   ]);
 
   readonly ownerUnits = signal<OwnerUnit[]>([
@@ -119,6 +142,9 @@ export class MockDataService {
       source: 'owner',
       title: 'Lakeview Residence — B-201',
       address: 'Road 5, Banani, Dhaka',
+      district: 'Dhaka',
+      area: 'Banani',
+      propertyType: 'apartment',
       rent: 18000,
       status: 'active',
     },
@@ -128,6 +154,9 @@ export class MockDataService {
       source: 'landlord-linked',
       title: 'Green View Apartments — A-102',
       address: 'Road 12, Dhanmondi, Dhaka',
+      district: 'Dhaka',
+      area: 'Dhanmondi',
+      propertyType: 'apartment',
       rent: 14000,
       status: 'active',
     },
