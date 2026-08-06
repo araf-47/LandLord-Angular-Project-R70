@@ -35,59 +35,40 @@ This is called out again at the point it matters below.
 
 ## 3. Current status
 
-**Done (draft 1, commit `0a84e70`):**
-- Angular 22 standalone frontend scaffold in `LandLord-Angular-Project-R70/`
-- Full page/route structure for LandLord core (auth, landlord area, tenant area)
-- Role-guarded lazy routing, shared plain design system CSS
-- `MockDataService` — in-memory fake backend so pages list/add/edit without a real API
-- Build verified clean, dev server smoke-tested
+**Phase 1, 2, and 3 are done.** Both apps are functionally complete per the source
+diagrams, cross-referenced against each other, and self-reviewed twice (see §3a for
+what those reviews found and didn't fix). Chronological detail:
 
-**Done (draft 2.0, since draft 1):**
-- LandLord app pushed past initial scaffold: monthly per-tenant billing ledger
+- **Draft 1** (`0a84e70`): LandLord scaffolded — Angular 22 standalone, full
+  page/route structure from the 3 LandLord-side diagrams, role-guarded lazy routing,
+  `MockDataService` for a working demo with no backend.
+- **Draft 2.0**: LandLord pushed past scaffold — monthly per-tenant billing ledger
   (`period`-keyed invoices, never overwritten), centralized bill generation +
-  payment application in `MockDataService`, a landlord-wide Ledger (cash book) with
-  property/date filters, tenant financial summary (Total Due / Total Paid /
-  Maintenance Cost) with full billing/payment/maintenance history per tenant, and
-  navigation fixes (tab sub-nav) for previously undiscoverable sibling routes
-- **BariVara.com app scaffolded** — separate Angular 22 project
-  `BariVara-Angular-Project-R70/`, same conventions as the LandLord app. Full route
-  structure for guest browsing, auth (shared pattern), tenant area, apartment-owner
-  area, and landlord-linked area. Own `MockDataService`, seeded so its
-  landlord-linked listing narratively matches a vacant unit in the LandLord app's
-  seed data. Build verified clean, dev server smoke-tested.
+  payment application, a landlord-wide Ledger (cash book) with property/date
+  filters, tenant financial summary with full billing/payment/maintenance history,
+  and nav fixes for previously undiscoverable sibling routes.
+- **Phase 2**: BariVara scaffolded as a separate Angular 22 project
+  (`BariVara-Angular-Project-R70/`), same conventions. Full route structure for
+  guest/tenant/owner/landlord-linked areas, own `MockDataService`. Then rebuilt the
+  homepage to commerce-marketplace style against a real reference
+  (`pics/rental-site-demo.png`) with real district/area/property-type filtering, and
+  gave auth pages a way back to the homepage.
+- **Pre-Phase-3 review**: found and fixed 3 correctness bugs — BariVara's
+  duplicate-booking bug, `MarketplaceRequest` missing the `tenantId` field
+  `BookingRequest` already had, LandLord's dead Repost/Pause buttons.
+- **Phase 3**: shared contract file (`shared-contracts.ts`, hand-synced in both
+  projects) with boundary DTOs for the future real sync; both apps on fixed dev
+  ports (LandLord 4200, BariVara 4201) with three dead stubs turned into real
+  cross-app links; both READMEs rewritten; seed data and login pattern checked
+  against each other, no drift.
+- **Phase 3 self-review**: found and fixed 3 more issues — LandLord's `Unit` gained
+  `propertyType` (the new contract required it but nothing could supply it), the two
+  cross-app "go look at listings" links now consistently land on `/browse`, and
+  Repost/Pause now says plainly it doesn't touch BariVara's copy of the data yet.
 
-**Done (since BariVara scaffold, still Phase 2 polish):**
-- BariVara homepage rebuilt to commerce-marketplace style against a real reference
-  (`pics/rental-site-demo.png`) — hero, District/Area/Property-Type search bar,
-  recent-listings grid. `district`, `area`, `propertyType` added as real (not
-  cosmetic) fields on `Listing`/`OwnerProperty`, wired through every place a listing
-  gets created or edited, and into matching filters on `/browse`
-- Auth pages (BariVara) got a way back to the homepage — were previously a dead end
-- Full review pass across both apps (see §3a) — 3 correctness issues found and fixed:
-  BariVara's duplicate-booking bug (booked-state was derived from a local signal
-  instead of real data), the one shared-concept field that had drifted between the
-  two apps (`MarketplaceRequest` lacked `tenantId`; `BookingRequest` already had it —
-  fixed on the LandLord side before Phase 3 locks the contract in), and LandLord's
-  dead Repost/Pause buttons on ad-management
-
-**Phase 3 review (self-audit before Phase 4):** found and fixed 3 issues — LandLord's
-`Unit` gained `propertyType` (the `VacancyAdSync` contract required it but nothing on
-the LandLord side could actually supply it), the two "go look at the other app's
-listings" links now consistently land on `/browse` instead of one going to a bare
-homepage, and Repost/Pause on ad-management now says plainly that it doesn't affect
-BariVara's copy of the data (two separate mock worlds until Phase 15).
-
-**Done (Phase 3, cross-app connection):**
-- Shared contract file (`shared-contracts.ts`) in both projects, boundary DTOs
-  defined for the future real sync
-- Both apps run on fixed dev ports (LandLord 4200, BariVara 4201) and link to each
-  other's dev URL from three previously-dead stubs
-- Both READMEs rewritten with real run instructions and mock-vs-real documentation
-- Seed data and login pattern checked against each other — no drift found
-
-**Not done:** visual/brand design pass (Phase 4), real backend, testing, deployment.
-See §3a for a tracked backlog of smaller gaps found during review but deliberately
-not fixed yet.
+**Not done:** visual/brand design pass (Phase 4), Phase 5 QA/sign-off, real backend,
+testing, deployment. See §3a for a tracked backlog of smaller gaps found during
+review but deliberately not fixed.
 
 ## 3a. Known gaps — reviewed, tracked, not yet fixed
 
@@ -310,8 +291,7 @@ now functionally deeper than a route scaffold.)*
 
 | Decision | Needed before | Options |
 |---|---|---|
-| BariVara app structure | Phase 2 (now) | Separate Angular project (recommended) vs. shared project, second route root |
-| Brand direction | Phase 4 | Provide colors/logo/reference, or have me propose one |
+| Brand direction | Phase 4 (now) | Provide colors/logo/reference, or have me propose one |
 | Backend language/framework | Phase 6 | Node.js/NestJS, Node/Express, Django, Laravel, etc. |
 | Hosting/infra | Phase 6, 19 | Self-managed VPS, AWS, GCP, Vercel+Supabase, Firebase |
 | Payment gateway | Phase 10 | bKash/Nagad (BD market), Stripe, SSLCommerz |
