@@ -46,7 +46,13 @@ export class TenantBrowseTransferComponent {
   requestTransfer(unitId: string): void {
     this.data.marketplaceRequests.update((list) => [
       ...list,
-      { id: nextId('r'), unitId, applicantName: this.data.tenants().find((t) => t.id === CURRENT_TENANT_ID)?.name ?? 'Tenant', status: 'pending' },
+      {
+        id: nextId('r'),
+        unitId,
+        applicantName: this.data.tenants().find((t) => t.id === CURRENT_TENANT_ID)?.name ?? 'Tenant',
+        tenantId: CURRENT_TENANT_ID,
+        status: 'pending',
+      },
     ]);
     this.requested.set(true);
   }

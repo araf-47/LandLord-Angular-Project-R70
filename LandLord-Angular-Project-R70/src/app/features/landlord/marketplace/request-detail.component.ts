@@ -1,18 +1,21 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MockDataService } from '../../../core/mock-data.service';
 
 @Component({
   selector: 'app-request-detail',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   template: `
     @if (request()) {
       <h1>Request — {{ request()!.applicantName }}</h1>
       <div class="card">
         <p><strong>Unit requested:</strong> {{ unitLabel() }}</p>
         <p><strong>Status:</strong> {{ request()!.status }}</p>
+        @if (request()!.tenantId) {
+          <a [routerLink]="['/landlord/tenants', request()!.tenantId]">View tenant profile</a>
+        }
       </div>
 
       <div class="card">

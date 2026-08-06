@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data.service';
@@ -27,11 +27,11 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data
           } @else if (auth.role() === 'tenant') {
             <div class="actions-row">
               <button class="btn" (click)="toggleFavorite()">{{ isFavorite() ? 'Saved ✓' : 'Save' }}</button>
-              @if (!booked()) {
+              @if (!alreadyRequested()) {
                 <button class="btn btn-primary" (click)="book()">Book now</button>
               }
             </div>
-            @if (booked()) {
+            @if (alreadyRequested()) {
               <p class="hint-text" style="margin-top:0.75rem;">
                 Request submitted —
                 {{ listing()!.source === 'owner' ? "sent to the owner's request inbox." : 'synced to LandLord core Marketplace & Leads.' }}
@@ -51,8 +51,10 @@ export class ListingDetailComponent {
   private readonly router = inject(Router);
   private readonly listingId = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
 
-  readonly booked = signal(false);
   readonly listing = computed(() => this.data.listingById(this.listingId));
+  readonly alreadyRequested = computed(() =>
+    this.data.bookingRequests().some((r) => r.listingId === this.listingId && r.tenantId === CURRENT_TENANT_ID && r.status !== 'rejected')
+  );
 
   isFavorite(): boolean {
     return this.data.favorites().some((f) => f.tenantId === CURRENT_TENANT_ID && f.listingId === this.listingId);
@@ -77,7 +79,6 @@ export class ListingDetailComponent {
         status: 'pending',
       },
     ]);
-    this.booked.set(true);
   }
 
   promptSignup(): void {

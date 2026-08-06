@@ -12,6 +12,8 @@ export interface Unit {
   unitNumber: string;
   rent: number;
   status: 'vacant' | 'occupied';
+  /** Vacant units auto-post to BariVara; the landlord can pause that listing without changing occupancy. */
+  adPaused?: boolean;
 }
 
 export interface TenantRecord {
@@ -100,6 +102,10 @@ export interface MarketplaceRequest {
   id: string;
   unitId: string;
   applicantName: string;
+  /** Set when the applicant is already a LandLord tenant (internal transfer request).
+   *  Left unset for external BariVara marketplace applicants, who don't have a
+   *  LandLord TenantRecord unless/until approved. */
+  tenantId?: string;
   status: 'pending' | 'approved' | 'rejected';
 }
 

@@ -14,11 +14,14 @@ import { MockDataService } from '../../../core/mock-data.service';
             <tr>
               <td>{{ u.unitNumber }}</td>
               <td><span class="badge" [class.badge-vacant]="u.status === 'vacant'" [class.badge-occupied]="u.status === 'occupied'">{{ u.status }}</span></td>
-              <td>{{ u.status === 'vacant' ? 'Live on BariVara.com' : 'Not listed' }}</td>
+              <td>{{ adStateLabel(u) }}</td>
               <td>
                 @if (u.status === 'vacant') {
-                  <button class="btn btn-sm">Repost</button>
-                  <button class="btn btn-sm">Pause</button>
+                  @if (u.adPaused) {
+                    <button class="btn btn-sm" (click)="repost(u.id)">Repost</button>
+                  } @else {
+                    <button class="btn btn-sm" (click)="pause(u.id)">Pause</button>
+                  }
                 }
               </td>
             </tr>
@@ -30,4 +33,17 @@ import { MockDataService } from '../../../core/mock-data.service';
 })
 export class AdManagementComponent {
   protected readonly data = inject(MockDataService);
+
+  adStateLabel(unit: { status: string; adPaused?: boolean }): string {
+    if (unit.status !== 'vacant') return 'Not listed';
+    return unit.adPaused ? 'Paused' : 'Live on BariVara.com';
+  }
+
+  pause(unitId: string): void {
+    this.data.units.update((list) => list.map((u) => (u.id === unitId ? { ...u, adPaused: true } : u)));
+  }
+
+  repost(unitId: string): void {
+    this.data.units.update((list) => list.map((u) => (u.id === unitId ? { ...u, adPaused: false } : u)));
+  }
 }
