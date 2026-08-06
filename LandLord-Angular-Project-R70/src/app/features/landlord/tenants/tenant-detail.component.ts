@@ -96,6 +96,25 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
           </tbody>
         </table>
       </div>
+
+      <div class="card">
+        <h3>Maintenance cost history</h3>
+        <table>
+          <thead><tr><th>Date</th><th>Description</th><th>Bearer</th><th>Amount</th></tr></thead>
+          <tbody>
+            @for (m of maintenanceHistory(); track m.id) {
+              <tr>
+                <td>{{ m.date }}</td>
+                <td>{{ m.description }}</td>
+                <td>{{ m.bearer === 'tenant' ? 'Tenant' : 'Landlord' }}</td>
+                <td>{{ m.amount }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="hint-text">No maintenance costs yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   `,
 })
@@ -113,6 +132,7 @@ export class TenantDetailComponent {
   readonly totalDue = computed(() => this.data.totalDueForTenant(this.tenantId));
   readonly totalPaid = computed(() => this.data.totalPaidForTenant(this.tenantId));
   readonly totalMaintenanceCost = computed(() => this.data.maintenanceCostForTenant(this.tenantId));
+  readonly maintenanceHistory = computed(() => this.data.maintenanceHistoryForTenant(this.tenantId));
 
   constructor() {
     const a = this.agreement();

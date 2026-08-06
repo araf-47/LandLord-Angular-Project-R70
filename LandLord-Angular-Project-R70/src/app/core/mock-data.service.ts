@@ -286,9 +286,16 @@ export class MockDataService {
 
   /** Maintenance cost this tenant is responsible for (bearer: 'tenant'), not what the landlord absorbed. */
   maintenanceCostForTenant(tenantId: string): number {
-    return this.expenses()
-      .filter((e) => e.tenantId === tenantId && e.bearer === 'tenant' && e.category === 'Maintenance')
+    return this.maintenanceHistoryForTenant(tenantId)
+      .filter((e) => e.bearer === 'tenant')
       .reduce((sum, e) => sum + e.amount, 0);
+  }
+
+  /** Every resolved maintenance cost tied to this tenant, whoever bore it, most recent first. */
+  maintenanceHistoryForTenant(tenantId: string): ExpenseRecord[] {
+    return this.expenses()
+      .filter((e) => e.tenantId === tenantId && e.category === 'Maintenance')
+      .sort((a, b) => b.date.localeCompare(a.date));
   }
 
   /** Every period that has bills, plus the current one, newest first — drives the month picker. */
