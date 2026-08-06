@@ -18,6 +18,7 @@ import { AuthService } from '../core/auth.service';
           <a routerLink="/landlord/rentals" routerLinkActive="active">Rental Agreements</a>
           <a routerLink="/landlord/payments" routerLinkActive="active">Payments</a>
           <a routerLink="/landlord/expenses" routerLinkActive="active">Expenses</a>
+          <a routerLink="/landlord/ledger" routerLinkActive="active">Ledger</a>
           <a routerLink="/landlord/maintenance" routerLinkActive="active">Maintenance</a>
           <a routerLink="/landlord/messages" routerLinkActive="active">Messages</a>
         </nav>

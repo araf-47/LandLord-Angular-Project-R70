@@ -25,6 +25,7 @@ export class LandlordDashboardComponent {
     { title: 'Rental Agreements', desc: 'View and edit lease terms.', link: '/landlord/rentals' },
     { title: 'Payments', desc: 'Generate bills, receive payments.', link: '/landlord/payments' },
     { title: 'Expenses', desc: 'Track property and tenant expenses.', link: '/landlord/expenses' },
+    { title: 'Ledger', desc: 'All money in and out, one cash book.', link: '/landlord/ledger' },
     { title: 'Maintenance', desc: 'Log and resolve issues.', link: '/landlord/maintenance' },
     { title: 'Messages', desc: 'Chat with tenants and applicants.', link: '/landlord/messages' },
   ];

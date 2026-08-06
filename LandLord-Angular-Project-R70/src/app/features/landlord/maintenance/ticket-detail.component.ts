@@ -47,9 +47,18 @@ export class LandlordTicketDetailComponent {
 
     if (costMoney) {
       const t = this.ticket();
+      const propertyId = this.data.units().find((u) => u.id === t?.unitId)?.propertyId ?? '';
       this.data.expenses.update((list) => [
         ...list,
-        { id: nextId('exp'), category: 'Maintenance', description: t?.description ?? '', amount: 0, tag: 'property' },
+        {
+          id: nextId('exp'),
+          propertyId,
+          category: 'Maintenance',
+          description: t?.description ?? '',
+          amount: 0,
+          tag: 'property',
+          date: new Date().toISOString().slice(0, 10),
+        },
       ]);
     }
     this.router.navigateByUrl('/landlord/maintenance');

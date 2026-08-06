@@ -9,6 +9,7 @@ export const LANDLORD_ROUTES: Routes = [
   { path: 'rentals', loadChildren: () => import('./rentals/rentals.routes').then((m) => m.RENTALS_ROUTES) },
   { path: 'payments', loadChildren: () => import('./payments/payments.routes').then((m) => m.PAYMENTS_ROUTES) },
   { path: 'expenses', loadComponent: () => import('./expenses/expense-management.component').then((m) => m.ExpenseManagementComponent) },
+  { path: 'ledger', loadComponent: () => import('./ledger.component').then((m) => m.LedgerComponent) },
   { path: 'maintenance', loadChildren: () => import('./maintenance/maintenance.routes').then((m) => m.LANDLORD_MAINTENANCE_ROUTES) },
   { path: 'messages', loadChildren: () => import('./messages/messages.routes').then((m) => m.LANDLORD_MESSAGES_ROUTES) },
 ];

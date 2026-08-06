@@ -61,10 +61,22 @@ export interface PaymentRecord {
 
 export interface ExpenseRecord {
   id: string;
+  propertyId: string;
   category: string;
   description: string;
   amount: number;
   tag: 'property' | 'tenant';
+  date: string;
+}
+
+/** One line of the cash book: a confirmed payment (income) or a logged expense (outflow). */
+export interface LedgerEntry {
+  id: string;
+  date: string;
+  type: 'income' | 'expense';
+  description: string;
+  propertyId?: string;
+  amount: number;
 }
 
 export interface MaintenanceTicket {
@@ -318,5 +330,48 @@ export class MockDataService {
     if (updates.size) {
       this.invoices.update((list) => list.map((i) => updates.get(i.id) ?? i));
     }
+  }
+
+  /**
+   * Resolves which property a tenant belongs to for ledger attribution. Checks the
+   * tenant's current unit first, then falls back to their rental agreement — that
+   * way payments made before a move-out still attribute correctly even after
+   * `unitId` gets cleared.
+   */
+  propertyIdForTenant(tenantId: string): string | undefined {
+    const tenant = this.tenants().find((t) => t.id === tenantId);
+    const unitId = tenant?.unitId ?? this.agreements().find((a) => a.tenantId === tenantId)?.unitId;
+    return this.units().find((u) => u.id === unitId)?.propertyId;
+  }
+
+  /**
+   * The cash book: every confirmed payment (income) and every logged expense
+   * (outflow), merged and sorted oldest first. Pass a propertyId to scope it to
+   * one property; omit for the landlord-wide view.
+   */
+  ledgerEntries(propertyId?: string): LedgerEntry[] {
+    const income: LedgerEntry[] = this.payments()
+      .filter((p) => p.status === 'confirmed')
+      .map((p) => ({
+        id: p.id,
+        date: p.date,
+        type: 'income' as const,
+        description: `Payment — ${this.tenants().find((t) => t.id === p.tenantId)?.name ?? 'Tenant'}`,
+        propertyId: this.propertyIdForTenant(p.tenantId),
+        amount: p.amount,
+      }));
+
+    const outflow: LedgerEntry[] = this.expenses().map((e) => ({
+      id: e.id,
+      date: e.date,
+      type: 'expense' as const,
+      description: e.description ? `${e.category} — ${e.description}` : e.category,
+      propertyId: e.propertyId,
+      amount: e.amount,
+    }));
+
+    return [...income, ...outflow]
+      .filter((entry) => !propertyId || entry.propertyId === propertyId)
+      .sort((a, b) => a.date.localeCompare(b.date));
   }
 }
