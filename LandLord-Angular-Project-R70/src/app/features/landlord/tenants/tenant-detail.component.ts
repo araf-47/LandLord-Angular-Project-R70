@@ -38,6 +38,21 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
         </div>
       }
 
+      <div class="module-grid" style="margin-bottom:1rem;">
+        <div class="card">
+          <p class="hint-text">Total due</p>
+          <h2 style="color:var(--danger);">{{ totalDue() }}</h2>
+        </div>
+        <div class="card">
+          <p class="hint-text">Total paid (lifetime)</p>
+          <h2 style="color:var(--success);">{{ totalPaid() }}</h2>
+        </div>
+        <div class="card">
+          <p class="hint-text">Total maintenance cost (tenant-borne)</p>
+          <h2>{{ totalMaintenanceCost() }}</h2>
+        </div>
+      </div>
+
       <div class="card">
         <h3>Billing history</h3>
         <table>
@@ -95,6 +110,9 @@ export class TenantDetailComponent {
   readonly agreement = computed(() => this.data.agreements().find((a) => a.tenantId === this.tenantId));
   readonly billingHistory = computed(() => this.data.invoicesForTenant(this.tenantId));
   readonly paymentHistory = computed(() => this.data.paymentsForTenant(this.tenantId));
+  readonly totalDue = computed(() => this.data.totalDueForTenant(this.tenantId));
+  readonly totalPaid = computed(() => this.data.totalPaidForTenant(this.tenantId));
+  readonly totalMaintenanceCost = computed(() => this.data.maintenanceCostForTenant(this.tenantId));
 
   constructor() {
     const a = this.agreement();

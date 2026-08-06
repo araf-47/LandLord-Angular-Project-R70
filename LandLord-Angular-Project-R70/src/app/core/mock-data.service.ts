@@ -65,7 +65,10 @@ export interface ExpenseRecord {
   category: string;
   description: string;
   amount: number;
-  tag: 'property' | 'tenant';
+  /** Who bears this cost — the landlord absorbs it as a business expense, or it's tracked against a specific tenant. */
+  bearer: 'landlord' | 'tenant';
+  /** Set whenever bearer is 'tenant' — which tenant this cost is attributed to. */
+  tenantId?: string;
   date: string;
 }
 
@@ -265,6 +268,27 @@ export class MockDataService {
     return this.payments()
       .filter((p) => p.tenantId === tenantId)
       .sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  /** What a tenant currently owes, across every unpaid/partial month. */
+  totalDueForTenant(tenantId: string): number {
+    return this.invoicesForTenant(tenantId)
+      .filter((i) => i.status !== 'paid')
+      .reduce((sum, i) => sum + i.balance, 0);
+  }
+
+  /** What a tenant has actually paid, lifetime — confirmed payments only. */
+  totalPaidForTenant(tenantId: string): number {
+    return this.paymentsForTenant(tenantId)
+      .filter((p) => p.status === 'confirmed')
+      .reduce((sum, p) => sum + p.amount, 0);
+  }
+
+  /** Maintenance cost this tenant is responsible for (bearer: 'tenant'), not what the landlord absorbed. */
+  maintenanceCostForTenant(tenantId: string): number {
+    return this.expenses()
+      .filter((e) => e.tenantId === tenantId && e.bearer === 'tenant' && e.category === 'Maintenance')
+      .reduce((sum, e) => sum + e.amount, 0);
   }
 
   /** Every period that has bills, plus the current one, newest first — drives the month picker. */

@@ -20,12 +20,23 @@ import { ExpenseRecord, MockDataService, nextId } from '../../../core/mock-data.
         </select>
       </div>
       <div class="field">
-        <label for="tag">Tag</label>
-        <select id="tag" name="tag" [(ngModel)]="tag">
-          <option value="property">Property</option>
+        <label for="bearer">Who bears this?</label>
+        <select id="bearer" name="bearer" [(ngModel)]="bearer">
+          <option value="landlord">Landlord</option>
           <option value="tenant">Tenant</option>
         </select>
       </div>
+      @if (bearer === 'tenant') {
+        <div class="field">
+          <label for="tenant">Tenant</label>
+          <select id="tenant" name="tenant" [(ngModel)]="tenantId">
+            <option value="">— choose —</option>
+            @for (t of data.tenants(); track t.id) {
+              <option [value]="t.id">{{ t.name }}</option>
+            }
+          </select>
+        </div>
+      }
       <div class="field">
         <label for="amount">Amount</label>
         <input id="amount" type="number" name="amount" [(ngModel)]="amount" />
@@ -45,14 +56,14 @@ import { ExpenseRecord, MockDataService, nextId } from '../../../core/mock-data.
 
     <div class="card">
       <table>
-        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Tag</th><th>Amount</th></tr></thead>
+        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Bearer</th><th>Amount</th></tr></thead>
         <tbody>
           @for (e of data.expenses(); track e.id) {
             <tr>
               <td>{{ e.date }}</td>
               <td>{{ e.category }}</td>
               <td>{{ e.description }}</td>
-              <td>{{ e.tag }}</td>
+              <td>{{ e.bearer === 'tenant' ? tenantName(e.tenantId) : 'Landlord' }}</td>
               <td>{{ e.amount }}</td>
             </tr>
           }
@@ -65,13 +76,20 @@ export class ExpenseManagementComponent {
   protected readonly data = inject(MockDataService);
 
   propertyId = this.data.properties()[0]?.id ?? '';
-  tag: ExpenseRecord['tag'] = 'property';
+  bearer: ExpenseRecord['bearer'] = 'landlord';
+  tenantId = '';
   amount = 0;
   category = '';
   description = '';
 
+  tenantName(tenantId?: string): string {
+    return this.data.tenants().find((t) => t.id === tenantId)?.name ?? '—';
+  }
+
   save(): void {
     if (!this.amount || !this.category || !this.propertyId) return;
+    if (this.bearer === 'tenant' && !this.tenantId) return;
+
     this.data.expenses.update((list) => [
       ...list,
       {
@@ -80,12 +98,14 @@ export class ExpenseManagementComponent {
         category: this.category,
         description: this.description,
         amount: this.amount,
-        tag: this.tag,
+        bearer: this.bearer,
+        tenantId: this.bearer === 'tenant' ? this.tenantId : undefined,
         date: new Date().toISOString().slice(0, 10),
       },
     ]);
     this.amount = 0;
     this.category = '';
     this.description = '';
+    this.tenantId = '';
   }
 }
