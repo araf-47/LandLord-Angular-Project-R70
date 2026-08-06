@@ -1,0 +1,693 @@
+<mxfile host="Electron">
+  <diagram name="LandLord Core - Owner Activity Diagram v2" id="landlord-core-owner-v2">
+    <mxGraphModel dx="3958" dy="370" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3200" pageHeight="1300" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3120" edge="1" parent="1" source="c3111" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;dashed=1;elbow=vertical;edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.586;exitDx=0;exitDy=0;exitPerimeter=0;" target="c3052" value="becomes a lead for">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="930" y="1079.31" />
+              <mxPoint x="930" y="1090" />
+              <mxPoint x="-329.94" y="1090" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c3001" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="1535" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="c3002" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;dashed=1;" value="Login (see Login Activity Diagram)" vertex="1">
+          <mxGeometry height="46" width="260" x="1420" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c3003" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Landlord Dashboard" vertex="1">
+          <mxGeometry height="50" width="220" x="1440" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="c3004" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Choose a Module" vertex="1">
+          <mxGeometry height="80" width="170" x="1465" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="c3005" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Property &amp; Units" vertex="1">
+          <mxGeometry height="50" width="220" x="-1220" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="c3006" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3005" value="Property">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-370" y="275" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c3007" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Tenant Management" vertex="1">
+          <mxGeometry height="50" width="220" x="-145" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="c3008" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3007" value="Tenant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3009" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Marketplace &amp; Leads" vertex="1">
+          <mxGeometry height="50" width="220" x="890" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c3010" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3009" value="Marketplace">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3011" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Rental Agreements" vertex="1">
+          <mxGeometry height="50" width="220" x="1250" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c3012" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3011" value="Rental">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3013" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Payments" vertex="1">
+          <mxGeometry height="50" width="220" x="1540" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c3014" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3013" value="Payments">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3015" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Expenses" vertex="1">
+          <mxGeometry height="50" width="220" x="1910" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c3016" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3015" value="Expenses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3017" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Maintenance" vertex="1">
+          <mxGeometry height="50" width="220" x="2170" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c3018" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3017" value="Maintenance">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3019" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Messages" vertex="1">
+          <mxGeometry height="50" width="220" x="2490" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c3020" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3019" value="Messages">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3021" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Logout" vertex="1">
+          <mxGeometry height="50" width="220" x="2790" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="c3022" edge="1" parent="1" source="c3004" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3021" value="Logout">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3023" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Action?" vertex="1">
+          <mxGeometry height="70" width="160" x="-1190" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="c3024" edge="1" parent="1" source="c3005" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3023" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3025" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Enter property info" vertex="1">
+          <mxGeometry height="50" width="220" x="-1590" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="c3026" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Validate &amp; save to database" vertex="1">
+          <mxGeometry height="50" width="220" x="-1590" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="c3027" edge="1" parent="1" source="c3023" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3025" value="Add property">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3028" edge="1" parent="1" source="c3025" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3026" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3029" edge="1" parent="1" source="c3026" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3030" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select existing property" vertex="1">
+          <mxGeometry height="50" width="220" x="-1070" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="c3031" edge="1" parent="1" source="c3023" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3030" value="Manage units">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3032" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Add unit or manage existing?" vertex="1">
+          <mxGeometry height="70" width="150" x="-1035" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="c3033" edge="1" parent="1" source="c3030" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3032" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3034" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Enter unit number &amp; rent" vertex="1">
+          <mxGeometry height="50" width="200" x="-1180" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="c3035" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Set status: Vacant" vertex="1">
+          <mxGeometry height="50" width="200" x="-1180" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="c3036" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save unit" vertex="1">
+          <mxGeometry height="50" width="200" x="-1180" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="c3037" edge="1" parent="1" source="c3032" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3034" value="Add">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3038" edge="1" parent="1" source="c3034" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3035" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3039" edge="1" parent="1" source="c3035" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3036" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3040" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;dashed=1;" value="Auto-post ad to BariVara.com" vertex="1">
+          <mxGeometry height="50" width="220" x="-1190" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="c3041" edge="1" parent="1" source="c3036" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3040" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3042" edge="1" parent="1" source="c3040" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3043" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="View unit list (vacant vs occupied)" vertex="1">
+          <mxGeometry height="50" width="220" x="-910" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="c3044" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select unit, edit info or change status" vertex="1">
+          <mxGeometry height="50" width="220" x="-910" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="c3045" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save changes" vertex="1">
+          <mxGeometry height="50" width="220" x="-910" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="c3046" edge="1" parent="1" source="c3032" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3043" value="View / manage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3047" edge="1" parent="1" source="c3043" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3044" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3048" edge="1" parent="1" source="c3044" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3045" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3049" edge="1" parent="1" source="c3045" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3050" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Action?" vertex="1">
+          <mxGeometry height="70" width="170" x="-120" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="c3051" edge="1" parent="1" source="c3007" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3050" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3052" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Register Tenant (walk-in)" vertex="1">
+          <mxGeometry height="50" width="230" x="-470" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="c3053" edge="1" parent="1" source="c3050" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3052" value="Register tenant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3054" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Insert tenant info" vertex="1">
+          <mxGeometry height="50" width="230" x="-620" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="c3055" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Create rental agreement" vertex="1">
+          <mxGeometry height="50" width="230" x="-620" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="c3056" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Record security deposit" vertex="1">
+          <mxGeometry height="50" width="230" x="-620" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="c3057" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Confirm agreement &amp; assign unit" vertex="1">
+          <mxGeometry height="50" width="230" x="-620" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="c3058" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Confirm tenant" vertex="1">
+          <mxGeometry height="50" width="230" x="-620" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="c3059" edge="1" parent="1" source="c3052" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3054" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3060" edge="1" parent="1" source="c3054" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3055" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3061" edge="1" parent="1" source="c3055" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3056" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3062" edge="1" parent="1" source="c3056" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3057" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3063" edge="1" parent="1" source="c3057" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3058" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3064" edge="1" parent="1" source="c3058" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3065" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="All Tenants — select tenant" vertex="1">
+          <mxGeometry height="50" width="220" x="-185" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="c3066" edge="1" parent="1" source="c3050" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3065" value="View tenant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3067" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="View all information" vertex="1">
+          <mxGeometry height="50" width="220" x="-185" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="c3068" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Edit lease agreement?" vertex="1">
+          <mxGeometry height="70" width="150" x="-150" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="c3069" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Edit / update, save" vertex="1">
+          <mxGeometry height="50" width="220" x="-185" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="c3070" edge="1" parent="1" source="c3065" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3067" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3071" edge="1" parent="1" source="c3067" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3068" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3072" edge="1" parent="1" source="c3068" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3069" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3073" edge="1" parent="1" source="c3069" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3074" edge="1" parent="1" source="c3068" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3075" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select tenant/unit for move-out" vertex="1">
+          <mxGeometry height="50" width="220" x="240" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="c3076" edge="1" parent="1" source="c3050" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3075" value="Move out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3077" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Check outstanding balance" vertex="1">
+          <mxGeometry height="50" width="220" x="390" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="c3078" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Input damage deductions" vertex="1">
+          <mxGeometry height="50" width="220" x="135" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="c3079" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Refund or final bill?" vertex="1">
+          <mxGeometry height="70" width="160" x="165" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="c3080" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Calculate refund" vertex="1">
+          <mxGeometry height="50" width="190" x="50" y="970" as="geometry" />
+        </mxCell>
+        <mxCell id="c3081" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Generate final invoice" vertex="1">
+          <mxGeometry height="50" width="190" x="270" y="970" as="geometry" />
+        </mxCell>
+        <mxCell id="c3082" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Update unit status to vacant" vertex="1">
+          <mxGeometry height="50" width="220" x="135" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="c3083" edge="1" parent="1" source="c3075" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3077" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3084" edge="1" parent="1" source="c3077" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3078" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3085" edge="1" parent="1" source="c3078" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3079" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3086" edge="1" parent="1" source="c3079" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3080" value="Refund">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3087" edge="1" parent="1" source="c3079" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3081" value="Final bill">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3088" edge="1" parent="1" source="c3080" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3082" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3089" edge="1" parent="1" source="c3081" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3082" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3090" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="8" width="180" x="155" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="c3091" edge="1" parent="1" source="c3082" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3090" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3092" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;dashed=1;" value="Auto-post vacancy ad to BariVara" vertex="1">
+          <mxGeometry height="50" width="190" x="50" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="c3093" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Archive tenant record (status → inactive, keep financial history)" vertex="1">
+          <mxGeometry height="60" width="220" x="255" y="1220" as="geometry" />
+        </mxCell>
+        <mxCell id="c3094" edge="1" parent="1" source="c3090" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3092" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="1218.97" />
+              <mxPoint x="144.97" y="1218.97" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c3095" edge="1" parent="1" source="c3090" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3093" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="270" y="1184" />
+              <mxPoint x="364.97" y="1184" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c3096" edge="1" parent="1" source="c3092" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3097" edge="1" parent="1" source="c3093" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3098" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Action?" vertex="1">
+          <mxGeometry height="70" width="170" x="915" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="c3099" edge="1" parent="1" source="c3009" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3098" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3100" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="View ad status per unit" vertex="1">
+          <mxGeometry height="50" width="220" x="670" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3101" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Repost / pause ad" vertex="1">
+          <mxGeometry height="50" width="220" x="670" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3102" edge="1" parent="1" source="c3098" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3100" value="Manage ads">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3103" edge="1" parent="1" source="c3100" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3101" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3104" edge="1" parent="1" source="c3101" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3105" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Open booking requests (synced from BariVara)" vertex="1">
+          <mxGeometry height="50" width="240" x="1060" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3106" edge="1" parent="1" source="c3098" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3105" value="View requests">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3107" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select request" vertex="1">
+          <mxGeometry height="50" width="240" x="1060" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3108" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="View applicant profile" vertex="1">
+          <mxGeometry height="50" width="240" x="1060" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3109" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Chat with applicant (optional)" vertex="1">
+          <mxGeometry height="50" width="240" x="1060" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="c3110" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Accept?" vertex="1">
+          <mxGeometry height="70" width="160" x="1100" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="c3111" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Approve request, notify applicant" vertex="1">
+          <mxGeometry height="50" width="220" x="940" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="c3112" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Reject request, notify applicant" vertex="1">
+          <mxGeometry height="50" width="220" x="1200" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="c3113" edge="1" parent="1" source="c3105" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3107" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3114" edge="1" parent="1" source="c3107" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3108" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3115" edge="1" parent="1" source="c3108" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3109" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3116" edge="1" parent="1" source="c3109" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3110" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3117" edge="1" parent="1" source="c3110" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3111" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3118" edge="1" parent="1" source="c3110" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3112" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3119" edge="1" parent="1" source="c3112" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3121" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="View rental agreement" vertex="1">
+          <mxGeometry height="50" width="220" x="1250" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3122" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Edit / update terms" vertex="1">
+          <mxGeometry height="50" width="220" x="1250" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3123" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save changes" vertex="1">
+          <mxGeometry height="50" width="220" x="1250" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3124" edge="1" parent="1" source="c3011" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3121" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3125" edge="1" parent="1" source="c3121" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3122" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3126" edge="1" parent="1" source="c3122" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3123" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3127" edge="1" parent="1" source="c3123" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3128" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Action?" vertex="1">
+          <mxGeometry height="70" width="170" x="1565" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="c3129" edge="1" parent="1" source="c3013" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3128" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3130" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Generate Bills (automated process)" vertex="1">
+          <mxGeometry height="50" width="220" x="1220" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3131" edge="1" parent="1" source="c3128" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3130" value="Generate bills">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3132" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Retrieve active tenants" vertex="1">
+          <mxGeometry height="50" width="220" x="1220" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3133" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Calculate base rent + utilities" vertex="1">
+          <mxGeometry height="50" width="220" x="1220" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3134" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Add previous unpaid balance" vertex="1">
+          <mxGeometry height="50" width="220" x="1220" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="c3135" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save new invoices as unpaid" vertex="1">
+          <mxGeometry height="50" width="220" x="1220" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="c3136" edge="1" parent="1" source="c3130" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3132" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3137" edge="1" parent="1" source="c3132" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3133" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3138" edge="1" parent="1" source="c3133" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3134" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3139" edge="1" parent="1" source="c3134" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3135" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3140" edge="1" parent="1" source="c3135" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3141" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select tenant" vertex="1">
+          <mxGeometry height="50" width="220" x="1540" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3142" edge="1" parent="1" source="c3128" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3141" value="Receive payment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3143" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Display total due" vertex="1">
+          <mxGeometry height="50" width="220" x="1540" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3144" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Add payment method (cash / bank / mobile)" vertex="1">
+          <mxGeometry height="50" width="220" x="1540" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3145" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Enter amount paid" vertex="1">
+          <mxGeometry height="50" width="220" x="1540" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="c3146" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Paid in full?" vertex="1">
+          <mxGeometry height="70" width="150" x="1575" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="c3147" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Mark fully paid" vertex="1">
+          <mxGeometry height="50" width="190" x="1455" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="c3148" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Mark partially paid, calculate remaining" vertex="1">
+          <mxGeometry height="60" width="220" x="1670" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="c3149" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save payment, generate receipt PDF" vertex="1">
+          <mxGeometry height="50" width="220" x="1540" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="c3150" edge="1" parent="1" source="c3141" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3143" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3151" edge="1" parent="1" source="c3143" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3144" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3152" edge="1" parent="1" source="c3144" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3145" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3153" edge="1" parent="1" source="c3145" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3146" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3154" edge="1" parent="1" source="c3146" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3147" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3155" edge="1" parent="1" source="c3146" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3148" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3156" edge="1" parent="1" source="c3147" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3149" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3157" edge="1" parent="1" source="c3148" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3149" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3158" edge="1" parent="1" source="c3149" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3159" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="View pending cash payments" vertex="1">
+          <mxGeometry height="50" width="220" x="1880" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3160" edge="1" parent="1" source="c3128" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3159" value="Confirm pending">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3161" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select pending payment" vertex="1">
+          <mxGeometry height="50" width="220" x="1880" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3162" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Confirm received?" vertex="1">
+          <mxGeometry height="70" width="160" x="1910" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3163" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Mark paid, update invoice, notify tenant" vertex="1">
+          <mxGeometry height="50" width="200" x="1790" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="c3164" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Reject / flag, notify tenant" vertex="1">
+          <mxGeometry height="50" width="200" x="2010" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="c3165" edge="1" parent="1" source="c3159" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3161" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3166" edge="1" parent="1" source="c3161" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3162" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3167" edge="1" parent="1" source="c3162" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3163" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3168" edge="1" parent="1" source="c3162" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3164" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3169" edge="1" parent="1" source="c3163" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3170" edge="1" parent="1" source="c3164" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3171" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Expense Management" vertex="1">
+          <mxGeometry height="50" width="220" x="1910" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3172" edge="1" parent="1" source="c3015" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3171" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3173" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="What type of expense?" vertex="1">
+          <mxGeometry height="70" width="160" x="1940" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3174" edge="1" parent="1" source="c3171" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3173" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3175" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Tag: property" vertex="1">
+          <mxGeometry height="50" width="190" x="1795" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="c3176" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Tag: tenant" vertex="1">
+          <mxGeometry height="50" width="190" x="2055" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="c3177" edge="1" parent="1" source="c3173" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3175" value="Property">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3178" edge="1" parent="1" source="c3173" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3176" value="Tenant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3179" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Add amount" vertex="1">
+          <mxGeometry height="50" width="220" x="1910" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="c3180" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Add category &amp; description" vertex="1">
+          <mxGeometry height="50" width="220" x="1910" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="c3181" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save expense" vertex="1">
+          <mxGeometry height="50" width="220" x="1910" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="c3182" edge="1" parent="1" source="c3175" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3179" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3183" edge="1" parent="1" source="c3176" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3179" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3184" edge="1" parent="1" source="c3179" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3180" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3185" edge="1" parent="1" source="c3180" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3181" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3186" edge="1" parent="1" source="c3181" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3187" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Action?" vertex="1">
+          <mxGeometry height="70" width="170" x="2195" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="c3188" edge="1" parent="1" source="c3017" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3187" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3189" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select tenant &amp; unit" vertex="1">
+          <mxGeometry height="50" width="220" x="2010" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3190" edge="1" parent="1" source="c3187" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3189" value="Log new issue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3191" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Enter issue description" vertex="1">
+          <mxGeometry height="50" width="220" x="2010" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3192" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Set status: Pending" vertex="1">
+          <mxGeometry height="50" width="220" x="2010" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3193" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save ticket" vertex="1">
+          <mxGeometry height="50" width="220" x="2010" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="c3194" edge="1" parent="1" source="c3189" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3191" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3195" edge="1" parent="1" source="c3191" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3192" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3196" edge="1" parent="1" source="c3192" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3193" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3197" edge="1" parent="1" source="c3193" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3198" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="View pending tickets" vertex="1">
+          <mxGeometry height="50" width="220" x="2390" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3199" edge="1" parent="1" source="c3187" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3198" value="Update issue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3200" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select ticket" vertex="1">
+          <mxGeometry height="50" width="220" x="2390" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3201" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Update status: Resolved" vertex="1">
+          <mxGeometry height="50" width="220" x="2390" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3202" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Repair cost money?" vertex="1">
+          <mxGeometry height="70" width="160" x="2420" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="c3203" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Save update" vertex="1">
+          <mxGeometry height="50" width="220" x="2390" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="c3204" edge="1" parent="1" source="c3198" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3200" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3205" edge="1" parent="1" source="c3200" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3201" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3206" edge="1" parent="1" source="c3201" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3202" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3207" edge="1" parent="1" source="c3202" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3203" value="No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3208" edge="1" parent="1" source="c3203" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3209" edge="1" parent="1" source="c3202" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;dashed=1;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3179" value="Yes — tag as maintenance expense">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3210" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Open Messages" vertex="1">
+          <mxGeometry height="50" width="220" x="2490" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3211" edge="1" parent="1" source="c3019" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3210" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3212" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Select conversation (tenant or applicant)" vertex="1">
+          <mxGeometry height="50" width="220" x="2490" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3213" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Send / reply message" vertex="1">
+          <mxGeometry height="50" width="220" x="2490" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="c3214" edge="1" parent="1" source="c3210" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3212" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3215" edge="1" parent="1" source="c3212" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3213" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3216" edge="1" parent="1" source="c3213" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3003" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3217" parent="1" style="rounded=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Logout" vertex="1">
+          <mxGeometry height="50" width="180" x="2810" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="c3218" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="32" width="32" x="2884" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="c3219" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="20" width="20" x="2890" y="676" as="geometry" />
+        </mxCell>
+        <mxCell id="c3220" edge="1" parent="1" source="c3021" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3217" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3221" edge="1" parent="1" source="c3217" style="rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;elbow=vertical;edgeStyle=orthogonalEdgeStyle;" target="c3218" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
