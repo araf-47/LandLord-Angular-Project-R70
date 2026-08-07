@@ -55,6 +55,7 @@ import { ExpenseRecord, MockDataService, nextId } from '../../../core/mock-data.
     </div>
 
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Bearer</th><th>Amount</th></tr></thead>
         <tbody>
@@ -69,6 +70,7 @@ import { ExpenseRecord, MockDataService, nextId } from '../../../core/mock-data.
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

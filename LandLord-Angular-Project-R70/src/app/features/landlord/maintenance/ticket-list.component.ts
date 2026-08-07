@@ -13,6 +13,7 @@ import { MockDataService } from '../../../core/mock-data.service';
     </div>
 
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Unit</th><th>Tenant</th><th>Description</th><th>Status</th><th></th></tr></thead>
         <tbody>
@@ -27,6 +28,7 @@ import { MockDataService } from '../../../core/mock-data.service';
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

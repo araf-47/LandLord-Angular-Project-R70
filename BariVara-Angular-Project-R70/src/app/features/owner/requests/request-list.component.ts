@@ -9,6 +9,7 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
   template: `
     <h1>Requests for my listings</h1>
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Applicant</th><th>Listing</th><th>Status</th><th></th></tr></thead>
         <tbody>
@@ -24,6 +25,7 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

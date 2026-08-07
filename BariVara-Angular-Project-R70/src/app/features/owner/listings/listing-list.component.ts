@@ -13,6 +13,7 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
     </div>
 
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Title</th><th>Rent</th><th>Status</th><th></th></tr></thead>
         <tbody>
@@ -32,6 +33,7 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

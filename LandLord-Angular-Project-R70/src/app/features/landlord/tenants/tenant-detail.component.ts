@@ -56,6 +56,7 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
 
       <div class="card">
         <h3>Billing history</h3>
+        <div class="table-scroll">
         <table>
           <thead><tr><th>Month</th><th>Rent</th><th>Utilities</th><th>Rolled over</th><th>Total</th><th>Status</th></tr></thead>
           <tbody>
@@ -79,10 +80,12 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
             }
           </tbody>
         </table>
+        </div>
       </div>
 
       <div class="card">
         <h3>Payment history</h3>
+        <div class="table-scroll">
         <table>
           <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
           <tbody>
@@ -102,10 +105,12 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
             }
           </tbody>
         </table>
+        </div>
       </div>
 
       <div class="card">
         <h3>Maintenance cost history</h3>
+        <div class="table-scroll">
         <table>
           <thead><tr><th>Date</th><th>Description</th><th>Bearer</th><th>Amount</th></tr></thead>
           <tbody>
@@ -121,6 +126,7 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
             }
           </tbody>
         </table>
+        </div>
       </div>
     }
   `,

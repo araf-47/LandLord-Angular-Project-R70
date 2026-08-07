@@ -30,6 +30,7 @@ import { InvoiceUtilityLine, MockDataService, periodLabel } from '../../../core/
     </div>
 
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead>
           <tr><th>Tenant</th><th>Rent</th><th>Utilities</th><th>Rolled over</th><th>Total due</th><th>Status</th><th></th></tr>
@@ -84,6 +85,7 @@ import { InvoiceUtilityLine, MockDataService, periodLabel } from '../../../core/
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

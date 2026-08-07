@@ -7,6 +7,7 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.serv
   template: `
     <h1>Transaction history</h1>
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Status</th><th></th></tr></thead>
         <tbody>
@@ -27,6 +28,7 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.serv
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

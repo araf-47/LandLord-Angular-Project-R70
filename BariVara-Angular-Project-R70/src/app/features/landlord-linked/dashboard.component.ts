@@ -8,6 +8,7 @@ import { MockDataService } from '../../core/mock-data.service';
   template: `
     <h1>View my live ads (auto-synced, read-only)</h1>
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Listing</th><th>Rent</th><th>Status</th></tr></thead>
         <tbody>
@@ -22,6 +23,7 @@ import { MockDataService } from '../../core/mock-data.service';
           }
         </tbody>
       </table>
+      </div>
     </div>
 
     <div class="card">

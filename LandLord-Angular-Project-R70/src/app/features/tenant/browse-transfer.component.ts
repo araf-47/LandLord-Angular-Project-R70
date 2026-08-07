@@ -10,6 +10,7 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data
 
     <div class="card">
       <h3>Vacant units (this property)</h3>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Unit</th><th>Rent</th><th></th></tr></thead>
         <tbody>
@@ -24,6 +25,7 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data
           }
         </tbody>
       </table>
+      </div>
       @if (requested()) {
         <p class="hint-text" style="margin-top:0.75rem;">Landlord notified via Marketplace &amp; Leads inbox.</p>
       }

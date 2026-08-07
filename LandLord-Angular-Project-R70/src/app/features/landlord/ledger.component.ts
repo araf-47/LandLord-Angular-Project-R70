@@ -56,6 +56,7 @@ function today(): string {
     </div>
 
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead>
         <tbody>
@@ -74,6 +75,7 @@ function today(): string {
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

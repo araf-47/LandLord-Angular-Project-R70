@@ -130,9 +130,41 @@ what those reviews found and didn't fix). Chronological detail:
   - Dashboard copy: "Choose a module" → "Manage your property" (sounded like
     software jargon, not something a landlord would think). Tenant dashboard's
     matching "Choose an action" heading is still open — flagged, not yet decided.
+- **Professional footer, both apps** — public pages only (homepage/browse/
+  listing-detail; deliberately not inside the sidebar dashboards, which don't
+  carry marketing footers). Logo + tagline, real links only (no dead links to
+  pages that don't exist — LandLord: Log in/Sign up/BariVara.com; BariVara:
+  Browse/Log in/Sign up/a line back to LandLord for owners), copyright line,
+  and a "Built by Araf" creator credit (plain text, no link, by your choice).
+- **Sidebar layout bug fixed, both apps (all 5 sidebar layouts).** `.app-shell`
+  used `min-height: 100dvh` instead of `height: 100dvh; overflow: hidden`, so it
+  grew to match tall page content instead of staying pinned to the viewport —
+  the sidebar (and the Logout button inside it) scrolled along with the page.
+  Fixed, plus a `min-height: 0` flexbox fix on `.main-area` so the content pane
+  can actually shrink and scroll on its own instead of forcing the whole page
+  to grow.
+- **Mobile nav rebuilt as a hamburger/off-canvas drawer**, replacing the
+  horizontal-scrolling strip from 4.4. Found along the way that the old mobile
+  nav hid the logo *and the Logout button* entirely (`display:none`) — no way
+  to log out from a phone. Now: topbar shows a hamburger icon at ≤860px,
+  tapping it slides in the full vertical nav (logo, links, logout) as an
+  overlay with a dismissible backdrop; tapping a link auto-closes it. Same
+  shared CSS classes as the desktop sidebar, so one CSS fix per app covers all
+  5 sidebar layouts (landlord, tenant ×2, owner, landlord-linked).
 
-**Not done:** Phase 5 QA/sign-off, real backend, testing, deployment. See §3a for a
-tracked backlog of smaller gaps found during review but deliberately not fixed.
+- **Phase 5 QA pass** (route-link audit + static responsive audit, both apps):
+  zero dead links/broken routerLinks found across either app; found and fixed
+  one real gap — a `.table-scroll` CSS utility existed but was never applied,
+  so all 20 tables across both apps (16 LandLord + 4 BariVara) would have
+  overflowed with no scroll affordance on narrow screens, now wrapped. Wrote
+  `DEMO-SCRIPT.md` (repo root) — a 12-step full-loop walkthrough script using
+  the two apps' matching seed data, for your review. Caveat: this QA pass was
+  done by static code/route audit, not a live browser click-through (no
+  browser tool in this environment) — see Phase 5.1/5.2 notes below.
+
+**Not done:** Phase 5.5 sign-off (yours to give), real backend, testing,
+deployment. See §3a for a tracked backlog of smaller gaps found during review
+but deliberately not fixed.
 
 ## 3a. Known gaps — reviewed, tracked, not yet fixed
 
@@ -166,11 +198,6 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   More noticeable now that the homepage is commerce-styled and implies real photos.
   (Needs object storage — Phase 8.4/11.4, or a placeholder-image service as a cheap
   frontend-only stopgap if it bothers you before then.)
-- **LandLord's public-layout doesn't check auth state.** BariVara's equivalent shows
-  "My Dashboard" instead of Login/Signup when already authenticated; LandLord's
-  always shows Login/Signup regardless. An already-logged-in landlord landing on `/`
-  sees the marketing page again instead of a way back to their dashboard. Cheap,
-  frontend-only — fixable now or foldable into Phase 4.
 
 ## 4. Part 1 — Frontend (both apps)
 
@@ -252,11 +279,11 @@ now functionally deeper than a route scaffold.)*
      actual badges — instead of abstract decoration). Because both apps share one
      CSS file per project, this cascades to nearly every page automatically rather
      than needing per-component edits ✅
-4.4. Responsive pass — **scoped to CSS reflow, not a full interactive mobile nav**:
-     sidebar collapses to a horizontal scrolling strip under 860px, hero/search bar
-     wrap and resize, `.table-scroll` utility added for wide tables. No hamburger
-     menu / off-canvas nav built — call it out if that's wanted, it's a distinct
-     follow-up (would need JS state in each layout component, not just CSS) ✅
+4.4. Responsive pass — CSS reflow: hero/search bar wrap and resize, `.table-scroll`
+     utility added for wide tables ✅. Mobile sidebar nav originally shipped as a
+     horizontal scrolling strip (not a full interactive nav); later replaced
+     ad-hoc (post-Phase-4, see §3 log) with a proper hamburger/off-canvas drawer
+     once it was flagged as a bad mobile experience ✅
 4.5. Empty states — already existed page-by-page (`@empty` blocks with hint text)
      from earlier phases, now inherit the refreshed styling for free. Loading/error
      states are **not applicable yet** — all data is synchronous mock data, there is
@@ -278,14 +305,37 @@ now functionally deeper than a route scaffold.)*
      auth-card (light) and tenant/owner/landlord-linked sidebars (dark) — the
      dark-variant gap from the review is closed now that the asset exists ✅
 
-### Phase 5 — Frontend QA & demo readiness
-5.1. Manual walkthrough of every branch in all 4 diagrams, both apps
-5.2. Cross-browser / cross-device check
-5.3. Fix any routing dead-ends or broken links found during walkthrough
-5.4. Record or write up the "full loop" demo script (vacate unit → ad appears on
-     BariVara mock → booking request → landlord approves → tenant registered) for
-     your review
-5.5. **Checkpoint: get your sign-off before starting Part 2**
+### Phase 5 — Frontend QA & demo readiness ✅ DONE (5.1–5.4) — 5.5 needs you
+5.1. **Done, but by static audit, not a live click-through** — I have no browser
+     tool in this environment, so instead of clicking every branch by hand I
+     extracted the full route tree from both apps' `*.routes.ts` files and
+     cross-referenced every `routerLink`, `[routerLink]`, `router.navigate(By)Url`
+     call, and role-guard redirect against it. Zero dead links, zero unmatched
+     targets, in either app. This catches broken *wiring*; it does not catch
+     things only a real click-through would (visual glitches, an interaction
+     that silently does nothing). Worth a manual pass on your end before 5.5.
+5.2. **Done, scoped to a static CSS audit** (same browser-tool limitation as
+     5.1): confirmed viewport meta tag present both apps, single 860px
+     breakpoint covers the sidebar drawer + hero, `.module-grid`/`.listing-grid`
+     use `repeat(auto-fill, minmax(...))` so they reflow at any width without
+     needing extra breakpoints. Found one real gap this way: a `.table-scroll`
+     utility class existed in both stylesheets but was never applied to a
+     single `<table>` — all 16 tables (LandLord) + 4 (BariVara) would have
+     overflowed with no scroll affordance on narrow screens. Fixed: every
+     `<table>` in both apps now wrapped in `.table-scroll`. Real
+     cross-*browser*-engine testing (Chrome vs. Safari vs. Firefox rendering
+     differences) is still unverified — no tool access to actually run one.
+5.3. **Done** — nothing to fix beyond the table-scroll gap above; the routing
+     audit in 5.1 came back clean.
+5.4. **Done** — `DEMO-SCRIPT.md` (repo root) written: a 12-step walkthrough
+     using the two apps' matching seed data (LandLord's unit A-102/Green View
+     Apartments/৳14,000 ↔ BariVara's landlord-linked listing of the same unit)
+     covering vacancy → ad → booking request → approval → tenant registration,
+     plus optional side branches (utility charges, partial payment, move-out,
+     mobile drawer) and a short list of known gaps to mention if asked.
+5.5. **Checkpoint: get your sign-off before starting Part 2** — open. Suggest:
+     skim `DEMO-SCRIPT.md`, run through Part A–C yourself in an actual browser
+     once (covers the click-through gap noted in 5.1/5.2), then say go.
 
 ## 5. Part 2 — Backend (starts after Part 1 sign-off)
 

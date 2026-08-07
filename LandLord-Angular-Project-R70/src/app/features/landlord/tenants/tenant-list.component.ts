@@ -28,6 +28,7 @@ import { MockDataService, TenantRecord } from '../../../core/mock-data.service';
     </div>
 
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead>
           <tr><th>Name</th><th>National ID</th><th>Phone</th><th>Unit</th><th>Status</th><th></th></tr>
@@ -52,6 +53,7 @@ import { MockDataService, TenantRecord } from '../../../core/mock-data.service';
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

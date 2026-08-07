@@ -9,6 +9,7 @@ import { MockDataService } from '../../../core/mock-data.service';
   template: `
     <h1>Booking requests (synced from BariVara)</h1>
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Applicant</th><th>Unit</th><th>Status</th><th></th></tr></thead>
         <tbody>
@@ -22,6 +23,7 @@ import { MockDataService } from '../../../core/mock-data.service';
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })

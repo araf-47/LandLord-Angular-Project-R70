@@ -12,6 +12,7 @@ import { MockDataService } from '../../../core/mock-data.service';
       sync, so BariVara's copy of a listing won't change when you click these here.
     </p>
     <div class="card">
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Unit</th><th>Status</th><th>Ad state</th><th></th></tr></thead>
         <tbody>
@@ -39,6 +40,7 @@ import { MockDataService } from '../../../core/mock-data.service';
           }
         </tbody>
       </table>
+      </div>
     </div>
   `,
 })
