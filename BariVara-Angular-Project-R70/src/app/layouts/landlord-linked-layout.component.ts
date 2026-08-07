@@ -1,15 +1,16 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { LogoComponent } from '../shared/logo.component';
 
 @Component({
   selector: 'app-landlord-linked-layout',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, LogoComponent],
   template: `
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="sidebar-brand">BariVara.com</div>
+        <div class="sidebar-brand"><app-logo theme="dark" /></div>
         <nav class="sidebar-nav">
           <a class="active">Dashboard</a>
         </nav>

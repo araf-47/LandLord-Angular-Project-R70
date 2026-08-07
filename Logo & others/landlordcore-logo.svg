@@ -1,0 +1,28 @@
+<svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LandLord Core logo">
+  <defs>
+    <style>
+      .main {
+        font-family: 'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 700;
+        fill: #0F2F5F;
+        letter-spacing: -1px;
+      }
+      .sub {
+        font-family: 'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        fill: #2F7FE0;
+        letter-spacing: 5px;
+      }
+    </style>
+  </defs>
+
+  <!-- Main wordmark: ~87% of the visual weight -->
+  <text x="20" y="128" class="main" font-size="94">LandLord</text>
+
+  <!-- Thin connecting rule: ties the small word to the large one so it reads
+       as one lockup rather than a stray label (classic "endorsed brand" device) -->
+  <line x1="345" y1="150" x2="463" y2="150" stroke="#2F7FE0" stroke-width="2"/>
+
+  <!-- Secondary word: ~13% of the visual weight, uppercase + tracked for hierarchy -->
+  <text x="345" y="178" class="sub" font-size="21">CORE</text>
+</svg>

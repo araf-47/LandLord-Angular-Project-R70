@@ -1,18 +1,24 @@
-/* Global design system — shared across all feature pages */
+/* Global design system — shared across all feature pages.
+   Brand: confident blue, restrained use of gradient/shadow — see project-plan.md
+   Phase 4 for the "avoid looking AI-generated" constraints this follows. */
 :root {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
+  --primary-light: #eff6ff;
   --accent: #d97706;
-  --bg: #f4f6f9;
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --border: #dbe2ea;
-  --text: #1f2937;
-  --text-muted: #6b7280;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
   --success: #16a34a;
   --danger: #dc2626;
   --warning: #d97706;
-  --radius: 8px;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.06);
+  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
 * {
@@ -25,16 +31,25 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4 {
   margin: 0 0 0.5rem 0;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
+h4 { font-size: 0.95rem; font-weight: 600; letter-spacing: 0; }
 
 p {
   margin: 0 0 0.75rem 0;
   color: var(--text-muted);
+  line-height: 1.55;
 }
 
 a {
@@ -80,6 +95,7 @@ a {
   padding: 0.6rem 1.25rem;
   font-size: 0.92rem;
   border-left: 3px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .sidebar-nav a:hover {
@@ -220,6 +236,71 @@ a {
   flex-wrap: wrap;
 }
 
+/* Two-column hero variant: copy left, a grounded product-preview card right,
+   instead of abstract decoration. */
+.hero-split {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+.hero-split .hero-copy {
+  flex: 1;
+  min-width: 280px;
+}
+.hero-split .hero-copy h1 {
+  font-size: 2.1rem;
+}
+.hero-split .hero-actions {
+  justify-content: flex-start;
+}
+.hero-preview-card {
+  flex-shrink: 0;
+  width: 300px;
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.1rem;
+  transform: rotate(1.5deg);
+}
+.hero-preview-card .hero-preview-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+.hero-preview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+.hero-preview-stats div {
+  text-align: center;
+}
+.hero-preview-stats .stat-value {
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: block;
+}
+.hero-preview-stats .stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.hero-preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+
 /* Orange (BariVara accent) callout — visually distinct from the rest of the page */
 .callout-banner {
   background: linear-gradient(135deg, var(--accent) 0%, #b45309 100%);
@@ -253,6 +334,7 @@ a {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   padding: 1.25rem;
   margin-bottom: 1rem;
 }
@@ -303,7 +385,7 @@ input:focus, select:focus, textarea:focus {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.55rem 1.1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -312,6 +394,10 @@ input:focus, select:focus, textarea:focus {
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.btn:active {
+  transform: translateY(1px);
 }
 
 .btn-primary {
@@ -391,12 +477,16 @@ th {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   padding: 1.25rem;
   text-decoration: none;
   color: var(--text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .module-tile:hover {
   border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 .module-tile .module-title {
   font-weight: 600;
@@ -435,4 +525,57 @@ th {
 .step-dot.active {
   background: var(--primary);
   color: #fff;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Responsive — Phase 4.4 (CSS reflow scope; see project-plan.md for what this
+   does and doesn't cover) */
+@media (max-width: 860px) {
+  .app-shell {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+  }
+  .sidebar-brand, .sidebar-footer {
+    display: none;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+  }
+  .sidebar-nav a {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .sidebar-nav a.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--primary);
+  }
+  .hero {
+    padding: 2rem 1.25rem;
+  }
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+  }
+  .hero-split {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-split .hero-actions {
+    justify-content: center;
+  }
+  .hero-preview-card {
+    width: 100%;
+    transform: none;
+  }
 }

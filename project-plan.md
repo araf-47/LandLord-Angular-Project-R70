@@ -74,9 +74,21 @@ what those reviews found and didn't fix). Chronological detail:
   an actual Phase 4.1 brand decision, so expect this page to get touched again once
   that happens.
 
-**Not done:** visual/brand design pass (Phase 4), Phase 5 QA/sign-off, real backend,
-testing, deployment. See §3a for a tracked backlog of smaller gaps found during
-review but deliberately not fixed.
+- **Phase 4**: design tokens refreshed in both apps (Inter, tightened palette, real
+  shadow/type scale), layout components get hover/press polish, LandLord's homepage
+  hero rebuilt with a grounded product-preview instead of decoration, CSS-reflow
+  responsive pass (not a full interactive mobile nav — see 4.4 notes), both apps
+  confirmed as one family/two skins. Deliberately built against an "avoid looking
+  AI-generated" constraint — restrained gradients, no glowing shadows, grounded
+  content over abstract decoration.
+- **Real logos** (both apps, after you supplied the SVGs): reusable `<app-logo>`
+  component per app picks the light or dark-background mark depending on where it's
+  placed, wired into every topbar/auth-card/sidebar spot in both apps. LandLord uses
+  Nunito for its badge-style mark, BariVara uses Poppins for its pin+house mark —
+  both loaded alongside each app's Inter body font.
+
+**Not done:** Phase 5 QA/sign-off, real backend, testing, deployment. See §3a for a
+tracked backlog of smaller gaps found during review but deliberately not fixed.
 
 ## 3a. Known gaps — reviewed, tracked, not yet fixed
 
@@ -177,15 +189,50 @@ now functionally deeper than a route scaffold.)*
 3.5. Both READMEs rewritten from ng-new boilerplate: what the app is, how to run it
      alongside the other one, what's mock vs. real, pointer to §3a known gaps ✅
 
-### Phase 4 — Visual design pass (both apps)
-4.1. Decide brand direction (colors, type, logo) — needs your input, or a Figma
-     source, or ask me to propose one
-4.2. Apply branding to both apps' shared design system tokens
-4.3. Refine layout components (sidebar, topbar, cards, listing cards) to match brand
-4.4. Responsive/mobile pass on every page in both apps
-4.5. Empty states, loading states, error states for every page in both apps
-4.6. Visual consistency check: LandLord and BariVara should read as one family with
-     two distinct skins (internal tool vs. public marketplace)
+### Phase 4 — Visual design pass (both apps) ✅ DONE (scoped — see notes)
+4.1. Brand direction decided: blue (LandLord) / orange (BariVara) — formalized from
+     what was already in place, not arbitrary (matches the source diagrams' own
+     color-coding). Inter for type, both apps. ~~Text wordmark only, no logo
+     icon~~ — superseded: real SVG logos were supplied later and integrated (4.7).
+     Explicit constraint carried through the whole pass: avoid the common
+     AI-generated-landing-page tells (gradient-everything, generic marketing copy,
+     glowing shadows, mismatched icons, empty centered "template" layouts) ✅
+4.2. Design tokens refreshed in both `styles.css`: Inter loaded via `index.html`,
+     tightened color/border palette, a real shadow scale (`--shadow-sm`/`--shadow-md`,
+     soft and single-direction, not glowing), a type scale with deliberate
+     size/weight/letter-spacing per heading level instead of browser defaults ✅
+4.3. Layout components refined: sidebar/topbar/tab hover transitions, buttons get a
+     tactile press state, cards/module-tiles/listing-cards get hover-lift +
+     shadow-md. LandLord's homepage hero rebuilt as a two-column layout with a
+     grounded product-preview card (a stylized real ledger snippet — actual numbers,
+     actual badges — instead of abstract decoration). Because both apps share one
+     CSS file per project, this cascades to nearly every page automatically rather
+     than needing per-component edits ✅
+4.4. Responsive pass — **scoped to CSS reflow, not a full interactive mobile nav**:
+     sidebar collapses to a horizontal scrolling strip under 860px, hero/search bar
+     wrap and resize, `.table-scroll` utility added for wide tables. No hamburger
+     menu / off-canvas nav built — call it out if that's wanted, it's a distinct
+     follow-up (would need JS state in each layout component, not just CSS) ✅
+4.5. Empty states — already existed page-by-page (`@empty` blocks with hint text)
+     from earlier phases, now inherit the refreshed styling for free. Loading/error
+     states are **not applicable yet** — all data is synchronous mock data, there is
+     no async operation that could show a loading spinner or a network error. Real
+     candidates once Phase 6+ wires up an actual API ✅ (empty states) / N/A (loading/error)
+4.6. Visual consistency check: both apps now share the exact same token structure,
+     type scale, shadow system, and component shapes — same family, distinct skins
+     (blue/professional vs. orange/marketplace) purely through the accent color and
+     BariVara's photo-forward listing cards vs. LandLord's data-forward tables ✅
+4.7. Real logos integrated (both apps), supplied by you after the initial "text
+     wordmark only" call in 4.1. Reviewed all 3 first-round SVGs against the design
+     system (found: Poppins dependency not yet loaded, BariVara initially had no
+     dark-background variant — both since resolved). Built a reusable `<app-logo
+     theme="light"|"dark">` component per app (inlined SVG, not an asset file — both
+     under 2KB) so each layout just declares which background it sits on instead of
+     duplicating markup. LandLord: badge-style mark (Nunito 800), wired into
+     public-layout topbar + auth-card (light) and landlord/tenant sidebars (dark).
+     BariVara: pin+house icon mark (Poppins), wired into public-layout topbar +
+     auth-card (light) and tenant/owner/landlord-linked sidebars (dark) — the
+     dark-variant gap from the review is closed now that the asset exists ✅
 
 ### Phase 5 — Frontend QA & demo readiness
 5.1. Manual walkthrough of every branch in all 4 diagrams, both apps
@@ -304,7 +351,6 @@ now functionally deeper than a route scaffold.)*
 
 | Decision | Needed before | Options |
 |---|---|---|
-| Brand direction | Phase 4 (now) | Provide colors/logo/reference, or have me propose one |
 | Backend language/framework | Phase 6 | Node.js/NestJS, Node/Express, Django, Laravel, etc. |
 | Hosting/infra | Phase 6, 19 | Self-managed VPS, AWS, GCP, Vercel+Supabase, Firebase |
 | Payment gateway | Phase 10 | bKash/Nagad (BD market), Stripe, SSLCommerz |

@@ -1,0 +1,27 @@
+<svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LandLord Core logo, badge style">
+  <defs>
+    <style>
+      .main {
+        font-family: 'Nunito', 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+        font-weight: 800;
+        fill: #122A52;
+      }
+      .badge-text {
+        font-family: 'Nunito', 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+        font-weight: 800;
+        fill: #FFFFFF;
+        letter-spacing: 2px;
+      }
+    </style>
+  </defs>
+
+  <!-- Main wordmark -->
+  <text x="16" y="120" class="main" font-size="88">LandLord</text>
+
+  <!-- Core as a contained pill badge, raised like a tier/version tag.
+       Containment (Gestalt "common region") replaces scale + a rule as the
+       hierarchy device, giving a distinctly different read from the line-rule
+       version while keeping the same 85/15 space split -->
+  <rect x="447" y="30" width="98" height="36" rx="18" fill="#2F7FE0"/>
+  <text x="496" y="54" class="badge-text" font-size="16" text-anchor="middle">CORE</text>
+</svg>

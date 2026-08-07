@@ -1,0 +1,21 @@
+<svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LandLord Core logo, badge style, reversed for dark backgrounds">
+  <defs>
+    <style>
+      .main {
+        font-family: 'Nunito', 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+        font-weight: 800;
+        fill: #F3F7FE;
+      }
+      .badge-text {
+        font-family: 'Nunito', 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+        font-weight: 800;
+        fill: #0B1C36;
+        letter-spacing: 2px;
+      }
+    </style>
+  </defs>
+
+  <text x="16" y="120" class="main" font-size="88">LandLord</text>
+  <rect x="447" y="30" width="98" height="36" rx="18" fill="#5B9CFF"/>
+  <text x="496" y="54" class="badge-text" font-size="16" text-anchor="middle">CORE</text>
+</svg>

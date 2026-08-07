@@ -1,22 +1,26 @@
 /* Global design system — shared shape with the LandLord app's styles.css, so the
-   two read as one family (Part 1 Phase 4.6). Primary accent swapped to warm orange
-   here (vs. LandLord's blue) as a light early differentiator — matches the color
-   choice already used for BariVara nodes in the source activity diagram. Full brand
-   pass is still Phase 4. */
+   two read as one family (Part 1 Phase 4.6). Primary accent is warm orange (vs.
+   LandLord's blue) — matches the color already used for BariVara nodes in the
+   source activity diagram. Restrained use of gradient/shadow throughout — see
+   project-plan.md Phase 4 for the "avoid looking AI-generated" constraints. */
 :root {
   --primary: #d97706;
   --primary-dark: #b45309;
+  --primary-light: #fffbeb;
   --accent: #2563eb;
-  --bg: #f4f6f9;
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --border: #dbe2ea;
-  --text: #1f2937;
-  --text-muted: #6b7280;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
   --success: #16a34a;
   --danger: #dc2626;
   --warning: #d97706;
-  --radius: 8px;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.06);
+  font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
 * {
@@ -29,16 +33,25 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4 {
   margin: 0 0 0.5rem 0;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
 }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
+h4 { font-size: 0.95rem; font-weight: 600; letter-spacing: 0; }
 
 p {
   margin: 0 0 0.75rem 0;
   color: var(--text-muted);
+  line-height: 1.55;
 }
 
 a {
@@ -84,6 +97,7 @@ a {
   padding: 0.6rem 1.25rem;
   font-size: 0.92rem;
   border-left: 3px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .sidebar-nav a:hover {
@@ -213,7 +227,7 @@ a {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0.75rem;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-md);
 }
 .search-bar input, .search-bar select {
   flex: 1;
@@ -224,6 +238,7 @@ a {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   padding: 1.25rem;
   margin-bottom: 1rem;
 }
@@ -250,7 +265,7 @@ input, select, textarea {
   font: inherit;
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
 }
@@ -274,7 +289,7 @@ input:focus, select:focus, textarea:focus {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.55rem 1.1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -283,6 +298,10 @@ input:focus, select:focus, textarea:focus {
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.btn:active {
+  transform: translateY(1px);
 }
 
 .btn-primary {
@@ -306,6 +325,11 @@ input:focus, select:focus, textarea:focus {
 .btn-sm {
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;
+}
+
+.btn-lg {
+  padding: 0.85rem 1.75rem;
+  font-size: 1.05rem;
 }
 
 .error-text {
@@ -335,6 +359,9 @@ th {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+.table-scroll {
+  overflow-x: auto;
 }
 
 /* Badges */
@@ -366,12 +393,16 @@ th {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   padding: 1.25rem;
   text-decoration: none;
   color: var(--text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .module-tile:hover {
   border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 .module-tile .module-title {
   font-weight: 600;
@@ -389,16 +420,20 @@ th {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
   text-decoration: none;
   color: var(--text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .listing-card:hover {
   border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
 }
 .listing-card-image {
-  height: 140px;
-  background: #f1f5f9;
+  height: 150px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -450,4 +485,42 @@ th {
 .step-dot.active {
   background: var(--primary);
   color: #fff;
+}
+
+/* Responsive — Phase 4.4 (CSS reflow scope; see project-plan.md for what this
+   does and doesn't cover) */
+@media (max-width: 860px) {
+  .app-shell {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+  }
+  .sidebar-brand, .sidebar-footer {
+    display: none;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+  }
+  .sidebar-nav a {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .sidebar-nav a.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--primary);
+  }
+  .search-bar {
+    flex-wrap: wrap;
+  }
+  .hero {
+    padding: 2rem 1.25rem;
+  }
+  .hero h1 {
+    font-size: 1.5rem;
+  }
 }

@@ -1,14 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { LogoComponent } from '../shared/logo.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, LogoComponent],
   template: `
     <header class="public-topbar">
-      <a routerLink="/" class="public-brand">BariVara.com</a>
+      <a routerLink="/" class="public-brand"><app-logo theme="light" /></a>
       <nav class="public-nav">
         <a routerLink="/browse">Browse</a>
         @if (auth.isAuthenticated()) {

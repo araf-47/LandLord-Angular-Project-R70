@@ -1,0 +1,22 @@
+<svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LandLord Core logo, reversed for dark backgrounds">
+  <defs>
+    <style>
+      .main {
+        font-family: 'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 700;
+        fill: #F3F7FE;
+        letter-spacing: -1px;
+      }
+      .sub {
+        font-family: 'Poppins', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        fill: #5B9CFF;
+        letter-spacing: 5px;
+      }
+    </style>
+  </defs>
+
+  <text x="20" y="128" class="main" font-size="94">LandLord</text>
+  <line x1="345" y1="150" x2="463" y2="150" stroke="#5B9CFF" stroke-width="2"/>
+  <text x="345" y="178" class="sub" font-size="21">CORE</text>
+</svg>

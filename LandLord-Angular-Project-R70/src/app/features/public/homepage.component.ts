@@ -7,15 +7,47 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   template: `
     <div class="public-content">
-      <div class="hero">
-        <h1>Run your rental properties without the spreadsheet chaos</h1>
-        <p>
-          Properties, tenants, rent collection, maintenance, and a real cash-book ledger —
-          all in one place built for landlords, not accountants.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary btn-lg" routerLink="/auth/signup">Get Started Free</a>
-          <a class="btn btn-lg" routerLink="/auth/login" style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.4); color:#fff;">Log in</a>
+      <div class="hero hero-split">
+        <div class="hero-copy">
+          <h1>Run your rental properties without the spreadsheet chaos</h1>
+          <p>
+            Properties, tenants, rent collection, maintenance, and a real cash-book ledger —
+            all in one place built for landlords, not accountants.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" routerLink="/auth/signup">Get Started Free</a>
+            <a class="btn btn-lg" routerLink="/auth/login" style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.4); color:#fff;">Log in</a>
+          </div>
+        </div>
+
+        <div class="hero-preview-card" aria-hidden="true">
+          <div class="hero-preview-title">Ledger — This Month</div>
+          <div class="hero-preview-stats">
+            <div>
+              <span class="stat-value" style="color:var(--success);">৳48,000</span>
+              <span class="stat-label">In</span>
+            </div>
+            <div>
+              <span class="stat-value" style="color:var(--danger);">৳6,200</span>
+              <span class="stat-label">Out</span>
+            </div>
+            <div>
+              <span class="stat-value">৳41,800</span>
+              <span class="stat-label">Net</span>
+            </div>
+          </div>
+          <div class="hero-preview-row">
+            <span>Payment — Rahim Uddin</span>
+            <span class="badge badge-paid">+15,000</span>
+          </div>
+          <div class="hero-preview-row">
+            <span>Expense — Maintenance</span>
+            <span class="badge badge-unpaid">-1,200</span>
+          </div>
+          <div class="hero-preview-row">
+            <span>Unit A-102</span>
+            <span class="badge badge-vacant">vacant</span>
+          </div>
         </div>
       </div>
 

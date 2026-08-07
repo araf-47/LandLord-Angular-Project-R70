@@ -1,15 +1,16 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { LogoComponent } from '../shared/logo.component';
 
 @Component({
   selector: 'app-owner-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LogoComponent],
   template: `
     <div class="app-shell">
       <aside class="sidebar">
-        <div class="sidebar-brand">BariVara.com</div>
+        <div class="sidebar-brand"><app-logo theme="dark" /></div>
         <nav class="sidebar-nav">
           <a routerLink="/owner/dashboard" routerLinkActive="active">Dashboard</a>
           <a routerLink="/owner/properties" routerLinkActive="active">Properties</a>
