@@ -60,7 +60,13 @@ import { InvoiceUtilityLine, MockDataService, periodLabel } from '../../../core/
                 }
               </td>
               <td>{{ i.prevUnpaidRolled }}</td>
-              <td>{{ i.amount }}</td>
+              <td>
+                @if (i.status === 'partial') {
+                  {{ i.balance }}/{{ i.amount }}
+                } @else {
+                  {{ i.balance }}
+                }
+              </td>
               <td><span class="badge" [class.badge-unpaid]="i.status === 'unpaid'" [class.badge-partial]="i.status === 'partial'" [class.badge-paid]="i.status === 'paid'">{{ i.status }}</span></td>
               <td>
                 @if (i.status === 'unpaid') {

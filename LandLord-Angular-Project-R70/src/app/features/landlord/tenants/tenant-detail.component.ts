@@ -64,7 +64,13 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
                 <td>{{ i.rent }}</td>
                 <td [title]="i.utilityItems.map(u => u.label + ': ' + u.amount).join(', ')">{{ data.invoiceUtilitiesTotal(i) }}</td>
                 <td>{{ i.prevUnpaidRolled }}</td>
-                <td>{{ i.amount }}</td>
+                <td>
+                  @if (i.status === 'partial') {
+                    {{ i.balance }}/{{ i.amount }}
+                  } @else {
+                    {{ i.balance }}
+                  }
+                </td>
                 <td><span class="badge" [class.badge-unpaid]="i.status === 'unpaid'" [class.badge-partial]="i.status === 'partial'" [class.badge-paid]="i.status === 'paid'">{{ i.status }}</span></td>
               </tr>
             } @empty {
