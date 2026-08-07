@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { LogoComponent } from '../shared/logo.component';
@@ -9,9 +9,12 @@ import { LogoComponent } from '../shared/logo.component';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, LogoComponent],
   template: `
     <div class="app-shell">
-      <aside class="sidebar">
+      @if (sidebarOpen()) {
+        <div class="sidebar-backdrop" (click)="sidebarOpen.set(false)"></div>
+      }
+      <aside class="sidebar" [class.open]="sidebarOpen()">
         <div class="sidebar-brand"><app-logo theme="dark" /></div>
-        <nav class="sidebar-nav">
+        <nav class="sidebar-nav" (click)="sidebarOpen.set(false)">
           <a routerLink="/landlord/dashboard" routerLinkActive="active">Dashboard</a>
           <a routerLink="/landlord/properties" routerLinkActive="active">Property &amp; Units</a>
           <a routerLink="/landlord/tenants" routerLinkActive="active">Tenant Management</a>
@@ -31,7 +34,12 @@ import { LogoComponent } from '../shared/logo.component';
       </aside>
       <div class="main-area">
         <header class="topbar">
-          <strong>Landlord Dashboard</strong>
+          <div class="topbar-left">
+            <button class="menu-toggle" type="button" (click)="sidebarOpen.set(!sidebarOpen())" aria-label="Toggle menu">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="5" x2="18" y2="5" /><line x1="2" y1="10" x2="18" y2="10" /><line x1="2" y1="15" x2="18" y2="15" /></svg>
+            </button>
+            <strong>Landlord Dashboard</strong>
+          </div>
           <span class="hint-text">{{ auth.user()?.name }} ({{ auth.user()?.email }})</span>
         </header>
         <div class="page-content">
@@ -44,6 +52,7 @@ import { LogoComponent } from '../shared/logo.component';
 export class LandlordLayoutComponent {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly sidebarOpen = signal(false);
 
   logout(): void {
     this.auth.logout();
