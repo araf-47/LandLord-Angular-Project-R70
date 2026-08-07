@@ -98,6 +98,38 @@ what those reviews found and didn't fix). Chronological detail:
   editing a unit's defaults later never rewrites past bills; the current month's
   amounts stay correctable up until the tenant pays anything against that bill,
   then lock like the rest of the invoice.
+- **LandLord deep-dive** (`9bd228a`, `5f627e0`, `8c470e9`) — kept stress-testing
+  against the "one landlord, real monthly bookkeeping" scenario and fixed what it
+  found:
+  - **Total due is dynamic now.** Monthly Bills and tenant Billing history were
+    showing the frozen original `amount` even after a partial payment landed;
+    both now show `balance` (or `remaining/original` while partial), and the
+    `partial` status badge got its own yellow/amber instead of sharing `unpaid`'s
+    red — the two were visually indistinguishable before.
+  - **Unit dropdown on tenant registration shows the property name** (`Prop >
+    Unit > Rent/mo`) — was unit-number-only, ambiguous the moment a landlord has
+    more than one building.
+  - **`TenantRecord.nationalId` added as the real unique identifier**, with
+    registration blocking a duplicate NID against any other *active* tenant
+    (inactive/moved-out tenants don't block re-registration). Name and phone
+    alone don't reliably distinguish tenants past a handful of them.
+  - **Tenant Management gained search** (name/NID/phone, reactive) and a status
+    filter (Active/Inactive/All, defaults to Active) — directly enabled by NID
+    finally being a real thing to search by; closes the vague "no search" item
+    that had been sitting in §3a.
+  - Fixed a real CSS bug along the way: `.search-bar` was never defined in
+    LandLord's own stylesheet (only in BariVara's) — the class name got reused
+    without porting the rule, so the search box and filter dropdown had no gap
+    between them at all.
+  - **Landlord dashboard gained 5 KPI stat cards** (Occupancy, Collected this
+    month, Outstanding this month, Net this month, Pending maintenance) above
+    the module grid — all derived from data already tracked, added as reusable
+    `MockDataService` methods rather than computed inline. Deliberately no chart
+    yet — not enough historical data in the seed to make a trend meaningful;
+    revisit once the app has real usage history behind it.
+  - Dashboard copy: "Choose a module" → "Manage your property" (sounded like
+    software jargon, not something a landlord would think). Tenant dashboard's
+    matching "Choose an action" heading is still open — flagged, not yet decided.
 
 **Not done:** Phase 5 QA/sign-off, real backend, testing, deployment. See §3a for a
 tracked backlog of smaller gaps found during review but deliberately not fixed.
