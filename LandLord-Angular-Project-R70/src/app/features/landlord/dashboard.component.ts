@@ -1,12 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MockDataService, periodLabel } from '../../core/mock-data.service';
 
 @Component({
   selector: 'app-landlord-dashboard',
   standalone: true,
   imports: [RouterLink],
   template: `
-    <h1>Choose a module</h1>
+    <h1>{{ currentPeriodLabel() }} overview</h1>
+    <div class="module-grid" style="margin-bottom:2rem;">
+      <div class="card">
+        <p class="hint-text">Occupancy</p>
+        <h2>{{ occupancy().occupied }}/{{ occupancy().total }}</h2>
+      </div>
+      <div class="card">
+        <p class="hint-text">Collected this month</p>
+        <h2 style="color:var(--success);">{{ collected() }}</h2>
+      </div>
+      <div class="card">
+        <p class="hint-text">Outstanding this month</p>
+        <h2 style="color:var(--danger);">{{ outstanding() }}</h2>
+      </div>
+      <div class="card">
+        <p class="hint-text">Net this month</p>
+        <h2>{{ net() }}</h2>
+      </div>
+      <div class="card">
+        <p class="hint-text">Pending maintenance</p>
+        <h2>{{ pendingMaintenance() }}</h2>
+      </div>
+    </div>
+
+    <h1>Manage your property</h1>
     <div class="module-grid">
       @for (m of modules; track m.link) {
         <a class="module-tile" [routerLink]="m.link">
@@ -18,6 +43,19 @@ import { RouterLink } from '@angular/router';
   `,
 })
 export class LandlordDashboardComponent {
+  private readonly data = inject(MockDataService);
+
+  private readonly period = this.data.currentPeriod();
+  readonly occupancy = () => this.data.occupancyStats();
+  readonly collected = () => this.data.collectedInPeriod(this.period);
+  readonly outstanding = () => this.data.outstandingInPeriod(this.period);
+  readonly pendingMaintenance = () => this.data.pendingMaintenanceCount();
+  readonly net = () => this.collected() - this.data.expensesInPeriod(this.period);
+
+  currentPeriodLabel(): string {
+    return periodLabel(this.period);
+  }
+
   readonly modules = [
     { title: 'Property & Units', desc: 'Manage properties and unit status.', link: '/landlord/properties' },
     { title: 'Tenant Management', desc: 'Register, view, and move out tenants.', link: '/landlord/tenants' },

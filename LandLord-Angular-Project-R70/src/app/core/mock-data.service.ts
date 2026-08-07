@@ -490,4 +490,36 @@ export class MockDataService {
       .filter((entry) => !propertyId || entry.propertyId === propertyId)
       .sort((a, b) => a.date.localeCompare(b.date));
   }
+
+  /** Units occupied vs. total — landlord dashboard occupancy stat. */
+  occupancyStats(): { occupied: number; total: number } {
+    const units = this.units();
+    return { occupied: units.filter((u) => u.status === 'occupied').length, total: units.length };
+  }
+
+  /** Confirmed money in for one billing period (YYYY-MM) — reuses the same data the Ledger page shows. */
+  collectedInPeriod(period: string): number {
+    return this.ledgerEntries()
+      .filter((e) => e.type === 'income' && e.date.startsWith(period))
+      .reduce((sum, e) => sum + e.amount, 0);
+  }
+
+  /** Expenses logged in one billing period. */
+  expensesInPeriod(period: string): number {
+    return this.ledgerEntries()
+      .filter((e) => e.type === 'expense' && e.date.startsWith(period))
+      .reduce((sum, e) => sum + e.amount, 0);
+  }
+
+  /** What's still owed for one billing period, across every tenant. */
+  outstandingInPeriod(period: string): number {
+    return this.invoicesForPeriod(period)
+      .filter((i) => i.status !== 'paid')
+      .reduce((sum, i) => sum + i.balance, 0);
+  }
+
+  /** Maintenance tickets still open. */
+  pendingMaintenanceCount(): number {
+    return this.tickets().filter((t) => t.status === 'pending').length;
+  }
 }
