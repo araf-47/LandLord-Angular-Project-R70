@@ -46,6 +46,9 @@ export interface TenantRecord {
   name: string;
   phone: string;
   email: string;
+  /** National ID (or passport for foreign tenants) — the real unique identifier;
+   *  name and phone alone don't reliably distinguish tenants at scale. */
+  nationalId: string;
   unitId?: string;
   status: 'active' | 'inactive';
 }
@@ -247,7 +250,7 @@ export class MockDataService {
   ]);
 
   readonly tenants = signal<TenantRecord[]>([
-    { id: 't-1', name: 'Rahim Uddin', phone: '01710000000', email: 'rahim@example.com', unitId: 'u-1', status: 'active' },
+    { id: 't-1', name: 'Rahim Uddin', phone: '01710000000', email: 'rahim@example.com', nationalId: '1234567890123', unitId: 'u-1', status: 'active' },
   ]);
 
   readonly agreements = signal<RentalAgreement[]>([
@@ -286,6 +289,16 @@ export class MockDataService {
 
   tenantByUnit(unitId: string): TenantRecord | undefined {
     return this.tenants().find((t) => t.unitId === unitId);
+  }
+
+  /**
+   * Finds an existing *active* tenant already registered under this NID, if any.
+   * Only active records conflict — someone who moved out and later returns (or a
+   * re-typed record for a past tenant) shouldn't be blocked by their own history.
+   */
+  activeTenantByNationalId(nationalId: string): TenantRecord | undefined {
+    const normalized = nationalId.trim();
+    return this.tenants().find((t) => t.status === 'active' && t.nationalId.trim() === normalized);
   }
 
   currentPeriod(): string {

@@ -329,6 +329,19 @@ a {
   text-align: center;
 }
 
+.search-bar {
+  display: flex;
+  gap: 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+.search-bar input, .search-bar select {
+  flex: 1;
+}
+
 /* Cards / forms */
 .card {
   background: var(--surface);
@@ -558,6 +571,9 @@ th {
   .sidebar-nav a.active {
     border-left-color: transparent;
     border-bottom-color: var(--primary);
+  }
+  .search-bar {
+    flex-wrap: wrap;
   }
   .hero {
     padding: 2rem 1.25rem;

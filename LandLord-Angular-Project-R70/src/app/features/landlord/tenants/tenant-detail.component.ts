@@ -11,6 +11,7 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
     @if (tenant()) {
       <h1>{{ tenant()!.name }}</h1>
       <div class="card">
+        <p><strong>National ID:</strong> {{ tenant()!.nationalId }}</p>
         <p><strong>Phone:</strong> {{ tenant()!.phone }}</p>
         <p><strong>Email:</strong> {{ tenant()!.email }}</p>
         <p><strong>Unit:</strong> {{ unitLabel() }}</p>

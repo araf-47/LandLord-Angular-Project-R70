@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MockDataService, nextId } from '../../../core/mock-data.service';
@@ -23,10 +23,19 @@ import { MockDataService, nextId } from '../../../core/mock-data.service';
             <input id="phone" name="phone" [(ngModel)]="phone" required />
           </div>
         </div>
-        <div class="field">
-          <label for="email">Email</label>
-          <input id="email" type="email" name="email" [(ngModel)]="email" required />
+        <div class="form-row">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" [(ngModel)]="email" required />
+          </div>
+          <div class="field">
+            <label for="nationalId">National ID (or passport)</label>
+            <input id="nationalId" name="nationalId" [(ngModel)]="nationalId" required />
+          </div>
         </div>
+        @if (nidError()) {
+          <p class="error-text">{{ nidError() }}</p>
+        }
       </div>
 
       <div>
@@ -35,7 +44,7 @@ import { MockDataService, nextId } from '../../../core/mock-data.service';
           <label for="unit">Vacant unit</label>
           <select id="unit" name="unit" [(ngModel)]="unitId">
             @for (u of vacantUnits(); track u.id) {
-              <option [value]="u.id">{{ u.unitNumber }} — {{ u.rent }}/mo</option>
+              <option [value]="u.id">{{ propertyName(u.propertyId) }} &gt; {{ u.unitNumber }} &gt; {{ u.rent }}/mo</option>
             }
           </select>
         </div>
@@ -62,21 +71,34 @@ export class TenantRegisterComponent {
   name = '';
   phone = '';
   email = '';
+  nationalId = '';
   unitId = '';
   terms = '';
   deposit: number | null = null;
+  readonly nidError = signal('');
 
   vacantUnits() {
     return this.data.units().filter((u) => u.status === 'vacant');
   }
 
+  propertyName(propertyId: string): string {
+    return this.data.properties().find((p) => p.id === propertyId)?.name ?? '—';
+  }
+
   save(): void {
-    if (!this.name || !this.unitId) return;
+    if (!this.name || !this.unitId || !this.nationalId) return;
+
+    const existing = this.data.activeTenantByNationalId(this.nationalId);
+    if (existing) {
+      this.nidError.set(`This National ID is already registered to an active tenant (${existing.name}).`);
+      return;
+    }
+    this.nidError.set('');
 
     const tenantId = nextId('t');
     this.data.tenants.update((list) => [
       ...list,
-      { id: tenantId, name: this.name, phone: this.phone, email: this.email, unitId: this.unitId, status: 'active' },
+      { id: tenantId, name: this.name, phone: this.phone, email: this.email, nationalId: this.nationalId, unitId: this.unitId, status: 'active' },
     ]);
     this.data.agreements.update((list) => [
       ...list,
