@@ -2,7 +2,11 @@ import { Routes } from '@angular/router';
 import { roleGuard } from './core/role.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'auth' },
+  {
+    path: '',
+    loadComponent: () => import('./layouts/public-layout.component').then((m) => m.PublicLayoutComponent),
+    children: [{ path: '', pathMatch: 'full', loadComponent: () => import('./features/public/homepage.component').then((m) => m.HomepageComponent) }],
+  },
   {
     path: 'auth',
     loadComponent: () => import('./layouts/auth-layout.component').then((m) => m.AuthLayoutComponent),
@@ -20,5 +24,5 @@ export const routes: Routes = [
     loadChildren: () => import('./features/tenant/tenant.routes').then((m) => m.TENANT_ROUTES),
     canActivate: [roleGuard('tenant')],
   },
-  { path: '**', redirectTo: 'auth' },
+  { path: '**', redirectTo: '' },
 ];
