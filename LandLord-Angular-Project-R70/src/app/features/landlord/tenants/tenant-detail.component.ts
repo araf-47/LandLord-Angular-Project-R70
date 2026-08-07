@@ -62,10 +62,10 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
               <tr>
                 <td>{{ monthLabel(i.period) }}</td>
                 <td>{{ i.rent }}</td>
-                <td>{{ i.utilities }}</td>
+                <td [title]="i.utilityItems.map(u => u.label + ': ' + u.amount).join(', ')">{{ data.invoiceUtilitiesTotal(i) }}</td>
                 <td>{{ i.prevUnpaidRolled }}</td>
                 <td>{{ i.amount }}</td>
-                <td><span class="badge" [class.badge-unpaid]="i.status !== 'paid'" [class.badge-paid]="i.status === 'paid'">{{ i.status }}</span></td>
+                <td><span class="badge" [class.badge-unpaid]="i.status === 'unpaid'" [class.badge-partial]="i.status === 'partial'" [class.badge-paid]="i.status === 'paid'">{{ i.status }}</span></td>
               </tr>
             } @empty {
               <tr><td colspan="6" class="hint-text">No bills yet.</td></tr>
@@ -119,7 +119,7 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
   `,
 })
 export class TenantDetailComponent {
-  private readonly data = inject(MockDataService);
+  protected readonly data = inject(MockDataService);
   private readonly tenantId = inject(ActivatedRoute).snapshot.paramMap.get('tenantId')!;
 
   readonly editing = signal(false);

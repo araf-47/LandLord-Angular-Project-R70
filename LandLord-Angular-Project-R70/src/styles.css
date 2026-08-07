@@ -465,6 +465,7 @@ th {
 .badge-pending { background: #e0e7ff; color: #3730a3; }
 .badge-paid { background: #dcfce7; color: #166534; }
 .badge-unpaid { background: #fee2e2; color: #991b1b; }
+.badge-partial { background: #fef3c7; color: #92400e; }
 
 /* Module grid on dashboards */
 .module-grid {

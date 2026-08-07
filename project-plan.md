@@ -86,6 +86,18 @@ what those reviews found and didn't fix). Chronological detail:
   placed, wired into every topbar/auth-card/sidebar spot in both apps. LandLord uses
   Nunito for its badge-style mark, BariVara uses Poppins for its pin+house mark —
   both loaded alongside each app's Inter body font.
+- **Utility charges** (LandLord): stress-tested the app against a concrete scenario
+  (a landlord with one 12-unit building doing this by hand in a notebook) and found
+  a real hole — bills had no way to include water/gas/service-charge amounts,
+  `utilities` was hardcoded to 0. Fixed with a per-unit configurable list
+  (`UtilityItem[]`, label + usual monthly amount, landlord's choice of what applies)
+  instead of a fixed set of fields — deliberately not a hardcoded "electricity"
+  line, since most city units now have prepaid meters (tenant recharges directly,
+  not the landlord's bill) while older buildings or other charges still vary.
+  Snapshotted onto each invoice at generation time (`InvoiceUtilityLine[]`) so
+  editing a unit's defaults later never rewrites past bills; the current month's
+  amounts stay correctable up until the tenant pays anything against that bill,
+  then lock like the rest of the invoice.
 
 **Not done:** Phase 5 QA/sign-off, real backend, testing, deployment. See §3a for a
 tracked backlog of smaller gaps found during review but deliberately not fixed.

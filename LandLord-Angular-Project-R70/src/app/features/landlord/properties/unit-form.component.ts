@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MockDataService, PropertyType, Unit, nextId } from '../../../core/mock-data.service';
+import { MockDataService, PropertyType, Unit, UtilityItem, nextId } from '../../../core/mock-data.service';
 
 @Component({
   selector: 'app-unit-form',
@@ -33,6 +33,30 @@ import { MockDataService, PropertyType, Unit, nextId } from '../../../core/mock-
           <option value="occupied">Occupied</option>
         </select>
       </div>
+
+      <div class="field">
+        <label>Utility charges (optional — this unit's usual monthly amounts)</label>
+        <p class="hint-text" style="margin-top:-0.2rem;">
+          Skip electricity here if this unit has a prepaid meter — the tenant recharges it directly, it's not your bill.
+        </p>
+        <div class="stack">
+          @for (item of utilityItems; track item.id; let i = $index) {
+            <div class="form-row">
+              <input [(ngModel)]="item.label" [name]="'utilLabel' + i" placeholder="e.g. Water" />
+              <input type="number" [(ngModel)]="item.defaultAmount" [name]="'utilAmount' + i" placeholder="Amount" style="max-width:140px;" />
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeUtility(i)">Remove</button>
+            </div>
+          }
+        </div>
+        <div class="actions-row" style="margin-top:0.5rem;">
+          <button type="button" class="btn btn-sm" (click)="addUtility('Water')">+ Water</button>
+          <button type="button" class="btn btn-sm" (click)="addUtility('Gas')">+ Gas</button>
+          <button type="button" class="btn btn-sm" (click)="addUtility('Service Charge')">+ Service Charge</button>
+          <button type="button" class="btn btn-sm" (click)="addUtility('Electricity')">+ Electricity</button>
+          <button type="button" class="btn btn-sm" (click)="addUtility('')">+ Custom</button>
+        </div>
+      </div>
+
       <div class="actions-row">
         <button class="btn btn-primary" (click)="save()">Save unit</button>
       </div>
@@ -56,6 +80,7 @@ export class UnitFormComponent {
   propertyType: PropertyType = 'apartment';
   rent: number | null = null;
   status: Unit['status'] = 'vacant';
+  utilityItems: UtilityItem[] = [];
 
   constructor() {
     if (this.unitId) {
@@ -65,25 +90,35 @@ export class UnitFormComponent {
         this.propertyType = unit.propertyType;
         this.rent = unit.rent;
         this.status = unit.status;
+        this.utilityItems = unit.utilityItems.map((u) => ({ ...u }));
       }
     }
   }
 
+  addUtility(label: string): void {
+    this.utilityItems = [...this.utilityItems, { id: nextId('util'), label, defaultAmount: 0 }];
+  }
+
+  removeUtility(index: number): void {
+    this.utilityItems = this.utilityItems.filter((_, i) => i !== index);
+  }
+
   save(): void {
     if (!this.unitNumber || this.rent == null) return;
+    const utilityItems = this.utilityItems.filter((u) => u.label.trim());
 
     if (this.editing) {
       this.data.units.update((list) =>
         list.map((u) =>
           u.id === this.unitId
-            ? { ...u, unitNumber: this.unitNumber, propertyType: this.propertyType, rent: this.rent!, status: this.status }
+            ? { ...u, unitNumber: this.unitNumber, propertyType: this.propertyType, rent: this.rent!, status: this.status, utilityItems }
             : u
         )
       );
     } else {
       this.data.units.update((list) => [
         ...list,
-        { id: nextId('u'), propertyId: this.propertyId, unitNumber: this.unitNumber, propertyType: this.propertyType, rent: this.rent!, status: this.status },
+        { id: nextId('u'), propertyId: this.propertyId, unitNumber: this.unitNumber, propertyType: this.propertyType, rent: this.rent!, status: this.status, utilityItems },
       ]);
     }
 

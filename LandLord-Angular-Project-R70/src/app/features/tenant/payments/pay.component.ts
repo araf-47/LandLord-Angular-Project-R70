@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../../core/mock-data.service';
 
@@ -10,6 +10,24 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../../core/mock-d
     <h1>Payments</h1>
     <div class="card" style="max-width:480px;">
       <p><strong>Current due (invoice):</strong> {{ totalDue() }}</p>
+
+      @if (nextInvoice(); as inv) {
+        <div class="stack" style="margin-bottom:1rem;">
+          <div class="hint-text" style="display:flex; justify-content:space-between;">
+            <span>Rent</span><span>{{ inv.rent }}</span>
+          </div>
+          @for (u of inv.utilityItems; track u.label) {
+            <div class="hint-text" style="display:flex; justify-content:space-between;">
+              <span>{{ u.label }}</span><span>{{ u.amount }}</span>
+            </div>
+          }
+          @if (inv.prevUnpaidRolled) {
+            <div class="hint-text" style="display:flex; justify-content:space-between;">
+              <span>Previous unpaid balance</span><span>{{ inv.prevUnpaidRolled }}</span>
+            </div>
+          }
+        </div>
+      }
 
       <div class="field">
         <label for="amount">Amount to pay</label>
@@ -49,6 +67,13 @@ export class TenantPayComponent {
   method: 'online' | 'cash' = 'online';
   date = new Date().toISOString().slice(0, 10);
   readonly result = signal('');
+
+  readonly nextInvoice = computed(() =>
+    this.data
+      .invoicesForTenant(CURRENT_TENANT_ID)
+      .filter((i) => i.status !== 'paid')
+      .sort((a, b) => a.period.localeCompare(b.period))[0]
+  );
 
   totalDue(): number {
     return this.data

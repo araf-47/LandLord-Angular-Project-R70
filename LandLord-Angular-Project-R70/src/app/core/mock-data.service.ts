@@ -13,6 +13,21 @@ export interface Property {
  *  payload (shared-contracts.ts) has somewhere to actually get this value from. */
 export type PropertyType = 'apartment' | 'room' | 'office';
 
+/**
+ * A utility charge a landlord bills alongside rent for a unit, with a usual
+ * monthly amount so it doesn't need retyping every month. Deliberately just a
+ * label + amount, not a fixed enum — what applies varies by building. In
+ * particular, most city buildings now have prepaid electricity meters (the
+ * tenant recharges directly), so a unit with a prepaid meter simply has no
+ * "Electricity" item here; older non-prepaid buildings can add one like any
+ * other utility.
+ */
+export interface UtilityItem {
+  id: string;
+  label: string;
+  defaultAmount: number;
+}
+
 export interface Unit {
   id: string;
   propertyId: string;
@@ -22,6 +37,8 @@ export interface Unit {
   propertyType: PropertyType;
   /** Vacant units auto-post to BariVara; the landlord can pause that listing without changing occupancy. */
   adPaused?: boolean;
+  /** This unit's usual monthly utility charges — see UtilityItem. Landlord's choice; often empty. */
+  utilityItems: UtilityItem[];
 }
 
 export interface TenantRecord {
@@ -42,6 +59,14 @@ export interface RentalAgreement {
   deposit: number;
 }
 
+/** One utility charge on a specific bill — a snapshot of a Unit's UtilityItem at
+ *  generation time, not a live reference, so editing a unit's defaults later never
+ *  rewrites past bills. */
+export interface InvoiceUtilityLine {
+  label: string;
+  amount: number;
+}
+
 export interface Invoice {
   id: string;
   tenantId: string;
@@ -49,7 +74,10 @@ export interface Invoice {
   /** Billing month this invoice belongs to, e.g. '2026-08'. Immutable once created. */
   period: string;
   rent: number;
-  utilities: number;
+  /** Itemized utility charges for this bill. Editable while status is 'unpaid' (see
+   *  MockDataService.updateInvoiceUtilities) — e.g. a metered gas amount that turns
+   *  out to differ from the unit's usual default — locked once any payment lands. */
+  utilityItems: InvoiceUtilityLine[];
   /** Unpaid balance carried in from prior periods, snapshotted at generation time. */
   prevUnpaidRolled: number;
   amount: number;
@@ -153,7 +181,7 @@ function seedInvoices(): Invoice[] {
       unitId: 'u-1',
       period: twoAgo,
       rent: 15000,
-      utilities: 0,
+      utilityItems: [],
       prevUnpaidRolled: 0,
       amount: 15000,
       balance: 0,
@@ -167,7 +195,7 @@ function seedInvoices(): Invoice[] {
       unitId: 'u-1',
       period: oneAgo,
       rent: 15000,
-      utilities: 1000,
+      utilityItems: [{ label: 'Water', amount: 300 }, { label: 'Service Charge', amount: 700 }],
       prevUnpaidRolled: 0,
       amount: 16000,
       balance: 6000,
@@ -181,10 +209,10 @@ function seedInvoices(): Invoice[] {
       unitId: 'u-1',
       period: current,
       rent: 15000,
-      utilities: 0,
+      utilityItems: [{ label: 'Water', amount: 300 }, { label: 'Service Charge', amount: 700 }],
       prevUnpaidRolled: 6000,
-      amount: 21000,
-      balance: 21000,
+      amount: 22000,
+      balance: 22000,
       status: 'unpaid',
       dueDate: periodDueDate(current),
       createdAt: now,
@@ -203,8 +231,19 @@ export class MockDataService {
   ]);
 
   readonly units = signal<Unit[]>([
-    { id: 'u-1', propertyId: 'p-1', unitNumber: 'A-101', rent: 15000, status: 'occupied', propertyType: 'apartment' },
-    { id: 'u-2', propertyId: 'p-1', unitNumber: 'A-102', rent: 14000, status: 'vacant', propertyType: 'apartment' },
+    {
+      id: 'u-1',
+      propertyId: 'p-1',
+      unitNumber: 'A-101',
+      rent: 15000,
+      status: 'occupied',
+      propertyType: 'apartment',
+      utilityItems: [
+        { id: 'util-1', label: 'Water', defaultAmount: 300 },
+        { id: 'util-2', label: 'Service Charge', defaultAmount: 700 },
+      ],
+    },
+    { id: 'u-2', propertyId: 'p-1', unitNumber: 'A-102', rent: 14000, status: 'vacant', propertyType: 'apartment', utilityItems: [] },
   ]);
 
   readonly tenants = signal<TenantRecord[]>([
@@ -320,11 +359,14 @@ export class MockDataService {
 
     const now = new Date().toISOString();
     const newInvoices: Invoice[] = activeTenants.map((t) => {
-      const rent = this.units().find((u) => u.id === t.unitId)?.rent ?? 0;
+      const unit = this.units().find((u) => u.id === t.unitId);
+      const rent = unit?.rent ?? 0;
+      const utilityItems: InvoiceUtilityLine[] = (unit?.utilityItems ?? []).map((u) => ({ label: u.label, amount: u.defaultAmount }));
+      const utilitiesTotal = utilityItems.reduce((sum, u) => sum + u.amount, 0);
       const prevUnpaidRolled = this.invoices()
         .filter((i) => i.tenantId === t.id && i.period < period)
         .reduce((sum, i) => sum + i.balance, 0);
-      const amount = rent + prevUnpaidRolled;
+      const amount = rent + utilitiesTotal + prevUnpaidRolled;
 
       return {
         id: nextId('inv'),
@@ -332,7 +374,7 @@ export class MockDataService {
         unitId: t.unitId!,
         period,
         rent,
-        utilities: 0,
+        utilityItems,
         prevUnpaidRolled,
         amount,
         balance: amount,
@@ -343,6 +385,28 @@ export class MockDataService {
     });
 
     this.invoices.update((list) => [...list, ...newInvoices]);
+  }
+
+  /** Sum of an invoice's itemized utility charges — convenience for display/calc. */
+  invoiceUtilitiesTotal(invoice: Invoice): number {
+    return invoice.utilityItems.reduce((sum, u) => sum + u.amount, 0);
+  }
+
+  /**
+   * Corrects the utility line items on a bill that hasn't been touched by any
+   * payment yet — e.g. a metered gas amount that turns out to differ from the
+   * unit's usual default. Once any payment lands (status is 'partial' or 'paid'),
+   * this is a no-op: the bill is locked, same as the rest of the invoice.
+   */
+  updateInvoiceUtilities(invoiceId: string, items: InvoiceUtilityLine[]): void {
+    this.invoices.update((list) =>
+      list.map((invoice) => {
+        if (invoice.id !== invoiceId || invoice.status !== 'unpaid') return invoice;
+        const utilitiesTotal = items.reduce((sum, u) => sum + u.amount, 0);
+        const amount = invoice.rent + utilitiesTotal + invoice.prevUnpaidRolled;
+        return { ...invoice, utilityItems: items, amount, balance: amount };
+      })
+    );
   }
 
   /**
