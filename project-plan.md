@@ -65,6 +65,14 @@ what those reviews found and didn't fix). Chronological detail:
   `propertyType` (the new contract required it but nothing could supply it), the two
   cross-app "go look at listings" links now consistently land on `/browse`, and
   Repost/Pause now says plainly it doesn't touch BariVara's copy of the data yet.
+- **LandLord marketing homepage** (`bff390d`, ad-hoc addition outside the formal
+  phase list — same treatment as BariVara's earlier commerce-homepage rebuild): `/`
+  now sells the product instead of redirecting straight to login — hero with two
+  prominent CTAs, a feature grid grounded in what's actually built, a dedicated
+  callout for the BariVara auto-post reach pitch, repeat CTA banner. Uses real
+  styling decisions (blue hero gradient, CTA sizing, orange callout) made ahead of
+  an actual Phase 4.1 brand decision, so expect this page to get touched again once
+  that happens.
 
 **Not done:** visual/brand design pass (Phase 4), Phase 5 QA/sign-off, real backend,
 testing, deployment. See §3a for a tracked backlog of smaller gaps found during
@@ -102,6 +110,11 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   More noticeable now that the homepage is commerce-styled and implies real photos.
   (Needs object storage — Phase 8.4/11.4, or a placeholder-image service as a cheap
   frontend-only stopgap if it bothers you before then.)
+- **LandLord's public-layout doesn't check auth state.** BariVara's equivalent shows
+  "My Dashboard" instead of Login/Signup when already authenticated; LandLord's
+  always shows Login/Signup regardless. An already-logged-in landlord landing on `/`
+  sees the marketing page again instead of a way back to their dashboard. Cheap,
+  frontend-only — fixable now or foldable into Phase 4.
 
 ## 4. Part 1 — Frontend (both apps)
 
