@@ -1,6 +1,6 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-16
+Last updated: 2026-08-16 (Tenant registration backend slice added)
 
 ## 1. Product summary
 
@@ -179,18 +179,39 @@ slice only, as a proof-of-pipe before committing to the full schema):
   — add/edit/delete a property and it survives a server restart and browser
   refresh, proven by direct `psql` check against the container.
 - **Property edit + delete added** (closes part of the §3a "no property
-  edit/delete" gap) — real backend-backed for Property. **Unit edit/delete
-  added too**, but Units are still mock-data-only (`MockDataService`), not yet
-  wired to a backend — Property and Units are deliberately disconnected right
-  now (Property has real numeric DB ids, Units still has mock string ids), so
-  "units per property" counts on the Properties page will read 0 until Units
-  gets its own backend slice.
-- **Everything else still on `MockDataService`** — this is one vertical slice
-  (Property only), not a start on the full Phase 6 schema. Auth is still a
-  stub, no Flyway migrations yet, nothing deployed anywhere (localhost only).
+  edit/delete" gap) — real backend-backed for Property.
+- **`Unit` entity, real end to end** — full CRUD (`GET/POST/PUT/DELETE
+  /api/units`, `GET /api/units?propertyId=`) backed by a real `unit` table,
+  FK'd to `property` via `propertyId`. `unit-list.component.ts` and
+  `unit-form.component.ts` now call a new `UnitApiService` instead of
+  `MockDataService`. Property and Units are now on the same real DB, so
+  "units per property" counts on the Properties page work again (reads from
+  `UnitApiService`, not the mock). Kept deliberately minimal like the
+  Property slice — dropped `propertyType` and per-unit utility-charge line
+  items from the form for now (backend entity is just
+  `propertyId`/`unitNumber`/`rent`/`status`); can be added back in a later
+  pass if needed.
+- **`Tenant` + `RentalAgreement`, registration slice real end to end** — real
+  `tenant` and `rental_agreement` tables. `POST /api/tenants/register` does
+  the full walk-in flow atomically (create tenant, create agreement, flip the
+  unit to `occupied` via the real `unit` table), `GET /api/tenants/active-by-nid`
+  backs the duplicate-active-NID check server-side (409 on conflict, matches
+  the old client-side check). `tenant-list.component.ts` (search/filter) and
+  `tenant-register.component.ts` now call a new `TenantApiService` plus the
+  existing `PropertyApiService`/`UnitApiService` for the vacant-unit picker.
+  **Deliberately scoped narrow**: `tenant-detail.component.ts` and
+  `tenant-moveout.component.ts` stay on `MockDataService` for now — they pull
+  billing/payment/maintenance history, none of which has a backend yet
+  (Phase 10/11), so migrating just the tenant record there would leave those
+  tables silently empty. Your call when we get there: migrate detail/moveout
+  now (empty history tables) or wait until billing has a backend too.
+- **Everything else still on `MockDataService`** — Property, Units, and
+  Tenant-registration are three vertical slices proven end-to-end, not a
+  start on the full Phase 6 schema. Auth is still a stub, no Flyway
+  migrations yet, nothing deployed anywhere (localhost only).
 
 **Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
-(auth, Units, Tenants, Billing, etc. — Phase 6-20), testing, deployment. See
+(auth, Tenants, Billing, etc. — Phase 6-20), testing, deployment. See
 §3a for a tracked backlog of smaller gaps found during review but deliberately
 not fixed (property/unit edit-delete entry below is now resolved).
 
@@ -373,8 +394,8 @@ now functionally deeper than a route scaffold.)*
      No hosting yet — localhost-only for now.**
 6.2. Design relational schema: users, properties, units, tenants, agreements,
      invoices, payments, expenses, maintenance_tickets, conversations, messages,
-     marketplace_requests, notifications, listings — **only `properties` done
-     so far (see Phase 8 below), rest still pending**
+     marketplace_requests, notifications, listings — **`properties` and `units`
+     done so far (see Phase 8 below), rest still pending**
 6.3. Set up project skeleton, migrations, environment config — **skeleton done
      (`landlord-backend/`, Spring Boot 4.1); migrations still ad hoc
      (`ddl-auto: update`), Flyway not yet introduced**
@@ -391,20 +412,32 @@ now functionally deeper than a route scaffold.)*
 7.5. Wire OTP email delivery (transactional email provider)
 
 ### Phase 8 — Properties & Units (real data)
-8.1. Backend: CRUD endpoints for properties and units — **Property done
-     (`GET/POST/PUT/DELETE /api/properties`); Units not started**
+8.1. Backend: CRUD endpoints for properties and units — **Done. Property
+     (`GET/POST/PUT/DELETE /api/properties`) and Unit (`GET/POST/PUT/DELETE
+     /api/units`, `GET /api/units?propertyId=`) both real, FK'd via `propertyId`.**
 8.2. Frontend: replace `MockDataService` properties/units calls with the real
-     API — **Property list/add/edit/delete wired to `PropertyApiService`;
-     Units still fully on `MockDataService`**
-8.3. Unit status transitions (vacant/occupied) enforced server-side — pending
-     Units backend
+     API — **Done. Property and Units both wired (`PropertyApiService`,
+     `UnitApiService`); "units per property" count on the Properties page
+     reads real data again.**
+8.3. Unit status transitions (vacant/occupied) enforced server-side —
+     **partial**: `vacant → occupied` now happens server-side as a side
+     effect of tenant registration (Phase 9.1). Still possible to set status
+     directly via `PUT /api/units/{id}` with no tenant behind it — no
+     move-out flow yet to reverse `occupied → vacant`.
 8.4. Unit photo upload (object storage integration) — pending
 
 ### Phase 9 — Tenant management & rental agreements
-9.1. Backend: tenant CRUD, rental agreement CRUD, move-out flow (balance calc,
-     deposit refund/final bill, archive)
-9.2. Frontend: wire tenant register/detail/move-out pages to API
-9.3. Backend: enforce one active tenant per unit, unit status side-effects
+9.1. Backend: tenant CRUD, rental agreement CRUD — **Done** (`Tenant`,
+     `RentalAgreement` entities, `/api/tenants/register` atomic walk-in flow).
+     Move-out flow (balance calc, deposit refund/final bill, archive) — **not
+     started**.
+9.2. Frontend: wire tenant register/detail/move-out pages to API — **register
+     + list done (`TenantApiService`); detail and move-out still on
+     `MockDataService`, blocked on Phase 10/11 billing backend (see §3 note)**
+9.3. Backend: enforce one active tenant per unit, unit status side-effects —
+     **partially done**: register flips the unit to `occupied` and blocks a
+     duplicate active National ID server-side; nothing yet stops two tenants
+     being assigned the same unit directly (no move-out flow to free it yet)
 
 ### Phase 10 — Billing engine (monthly bills)
 10.1. Backend: `invoices` schema with `period` (billing month) field

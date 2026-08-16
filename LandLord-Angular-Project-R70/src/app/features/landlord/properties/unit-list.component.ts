@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { PropertyApiService } from '../../../core/property-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-unit-list',
@@ -19,7 +20,7 @@ import { MockDataService } from '../../../core/mock-data.service';
           <tr><th>Unit</th><th>Rent</th><th>Status</th><th></th></tr>
         </thead>
         <tbody>
-          @for (u of data.unitsByProperty(propertyId); track u.id) {
+          @for (u of unitApi.units(); track u.id) {
             <tr>
               <td>{{ u.unitNumber }}</td>
               <td>{{ u.rent }}</td>
@@ -36,16 +37,24 @@ import { MockDataService } from '../../../core/mock-data.service';
     </div>
   `,
 })
-export class UnitListComponent {
-  protected readonly data = inject(MockDataService);
+export class UnitListComponent implements OnInit {
+  protected readonly propertyApi = inject(PropertyApiService);
+  protected readonly unitApi = inject(UnitApiService);
   protected readonly propertyId = inject(ActivatedRoute).snapshot.paramMap.get('propertyId')!;
 
-  propertyName(): string {
-    return this.data.properties().find((p) => p.id === this.propertyId)?.name ?? 'Property';
+  async ngOnInit(): Promise<void> {
+    if (this.propertyApi.properties().length === 0) {
+      await this.propertyApi.load();
+    }
+    await this.unitApi.load(+this.propertyId);
   }
 
-  remove(unitId: string): void {
+  propertyName(): string {
+    return this.propertyApi.properties().find((p) => p.id === +this.propertyId)?.name ?? 'Property';
+  }
+
+  async remove(unitId: number): Promise<void> {
     if (!confirm('Delete this unit? This cannot be undone.')) return;
-    this.data.units.update((list) => list.filter((u) => u.id !== unitId));
+    await this.unitApi.delete(unitId);
   }
 }

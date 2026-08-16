@@ -1,7 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MockDataService, nextId } from '../../../core/mock-data.service';
+import { PropertyApiService } from '../../../core/property-api.service';
+import { TenantApiService } from '../../../core/tenant-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-tenant-register',
@@ -64,54 +66,54 @@ import { MockDataService, nextId } from '../../../core/mock-data.service';
     </div>
   `,
 })
-export class TenantRegisterComponent {
-  private readonly data = inject(MockDataService);
+export class TenantRegisterComponent implements OnInit {
+  private readonly propertyApi = inject(PropertyApiService);
+  private readonly unitApi = inject(UnitApiService);
+  private readonly tenantApi = inject(TenantApiService);
   private readonly router = inject(Router);
 
   name = '';
   phone = '';
   email = '';
   nationalId = '';
-  unitId = '';
+  unitId: number | null = null;
   terms = '';
   deposit: number | null = null;
   readonly nidError = signal('');
 
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.propertyApi.load(), this.unitApi.load()]);
+  }
+
   vacantUnits() {
-    return this.data.units().filter((u) => u.status === 'vacant');
+    return this.unitApi.units().filter((u) => u.status === 'vacant');
   }
 
-  propertyName(propertyId: string): string {
-    return this.data.properties().find((p) => p.id === propertyId)?.name ?? '—';
+  propertyName(propertyId: number): string {
+    return this.propertyApi.properties().find((p) => p.id === propertyId)?.name ?? '—';
   }
 
-  save(): void {
+  async save(): Promise<void> {
     if (!this.name || !this.unitId || !this.nationalId) return;
 
-    const existing = this.data.activeTenantByNationalId(this.nationalId);
-    if (existing) {
-      this.nidError.set(`This National ID is already registered to an active tenant (${existing.name}).`);
-      return;
-    }
     this.nidError.set('');
-
-    const tenantId = nextId('t');
-    this.data.tenants.update((list) => [
-      ...list,
-      { id: tenantId, name: this.name, phone: this.phone, email: this.email, nationalId: this.nationalId, unitId: this.unitId, status: 'active' },
-    ]);
-    this.data.agreements.update((list) => [
-      ...list,
-      {
-        id: nextId('a'),
-        tenantId,
+    try {
+      await this.tenantApi.register({
+        name: this.name,
+        phone: this.phone,
+        email: this.email,
+        nationalId: this.nationalId,
         unitId: this.unitId,
-        startDate: new Date().toISOString().slice(0, 10),
-        terms: this.terms || 'Standard lease',
+        terms: this.terms,
         deposit: this.deposit ?? 0,
-      },
-    ]);
-    this.data.units.update((list) => list.map((u) => (u.id === this.unitId ? { ...u, status: 'occupied' } : u)));
+      });
+    } catch (err: any) {
+      if (err?.status === 409) {
+        this.nidError.set('This National ID is already registered to an active tenant.');
+        return;
+      }
+      throw err;
+    }
 
     this.router.navigateByUrl('/landlord/tenants');
   }

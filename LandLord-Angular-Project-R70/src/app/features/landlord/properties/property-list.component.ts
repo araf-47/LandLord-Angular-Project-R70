@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
 import { PropertyApiService } from '../../../core/property-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-property-list',
@@ -24,7 +24,7 @@ import { PropertyApiService } from '../../../core/property-api.service';
             <tr>
               <td>{{ p.name }}</td>
               <td>{{ p.address }}</td>
-              <td>{{ data.unitsByProperty(p.id + '').length }}</td>
+              <td>{{ unitCount(p.id) }}</td>
               <td class="actions-row">
                 <a class="btn btn-sm" [routerLink]="['/landlord/properties', p.id, 'units']">Manage units</a>
                 <a class="btn btn-sm" [routerLink]="['/landlord/properties', p.id, 'edit']">Edit</a>
@@ -41,11 +41,15 @@ import { PropertyApiService } from '../../../core/property-api.service';
   `,
 })
 export class PropertyListComponent implements OnInit {
-  protected readonly data = inject(MockDataService);
   protected readonly api = inject(PropertyApiService);
+  protected readonly unitApi = inject(UnitApiService);
 
-  ngOnInit(): void {
-    this.api.load();
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.api.load(), this.unitApi.load()]);
+  }
+
+  unitCount(propertyId: number): number {
+    return this.unitApi.units().filter((u) => u.propertyId === propertyId).length;
   }
 
   async remove(id: number): Promise<void> {

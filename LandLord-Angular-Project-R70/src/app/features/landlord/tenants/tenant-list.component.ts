@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MockDataService, TenantRecord } from '../../../core/mock-data.service';
+import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-tenant-list',
@@ -57,17 +58,22 @@ import { MockDataService, TenantRecord } from '../../../core/mock-data.service';
     </div>
   `,
 })
-export class TenantListComponent {
-  protected readonly data = inject(MockDataService);
+export class TenantListComponent implements OnInit {
+  protected readonly api = inject(TenantApiService);
+  protected readonly unitApi = inject(UnitApiService);
 
   readonly query = signal('');
   readonly statusFilter = signal<'active' | 'inactive' | 'all'>('active');
+
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.api.load(), this.unitApi.load()]);
+  }
 
   readonly filteredTenants = computed(() => {
     const q = this.query().trim().toLowerCase();
     const status = this.statusFilter();
 
-    return this.data.tenants().filter((t: TenantRecord) => {
+    return this.api.tenants().filter((t: ApiTenant) => {
       const matchesStatus = status === 'all' || t.status === status;
       const matchesQuery =
         !q ||
@@ -78,7 +84,7 @@ export class TenantListComponent {
     });
   });
 
-  unitLabel(unitId?: string): string {
-    return this.data.units().find((u) => u.id === unitId)?.unitNumber ?? '—';
+  unitLabel(unitId: number | null): string {
+    return this.unitApi.units().find((u) => u.id === unitId)?.unitNumber ?? '—';
   }
 }
