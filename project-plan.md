@@ -1,6 +1,6 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-07
+Last updated: 2026-08-16
 
 ## 1. Product summary
 
@@ -162,18 +162,47 @@ what those reviews found and didn't fix). Chronological detail:
   done by static code/route audit, not a live browser click-through (no
   browser tool in this environment) — see Phase 5.1/5.2 notes below.
 
-**Not done:** Phase 5.5 sign-off (yours to give), real backend, testing,
-deployment. See §3a for a tracked backlog of smaller gaps found during review
-but deliberately not fixed.
+**Part 2 backend work has started ahead of formal Phase 6/7/8 order** (Property
+slice only, as a proof-of-pipe before committing to the full schema):
+- **Local Postgres via Docker** — official `postgres:16` image, `docker-compose.yml`
+  at repo root, `landlord_db` database, persisted named volume. Docker Engine
+  installed via the official `download.docker.com` apt repo (Debian 13/trixie).
+- **`landlord-backend/`** — new Spring Boot 4.1 project (Java 21, Maven wrapper),
+  generated via the official Spring Initializr (`start.spring.io`), deps: Web,
+  Data JPA, PostgreSQL driver, Validation. Runs on `:8080`, CORS opened for
+  `:4200`/`:4201`.
+- **`Property` entity, real end to end** — full CRUD (`GET/POST/PUT/DELETE
+  /api/properties`) backed by an actual `property` table in `landlord_db`
+  (`ddl-auto: update` for now, no Flyway yet). LandLord's Properties page
+  (`property-list.component.ts`, `property-form.component.ts`) now calls this
+  API via a new `PropertyApiService` (`HttpClient`) instead of `MockDataService`
+  — add/edit/delete a property and it survives a server restart and browser
+  refresh, proven by direct `psql` check against the container.
+- **Property edit + delete added** (closes part of the §3a "no property
+  edit/delete" gap) — real backend-backed for Property. **Unit edit/delete
+  added too**, but Units are still mock-data-only (`MockDataService`), not yet
+  wired to a backend — Property and Units are deliberately disconnected right
+  now (Property has real numeric DB ids, Units still has mock string ids), so
+  "units per property" counts on the Properties page will read 0 until Units
+  gets its own backend slice.
+- **Everything else still on `MockDataService`** — this is one vertical slice
+  (Property only), not a start on the full Phase 6 schema. Auth is still a
+  stub, no Flyway migrations yet, nothing deployed anywhere (localhost only).
+
+**Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
+(auth, Units, Tenants, Billing, etc. — Phase 6-20), testing, deployment. See
+§3a for a tracked backlog of smaller gaps found during review but deliberately
+not fixed (property/unit edit-delete entry below is now resolved).
 
 ## 3a. Known gaps — reviewed, tracked, not yet fixed
 
 Found during a full review pass across both apps (2026-08-07). Not blocking Phase 3;
 listed here so they're not lost, with a note on which phase naturally absorbs each.
 
-- **No property edit or delete, either app.** Add-only. (Candidate: fold into
-  whichever phase does the properties/units backend, Phase 8 — or do as a quick
-  frontend-only add before then if it starts to hurt demoing.)
+- ~~**No property edit or delete, either app.**~~ **Resolved for LandLord**
+  (2026-08-16), ahead of schedule, alongside the Property backend slice —
+  real edit/delete now backed by Postgres. BariVara's owner side still add-only
+  (unaffected, no backend there yet).
 - **BariVara owner side has no unit-management page.** LandLord has "Manage units"
   per property (list/add/edit); BariVara can only add one unit bundled into property
   creation, no way to add a second unit or edit rent later. (Phase 4 or earlier —
@@ -340,13 +369,19 @@ now functionally deeper than a route scaffold.)*
 ## 5. Part 2 — Backend (starts after Part 1 sign-off)
 
 ### Phase 6 — Backend foundation
-6.1. Choose backend stack + hosting (Open Decision)
+6.1. ~~Choose backend stack + hosting~~ **Decided: Java + Spring Boot, PostgreSQL.
+     No hosting yet — localhost-only for now.**
 6.2. Design relational schema: users, properties, units, tenants, agreements,
      invoices, payments, expenses, maintenance_tickets, conversations, messages,
-     marketplace_requests, notifications, listings
-6.3. Set up project skeleton, migrations, environment config
-6.4. Set up API auth (JWT issue/verify, password hashing, OTP delivery)
-6.5. Local dev environment (docker-compose: API + Postgres)
+     marketplace_requests, notifications, listings — **only `properties` done
+     so far (see Phase 8 below), rest still pending**
+6.3. Set up project skeleton, migrations, environment config — **skeleton done
+     (`landlord-backend/`, Spring Boot 4.1); migrations still ad hoc
+     (`ddl-auto: update`), Flyway not yet introduced**
+6.4. Set up API auth (JWT issue/verify, password hashing, OTP delivery) — not
+     started, API currently wide open
+6.5. ✅ **Local dev environment: `docker-compose.yml` at repo root, official
+     `postgres:16` image, `landlord_db`, port 5432, named volume**
 
 ### Phase 7 — Real authentication (both apps)
 7.1. Backend: signup/login/OTP/forgot-password/reset-password endpoints
@@ -356,10 +391,14 @@ now functionally deeper than a route scaffold.)*
 7.5. Wire OTP email delivery (transactional email provider)
 
 ### Phase 8 — Properties & Units (real data)
-8.1. Backend: CRUD endpoints for properties and units
-8.2. Frontend: replace `MockDataService` properties/units calls with the real API
-8.3. Unit status transitions (vacant/occupied) enforced server-side
-8.4. Unit photo upload (object storage integration)
+8.1. Backend: CRUD endpoints for properties and units — **Property done
+     (`GET/POST/PUT/DELETE /api/properties`); Units not started**
+8.2. Frontend: replace `MockDataService` properties/units calls with the real
+     API — **Property list/add/edit/delete wired to `PropertyApiService`;
+     Units still fully on `MockDataService`**
+8.3. Unit status transitions (vacant/occupied) enforced server-side — pending
+     Units backend
+8.4. Unit photo upload (object storage integration) — pending
 
 ### Phase 9 — Tenant management & rental agreements
 9.1. Backend: tenant CRUD, rental agreement CRUD, move-out flow (balance calc,

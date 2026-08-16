@@ -24,7 +24,10 @@ import { MockDataService } from '../../../core/mock-data.service';
               <td>{{ u.unitNumber }}</td>
               <td>{{ u.rent }}</td>
               <td><span class="badge" [class.badge-vacant]="u.status === 'vacant'" [class.badge-occupied]="u.status === 'occupied'">{{ u.status }}</span></td>
-              <td><a class="btn btn-sm" [routerLink]="['/landlord/properties', propertyId, 'units', u.id, 'edit']">Edit</a></td>
+              <td class="actions-row">
+                <a class="btn btn-sm" [routerLink]="['/landlord/properties', propertyId, 'units', u.id, 'edit']">Edit</a>
+                <button type="button" class="btn btn-sm btn-danger" (click)="remove(u.id)">Delete</button>
+              </td>
             </tr>
           }
         </tbody>
@@ -39,5 +42,10 @@ export class UnitListComponent {
 
   propertyName(): string {
     return this.data.properties().find((p) => p.id === this.propertyId)?.name ?? 'Property';
+  }
+
+  remove(unitId: string): void {
+    if (!confirm('Delete this unit? This cannot be undone.')) return;
+    this.data.units.update((list) => list.filter((u) => u.id !== unitId));
   }
 }

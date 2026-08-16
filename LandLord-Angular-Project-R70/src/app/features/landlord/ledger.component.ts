@@ -86,20 +86,18 @@ export class LedgerComponent {
   readonly fromDate = signal(firstOfMonth());
   readonly toDate = signal(today());
 
-  /** Cumulative balance computed over the property-filtered ledger, oldest first,
-   *  before the date range narrows what's displayed — so narrowing the date filter
-   *  doesn't make the running balance reset to zero. */
-  private readonly withBalance = computed(() => {
+  /** Cumulative balance computed over entries within the selected date range,
+   *  oldest first, so the last row's balance always matches the Net card above. */
+  readonly visibleRows = computed(() => {
     let balance = 0;
-    return this.data.ledgerEntries(this.propertyFilter() || undefined).map((entry) => {
-      balance += entry.type === 'income' ? entry.amount : -entry.amount;
-      return { ...entry, balance };
-    });
+    return this.data
+      .ledgerEntries(this.propertyFilter() || undefined)
+      .filter((entry) => entry.date >= this.fromDate() && entry.date <= this.toDate())
+      .map((entry) => {
+        balance += entry.type === 'income' ? entry.amount : -entry.amount;
+        return { ...entry, balance };
+      });
   });
-
-  readonly visibleRows = computed(() =>
-    this.withBalance().filter((row) => row.date >= this.fromDate() && row.date <= this.toDate())
-  );
 
   readonly totalIn = computed(() =>
     this.visibleRows()
