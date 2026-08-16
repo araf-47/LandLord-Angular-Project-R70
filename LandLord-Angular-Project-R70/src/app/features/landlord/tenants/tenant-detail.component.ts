@@ -1,7 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { ApiInvoice, ApiPayment, BillingApiService } from '../../../core/billing-api.service';
 import { MockDataService, periodLabel } from '../../../core/mock-data.service';
+import { ApiRentalAgreement, ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-tenant-detail',
@@ -64,7 +67,7 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
               <tr>
                 <td>{{ monthLabel(i.period) }}</td>
                 <td>{{ i.rent }}</td>
-                <td [title]="i.utilityItems.map(u => u.label + ': ' + u.amount).join(', ')">{{ data.invoiceUtilitiesTotal(i) }}</td>
+                <td>{{ i.utilitiesTotal }}</td>
                 <td>{{ i.prevUnpaidRolled }}</td>
                 <td>
                   @if (i.status === 'partial') {
@@ -91,7 +94,7 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
           <tbody>
             @for (p of paymentHistory(); track p.id) {
               <tr>
-                <td>{{ p.date }}</td>
+                <td>{{ dateLabel(p.date) }}</td>
                 <td>{{ p.amount }}</td>
                 <td>{{ p.method }}</td>
                 <td>
@@ -131,39 +134,59 @@ import { MockDataService, periodLabel } from '../../../core/mock-data.service';
     }
   `,
 })
-export class TenantDetailComponent {
+export class TenantDetailComponent implements OnInit {
+  private readonly api = inject(TenantApiService);
+  private readonly billingApi = inject(BillingApiService);
+  private readonly unitApi = inject(UnitApiService);
+  // Maintenance module still mock-only (Phase 11 not built).
   protected readonly data = inject(MockDataService);
-  private readonly tenantId = inject(ActivatedRoute).snapshot.paramMap.get('tenantId')!;
+  private readonly tenantId = +inject(ActivatedRoute).snapshot.paramMap.get('tenantId')!;
 
   readonly editing = signal(false);
   termsDraft = '';
 
-  readonly tenant = computed(() => this.data.tenants().find((t) => t.id === this.tenantId));
-  readonly agreement = computed(() => this.data.agreements().find((a) => a.tenantId === this.tenantId));
-  readonly billingHistory = computed(() => this.data.invoicesForTenant(this.tenantId));
-  readonly paymentHistory = computed(() => this.data.paymentsForTenant(this.tenantId));
-  readonly totalDue = computed(() => this.data.totalDueForTenant(this.tenantId));
-  readonly totalPaid = computed(() => this.data.totalPaidForTenant(this.tenantId));
-  readonly totalMaintenanceCost = computed(() => this.data.maintenanceCostForTenant(this.tenantId));
-  readonly maintenanceHistory = computed(() => this.data.maintenanceHistoryForTenant(this.tenantId));
+  readonly tenant = signal<ApiTenant | null>(null);
+  readonly agreement = signal<ApiRentalAgreement | null>(null);
+  readonly billingHistory = signal<ApiInvoice[]>([]);
+  readonly paymentHistory = signal<ApiPayment[]>([]);
 
-  constructor() {
-    const a = this.agreement();
-    if (a) this.termsDraft = a.terms;
+  readonly totalDue = computed(() => this.billingHistory().reduce((sum, i) => sum + i.balance, 0));
+  readonly totalPaid = computed(() => this.paymentHistory().reduce((sum, p) => sum + p.amount, 0));
+  readonly totalMaintenanceCost = computed(() => this.data.maintenanceCostForTenant(String(this.tenantId)));
+  readonly maintenanceHistory = computed(() => this.data.maintenanceHistoryForTenant(String(this.tenantId)));
+
+  async ngOnInit(): Promise<void> {
+    const [tenant, agreement, invoices, payments] = await Promise.all([
+      this.api.get(this.tenantId),
+      this.api.agreementFor(this.tenantId),
+      this.billingApi.invoicesForTenant(this.tenantId),
+      this.billingApi.paymentsForTenant(this.tenantId),
+      this.unitApi.units().length ? Promise.resolve() : this.unitApi.load(),
+    ]);
+    this.tenant.set(tenant);
+    this.agreement.set(agreement);
+    this.termsDraft = agreement?.terms ?? '';
+    this.billingHistory.set(invoices);
+    this.paymentHistory.set(payments);
   }
 
   monthLabel(period: string): string {
     return periodLabel(period);
   }
 
-  unitLabel(): string {
-    return this.data.units().find((u) => u.id === this.tenant()?.unitId)?.unitNumber ?? '—';
+  dateLabel(date: string): string {
+    return date.slice(0, 10);
   }
 
-  saveTerms(): void {
+  unitLabel(): string {
+    return this.unitApi.units().find((u) => u.id === this.tenant()?.unitId)?.unitNumber ?? '—';
+  }
+
+  async saveTerms(): Promise<void> {
     const a = this.agreement();
     if (!a) return;
-    this.data.agreements.update((list) => list.map((x) => (x.id === a.id ? { ...x, terms: this.termsDraft } : x)));
+    const updated = await this.api.updateAgreement(this.tenantId, this.termsDraft);
+    this.agreement.set(updated);
     this.editing.set(false);
   }
 }

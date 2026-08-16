@@ -1,6 +1,6 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-16 (Billing engine + move-out backend slice added)
+Last updated: 2026-08-17 (tenant-detail + billing views migrated off mock)
 
 ## 1. Product summary
 
@@ -227,15 +227,32 @@ slice only, as a proof-of-pipe before committing to the full schema):
   and deposit refund are still just a displayed number, not an actual
   transaction of any kind (no payment-gateway integration exists to make a
   "refund" real). Closes Phase 9.1/9.2's move-out gap.
-- **`tenant-detail.component.ts` still on `MockDataService`** — was
-  explicitly left out of the Tenant-registration slice because it needed a
-  billing backend, which now exists. Worth migrating next since the blocker
-  is gone, but wasn't part of this pass's ask.
-- **Everything else still on `MockDataService`** — Property, Units, Tenant-
-  registration, and now Billing/Move-out are four vertical slices proven
-  end-to-end, not a start on the full Phase 6 schema. Auth is still a stub
-  (API wide open), no Flyway migrations yet, nothing deployed anywhere
-  (localhost only).
+- **`tenant-detail.component.ts` migrated off `MockDataService`** — tenant
+  record, agreement (with a new `PUT /api/tenants/{id}/agreement` for editing
+  terms), billing history, and payment history all now hit the real
+  `TenantApiService`/`BillingApiService`. Total due/paid computed client-side
+  from the real invoice/payment lists. Maintenance cost/history stays on
+  `MockDataService` — no maintenance backend exists yet (Phase 11) — and is
+  keyed by the mock string tenant IDs, so it'll just render empty for real
+  (numeric-ID) tenants until that slice is built.
+- **Billing views migrated** — `generate-bills.component.ts` ("Monthly
+  Bills") now lists real invoices for the current period only (matches the
+  backend's current-month-only generation, no cron yet) and bulk-generates
+  for any active, unit-assigned tenant missing one, via a new
+  `GET /api/invoices` with optional `period` filter (previously required
+  `tenantId`). Dropped the itemized utility-line edit UI — real `Invoice`
+  only has `utilitiesTotal`, no per-line breakdown, matching the earlier
+  simplification. `receive-payment.component.ts` now calls the real
+  `POST /api/payments`, applying the entered amount across that tenant's
+  unpaid invoices oldest-first (backend has no single "pay whatever's owed"
+  endpoint). `pending-cash.component.ts` stays on mock — the real payment
+  flow has no pending→confirm step (10.4 already simplified to
+  straight-to-confirmed), so there's nothing on the backend for it to call.
+- **Everything else still on `MockDataService`** — Property, Units, Tenant,
+  Billing/Move-out, and now tenant-detail/billing-views are real; pending-cash,
+  maintenance, marketplace, messages, and tenant-side payment pages are not.
+  Auth is still a stub (API wide open), no Flyway migrations yet, nothing
+  deployed anywhere (localhost only).
 
 **Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
 (auth, Tenants, Billing, etc. — Phase 6-20), testing, deployment. See
@@ -459,10 +476,10 @@ now functionally deeper than a route scaffold.)*
      walk-in flow, `/api/tenants/{id}/move-out` balance calc + archive).
      Deposit refund/final-bill is a displayed number only, not a real
      transaction — no payment gateway to make it real yet.
-9.2. Frontend: wire tenant register/detail/move-out pages to API —
-     **register, list, and move-out done. `tenant-detail.component.ts` is
-     the only one left on `MockDataService`** — no longer blocked (billing
-     backend exists now), just not done yet.
+9.2. Frontend: wire tenant register/detail/move-out pages to API — **Done**.
+     register, list, move-out, and now `tenant-detail.component.ts` all call
+     real APIs. Only maintenance cost/history on the detail page stays mock
+     (Phase 11 has no backend yet).
 9.3. Backend: enforce one active tenant per unit, unit status side-effects —
      **done for the flows that exist**: register flips `vacant → occupied`
      and blocks a duplicate active National ID; move-out flips
@@ -485,11 +502,19 @@ now functionally deeper than a route scaffold.)*
       step yet), applies to invoice balance, flips unpaid/partial/paid.
 10.5. Backend: receipt generation (PDF) — not started
 10.6. Frontend: "Monthly Bills" view — current month only, filtered by
-      `period` — still on `MockDataService`, not touched this pass
-10.7. Frontend: billing history view (past periods) — still on
-      `MockDataService` (`tenant-detail.component.ts`), not touched this pass
+      `period` — **Done** (`generate-bills.component.ts`, real
+      `GET /api/invoices?period=`, bulk-generate for tenants missing one).
+      No itemized utility edit anymore (backend has no per-line field).
+10.7. Frontend: billing history view (past periods) — **Done**
+      (`tenant-detail.component.ts`, real invoice/payment lists). No
+      period picker for past months — only current-month generation exists
+      server-side (10.3 not started), so history is just "whatever's been
+      generated to date."
 10.8. Frontend: tenant-side pay flow wired to a real payment gateway — not
-      started, no gateway chosen yet (see §6 open decisions)
+      started, no gateway chosen yet (see §6 open decisions). Landlord-side
+      `receive-payment.component.ts` is real (applies to oldest unpaid
+      invoice first via `POST /api/payments`); `pending-cash.component.ts`
+      stays mock — no pending→confirm step exists server-side to back it.
 
 ### Phase 11 — Expenses & Maintenance
 11.1. Backend: expense CRUD tagged by property/tenant

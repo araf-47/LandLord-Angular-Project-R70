@@ -40,8 +40,10 @@ public class BillingController {
     }
 
     @GetMapping("/api/invoices")
-    public List<Invoice> invoicesForTenant(@RequestParam Long tenantId) {
-        return invoices.findByTenantId(tenantId);
+    public List<Invoice> invoicesForTenant(@RequestParam(required = false) Long tenantId, @RequestParam(required = false) String period) {
+        if (tenantId != null) return invoices.findByTenantId(tenantId);
+        if (period != null) return invoices.findByPeriod(period);
+        return invoices.findAll();
     }
 
     @GetMapping("/api/payments")

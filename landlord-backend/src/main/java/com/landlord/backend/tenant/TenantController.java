@@ -106,6 +106,16 @@ public class TenantController {
         return tenants.save(existing);
     }
 
+    public record UpdateAgreementRequest(String terms) {}
+
+    @PutMapping("/{tenantId}/agreement")
+    public RentalAgreement updateAgreement(@PathVariable Long tenantId, @RequestBody UpdateAgreementRequest request) {
+        RentalAgreement agreement = agreements.findFirstByTenantIdOrderByIdDesc(tenantId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No agreement for tenant"));
+        agreement.setTerms(request.terms());
+        return agreements.save(agreement);
+    }
+
     public record MoveOutResult(double outstandingBalance) {}
 
     @PostMapping("/{id}/move-out")

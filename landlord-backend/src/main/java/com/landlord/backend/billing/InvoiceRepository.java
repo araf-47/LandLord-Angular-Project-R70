@@ -10,4 +10,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByTenantIdAndStatusNot(Long tenantId, String status);
 
     Optional<Invoice> findFirstByTenantIdOrderByCreatedAtDesc(Long tenantId);
+
+    List<Invoice> findByPeriod(String period);
 }

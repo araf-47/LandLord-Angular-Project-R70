@@ -72,6 +72,10 @@ export class TenantApiService {
     return created;
   }
 
+  async updateAgreement(tenantId: number, terms: string): Promise<ApiRentalAgreement> {
+    return firstValueFrom(this.http.put<ApiRentalAgreement>(`${API_BASE}/${tenantId}/agreement`, { terms }));
+  }
+
   async moveOut(id: number): Promise<{ outstandingBalance: number }> {
     const result = await firstValueFrom(
       this.http.post<{ outstandingBalance: number }>(`${API_BASE}/${id}/move-out`, {})

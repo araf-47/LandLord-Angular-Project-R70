@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MockDataService, PaymentRecord, nextId } from '../../../core/mock-data.service';
+import { ApiInvoice, ApiPayment, BillingApiService } from '../../../core/billing-api.service';
+import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
 
 @Component({
   selector: 'app-receive-payment',
@@ -11,9 +12,9 @@ import { MockDataService, PaymentRecord, nextId } from '../../../core/mock-data.
     <div class="card stack" style="max-width:520px;">
       <div class="field">
         <label for="tenant">Select tenant</label>
-        <select id="tenant" name="tenant" [(ngModel)]="tenantId">
+        <select id="tenant" name="tenant" [(ngModel)]="tenantId" (ngModelChange)="onTenantChange()">
           <option value="">— choose —</option>
-          @for (t of data.tenants(); track t.id) {
+          @for (t of tenants(); track t.id) {
             <option [value]="t.id">{{ t.name }}</option>
           }
         </select>
@@ -47,39 +48,51 @@ import { MockDataService, PaymentRecord, nextId } from '../../../core/mock-data.
     </div>
   `,
 })
-export class ReceivePaymentComponent {
-  protected readonly data = inject(MockDataService);
+export class ReceivePaymentComponent implements OnInit {
+  private readonly tenantApi = inject(TenantApiService);
+  private readonly billingApi = inject(BillingApiService);
 
-  tenantId = '';
-  method: PaymentRecord['method'] = 'cash';
+  readonly tenants = signal<ApiTenant[]>([]);
+  readonly unpaidInvoices = signal<ApiInvoice[]>([]);
+
+  tenantId: number | '' = '';
+  method: ApiPayment['method'] = 'cash';
   amount = 0;
   readonly saved = signal(false);
 
-  totalDue(): number {
-    return this.data
-      .invoices()
-      .filter((i) => i.tenantId === this.tenantId && i.status !== 'paid')
-      .reduce((sum, i) => sum + i.balance, 0);
+  async ngOnInit(): Promise<void> {
+    await this.tenantApi.load();
+    this.tenants.set(this.tenantApi.tenants());
   }
 
-  save(): void {
+  async onTenantChange(): Promise<void> {
+    this.saved.set(false);
+    if (!this.tenantId) {
+      this.unpaidInvoices.set([]);
+      return;
+    }
+    const invoices = await this.billingApi.invoicesForTenant(this.tenantId);
+    this.unpaidInvoices.set(invoices.filter((i) => i.status !== 'paid'));
+  }
+
+  totalDue(): number {
+    return this.unpaidInvoices().reduce((sum, i) => sum + i.balance, 0);
+  }
+
+  async save(): Promise<void> {
     if (!this.tenantId || !this.amount) return;
 
-    this.data.applyPaymentToTenant(this.tenantId, this.amount);
+    let remaining = this.amount;
+    const oldest = [...this.unpaidInvoices()].sort((a, b) => a.id - b.id);
+    for (const invoice of oldest) {
+      if (remaining <= 0) break;
+      const applied = Math.min(remaining, invoice.balance);
+      await this.billingApi.recordPayment(this.tenantId, invoice.id, applied, this.method);
+      remaining -= applied;
+    }
 
-    this.data.payments.update((list) => [
-      ...list,
-      {
-        id: nextId('pay'),
-        tenantId: this.tenantId,
-        invoiceId: '',
-        amount: this.amount,
-        method: this.method,
-        status: 'confirmed',
-        date: new Date().toISOString().slice(0, 10),
-      },
-    ]);
-
+    const invoices = await this.billingApi.invoicesForTenant(this.tenantId);
+    this.unpaidInvoices.set(invoices.filter((i) => i.status !== 'paid'));
     this.saved.set(true);
   }
 }
