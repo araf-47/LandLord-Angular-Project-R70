@@ -1,5 +1,7 @@
 package com.landlord.backend.tenant;
 
+import com.landlord.backend.billing.Invoice;
+import com.landlord.backend.billing.InvoiceRepository;
 import com.landlord.backend.unit.Unit;
 import com.landlord.backend.unit.UnitRepository;
 import jakarta.validation.Valid;
@@ -27,11 +29,13 @@ public class TenantController {
     private final TenantRepository tenants;
     private final RentalAgreementRepository agreements;
     private final UnitRepository units;
+    private final InvoiceRepository invoices;
 
-    public TenantController(TenantRepository tenants, RentalAgreementRepository agreements, UnitRepository units) {
+    public TenantController(TenantRepository tenants, RentalAgreementRepository agreements, UnitRepository units, InvoiceRepository invoices) {
         this.tenants = tenants;
         this.agreements = agreements;
         this.units = units;
+        this.invoices = invoices;
     }
 
     @GetMapping
@@ -100,6 +104,30 @@ public class TenantController {
         existing.setUnitId(update.getUnitId());
         existing.setStatus(update.getStatus());
         return tenants.save(existing);
+    }
+
+    public record MoveOutResult(double outstandingBalance) {}
+
+    @PostMapping("/{id}/move-out")
+    public MoveOutResult moveOut(@PathVariable Long id) {
+        Tenant tenant = tenants.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        double outstandingBalance = invoices.findByTenantIdAndStatusNot(id, "paid").stream()
+            .mapToDouble(Invoice::getBalance)
+            .sum();
+
+        if (tenant.getUnitId() != null) {
+            units.findById(tenant.getUnitId()).ifPresent(unit -> {
+                unit.setStatus("vacant");
+                units.save(unit);
+            });
+        }
+
+        tenant.setStatus("inactive");
+        tenant.setUnitId(null);
+        tenants.save(tenant);
+
+        return new MoveOutResult(outstandingBalance);
     }
 
     @DeleteMapping("/{id}")

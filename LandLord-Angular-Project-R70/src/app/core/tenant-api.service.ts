@@ -44,6 +44,18 @@ export class TenantApiService {
     this.tenants.set(result);
   }
 
+  async get(id: number): Promise<ApiTenant> {
+    return firstValueFrom(this.http.get<ApiTenant>(`${API_BASE}/${id}`));
+  }
+
+  async agreementFor(tenantId: number): Promise<ApiRentalAgreement | null> {
+    try {
+      return await firstValueFrom(this.http.get<ApiRentalAgreement>(`${API_BASE}/${tenantId}/agreement`));
+    } catch {
+      return null;
+    }
+  }
+
   async activeByNationalId(nationalId: string): Promise<ApiTenant | null> {
     try {
       return await firstValueFrom(
@@ -58,5 +70,15 @@ export class TenantApiService {
     const created = await firstValueFrom(this.http.post<ApiTenant>(`${API_BASE}/register`, request));
     this.tenants.update((list) => [...list, created]);
     return created;
+  }
+
+  async moveOut(id: number): Promise<{ outstandingBalance: number }> {
+    const result = await firstValueFrom(
+      this.http.post<{ outstandingBalance: number }>(`${API_BASE}/${id}/move-out`, {})
+    );
+    this.tenants.update((list) =>
+      list.map((t) => (t.id === id ? { ...t, status: 'inactive', unitId: null } : t))
+    );
+    return result;
   }
 }

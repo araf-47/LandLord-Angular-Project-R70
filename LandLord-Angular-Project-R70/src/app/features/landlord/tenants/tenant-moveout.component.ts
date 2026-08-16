@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { BillingApiService } from '../../../core/billing-api.service';
+import { ApiRentalAgreement, ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
 
 @Component({
   selector: 'app-tenant-moveout',
@@ -40,23 +41,29 @@ import { MockDataService } from '../../../core/mock-data.service';
     }
   `,
 })
-export class TenantMoveoutComponent {
-  private readonly data = inject(MockDataService);
+export class TenantMoveoutComponent implements OnInit {
+  private readonly api = inject(TenantApiService);
+  private readonly billingApi = inject(BillingApiService);
   private readonly router = inject(Router);
-  private readonly tenantId = inject(ActivatedRoute).snapshot.paramMap.get('tenantId')!;
+  private readonly tenantId = +inject(ActivatedRoute).snapshot.paramMap.get('tenantId')!;
 
   deductions = 0;
   mode: 'refund' | 'bill' = 'refund';
   readonly done = signal(false);
 
-  readonly tenant = computed(() => this.data.tenants().find((t) => t.id === this.tenantId));
-  readonly agreement = computed(() => this.data.agreements().find((a) => a.tenantId === this.tenantId));
+  readonly tenant = signal<ApiTenant | null>(null);
+  readonly agreement = signal<ApiRentalAgreement | null>(null);
+  readonly outstandingBalance = signal(0);
 
-  outstandingBalance(): number {
-    return this.data
-      .invoices()
-      .filter((i) => i.tenantId === this.tenantId)
-      .reduce((sum, i) => sum + i.balance, 0);
+  async ngOnInit(): Promise<void> {
+    const [tenant, agreement, balance] = await Promise.all([
+      this.api.get(this.tenantId),
+      this.api.agreementFor(this.tenantId),
+      this.billingApi.outstandingBalance(this.tenantId),
+    ]);
+    this.tenant.set(tenant);
+    this.agreement.set(agreement);
+    this.outstandingBalance.set(balance);
   }
 
   resultLabel(): string {
@@ -68,12 +75,10 @@ export class TenantMoveoutComponent {
     return this.mode === 'refund' ? Math.max(0, deposit - this.deductions) : this.outstandingBalance() + this.deductions;
   }
 
-  process(): void {
-    const t = this.tenant();
-    if (!t) return;
-
-    this.data.units.update((list) => list.map((u) => (u.id === t.unitId ? { ...u, status: 'vacant' } : u)));
-    this.data.tenants.update((list) => list.map((x) => (x.id === t.id ? { ...x, status: 'inactive', unitId: undefined } : x)));
+  async process(): Promise<void> {
+    if (!this.tenant()) return;
+    const result = await this.api.moveOut(this.tenantId);
+    this.outstandingBalance.set(result.outstandingBalance);
     this.done.set(true);
     setTimeout(() => this.router.navigateByUrl('/landlord/tenants'), 900);
   }
