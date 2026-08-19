@@ -1,6 +1,7 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-19 (pending-cash retired; Maintenance + Expenses real end to end;
+Last updated: 2026-08-20 (Ledger + landlord dashboard KPI tiles real end to
+end; pending-cash retired; Maintenance + Expenses real end to end;
 numeric-select ngModel bug found and fixed in 3 forms)
 
 ## 1. Product summary
@@ -280,14 +281,23 @@ slice only, as a proof-of-pipe before committing to the full schema):
   only the expense side would leave it half-real, half-mock inside a single
   computed. Needs its own pass once Payments/Property are wired into the
   Ledger view together, not a Maintenance-scoped fix.
-  **Ledger readiness check (2026-08-19)**: Expenses and Properties are both
-  real now, so two of the three pieces `ledgerEntries()` needs are ready.
-  Blocked on one gap: `GET /api/payments` requires a `tenantId` param
-  (`BillingController.paymentsForTenant`) — there's no way to fetch every
-  payment landlord-wide for the Ledger's income side. Needs `tenantId` made
-  optional there (same pattern `GET /api/invoices` already uses — falls back
-  to `findAll()`) before Ledger can be migrated. Held for a future session;
-  not started.
+  **Ledger migrated, real end to end (2026-08-19)**: `GET /api/payments`'s
+  `tenantId` param made optional (falls back to `findAll()`, same pattern as
+  `GET /api/invoices`), plus a new `BillingApiService.allPayments()`.
+  `ledger.component.ts` no longer touches `MockDataService` — loads
+  properties/units/tenants/payments/expenses via the real APIs in `ngOnInit`,
+  resolves each payment's property through tenant→unit→property (falling
+  back to `TenantApiService.agreementFor()` per tenant whose `unitId` is
+  currently null, e.g. after move-out, matching the mock's old fallback
+  logic), and builds the same income/expense merge client-side.
+  **Landlord dashboard KPI tiles migrated too (2026-08-20)**:
+  `dashboard.component.ts` no longer injects `MockDataService` at all —
+  Occupancy now reads `UnitApiService`, Collected reads real confirmed
+  `Payment`s for the period, Outstanding reads real unpaid/partial
+  `Invoice` balances for the period (`BillingApiService.invoicesForPeriod`,
+  already existed), Net stays derived from Collected minus the
+  already-real expenses total. Only kept `periodKey`/`periodLabel` (pure
+  date-formatting helpers) from `mock-data.service.ts`.
 - **Real bug found and fixed: numeric `<select [(ngModel)]>` silently failed
   to sync the picked option back to the bound property.** Surfaced when you
   screenshotted "Log new issue" — dropdown visually showed a tenant selected,
@@ -331,10 +341,11 @@ slice only, as a proof-of-pipe before committing to the full schema):
   retroactively shows up. Confirmed working live in the browser on tenant
   Atiqur Rahman's detail page (400 tenant-borne maintenance cost, correct).
 - **Everything else still on `MockDataService`** — Property, Units, Tenant,
-  Billing/Move-out, tenant-detail/billing-views, and now Maintenance/Expenses
-  are real; `ledger.component.ts`, marketplace, messages, and the rest of the
-  tenant-side payment pages are not. Auth is still a stub (API wide open), no
-  Flyway migrations yet, nothing deployed anywhere (localhost only).
+  Billing/Move-out, tenant-detail/billing-views, Maintenance/Expenses,
+  Ledger, and now the landlord dashboard KPI tiles are real; marketplace,
+  messages, and the rest of the tenant-side payment pages are not. Auth is
+  still a stub (API wide open), no Flyway migrations yet,
+  nothing deployed anywhere (localhost only).
 
 **Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
 (auth, Tenants, Billing, etc. — Phase 6-20), testing, deployment. See
@@ -625,9 +636,8 @@ now functionally deeper than a route scaffold.)*
       ticket-list/ticket-new, `expense-management.component.ts`) plus the
       landlord dashboard's maintenance/net tiles and
       `tenant-detail.component.ts`'s maintenance history now call the real
-      `MaintenanceApiService`. `ledger.component.ts` intentionally left
-      mock (see §3 note — entangled with Payments/Property, not a clean
-      Maintenance-only swap).
+      `MaintenanceApiService`. `ledger.component.ts` migrated separately,
+      2026-08-19 (see §3 note) once Payments/Property/Expenses were all real.
 11.4. Maintenance image upload (object storage) — still pending, same as
       8.4
 

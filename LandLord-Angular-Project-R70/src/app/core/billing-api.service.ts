@@ -45,6 +45,10 @@ export class BillingApiService {
     return firstValueFrom(this.http.get<ApiPayment[]>(`${BASE}/payments`, { params: { tenantId } }));
   }
 
+  async allPayments(): Promise<ApiPayment[]> {
+    return firstValueFrom(this.http.get<ApiPayment[]>(`${BASE}/payments`));
+  }
+
   async generateInvoice(tenantId: number, utilitiesTotal = 0): Promise<ApiInvoice> {
     return firstValueFrom(this.http.post<ApiInvoice>(`${BASE}/invoices/generate`, { tenantId, utilitiesTotal }));
   }

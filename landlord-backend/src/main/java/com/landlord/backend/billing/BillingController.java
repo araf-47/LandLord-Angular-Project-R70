@@ -47,8 +47,9 @@ public class BillingController {
     }
 
     @GetMapping("/api/payments")
-    public List<Payment> paymentsForTenant(@RequestParam Long tenantId) {
-        return payments.findByTenantId(tenantId);
+    public List<Payment> paymentsForTenant(@RequestParam(required = false) Long tenantId) {
+        if (tenantId != null) return payments.findByTenantId(tenantId);
+        return payments.findAll();
     }
 
     public record GenerateInvoiceRequest(Long tenantId, Double utilitiesTotal) {}

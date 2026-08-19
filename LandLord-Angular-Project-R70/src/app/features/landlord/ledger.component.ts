@@ -1,6 +1,20 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MockDataService, periodKey } from '../../core/mock-data.service';
+import { periodKey } from '../../core/mock-data.service';
+import { BillingApiService } from '../../core/billing-api.service';
+import { MaintenanceApiService } from '../../core/maintenance-api.service';
+import { TenantApiService } from '../../core/tenant-api.service';
+import { UnitApiService } from '../../core/unit-api.service';
+import { PropertyApiService, ApiProperty } from '../../core/property-api.service';
+
+interface LedgerEntry {
+  id: string;
+  date: string;
+  type: 'income' | 'expense';
+  description: string;
+  propertyId: number | undefined;
+  amount: number;
+}
 
 function firstOfMonth(): string {
   const [year, month] = periodKey().split('-');
@@ -24,7 +38,7 @@ function today(): string {
           <label for="property">Property</label>
           <select id="property" name="property" [ngModel]="propertyFilter()" (ngModelChange)="propertyFilter.set($event)">
             <option value="">All properties</option>
-            @for (p of data.properties(); track p.id) {
+            @for (p of properties(); track p.id) {
               <option [value]="p.id">{{ p.name }}</option>
             }
           </select>
@@ -79,19 +93,77 @@ function today(): string {
     </div>
   `,
 })
-export class LedgerComponent {
-  protected readonly data = inject(MockDataService);
+export class LedgerComponent implements OnInit {
+  private readonly billing = inject(BillingApiService);
+  private readonly maintenance = inject(MaintenanceApiService);
+  private readonly tenantApi = inject(TenantApiService);
+  private readonly unitApi = inject(UnitApiService);
+  private readonly propertyApi = inject(PropertyApiService);
+
+  readonly properties = signal<ApiProperty[]>([]);
+  readonly entries = signal<LedgerEntry[]>([]);
 
   readonly propertyFilter = signal('');
   readonly fromDate = signal(firstOfMonth());
   readonly toDate = signal(today());
 
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.propertyApi.load(), this.unitApi.load(), this.tenantApi.load()]);
+    this.properties.set(this.propertyApi.properties());
+
+    const units = this.unitApi.units();
+    const unitPropertyId = new Map(units.map((u) => [u.id, u.propertyId]));
+
+    const tenants = this.tenantApi.tenants();
+    const tenantName = new Map(tenants.map((t) => [t.id, t.name]));
+
+    const tenantUnitId = new Map<number, number>();
+    for (const t of tenants) {
+      if (t.unitId != null) tenantUnitId.set(t.id, t.unitId);
+    }
+    const orphanTenants = tenants.filter((t) => t.unitId == null);
+    const agreements = await Promise.all(orphanTenants.map((t) => this.tenantApi.agreementFor(t.id)));
+    agreements.forEach((agreement, i) => {
+      if (agreement) tenantUnitId.set(orphanTenants[i].id, agreement.unitId);
+    });
+
+    const propertyIdForTenant = (tenantId: number) => {
+      const unitId = tenantUnitId.get(tenantId);
+      return unitId != null ? unitPropertyId.get(unitId) : undefined;
+    };
+
+    const [payments, expenses] = await Promise.all([this.billing.allPayments(), this.maintenance.allExpenses()]);
+
+    const income: LedgerEntry[] = payments
+      .filter((p) => p.status === 'confirmed')
+      .map((p) => ({
+        id: `p-${p.id}`,
+        date: p.date,
+        type: 'income' as const,
+        description: `Payment — ${tenantName.get(p.tenantId) ?? 'Tenant'}`,
+        propertyId: propertyIdForTenant(p.tenantId),
+        amount: p.amount,
+      }));
+
+    const outflow: LedgerEntry[] = expenses.map((e) => ({
+      id: `e-${e.id}`,
+      date: e.date,
+      type: 'expense' as const,
+      description: e.description ? `${e.category} — ${e.description}` : e.category,
+      propertyId: e.propertyId ?? undefined,
+      amount: e.amount,
+    }));
+
+    this.entries.set([...income, ...outflow].sort((a, b) => a.date.localeCompare(b.date)));
+  }
+
   /** Cumulative balance computed over entries within the selected date range,
    *  oldest first, so the last row's balance always matches the Net card above. */
   readonly visibleRows = computed(() => {
     let balance = 0;
-    return this.data
-      .ledgerEntries(this.propertyFilter() || undefined)
+    const propertyFilter = this.propertyFilter();
+    return this.entries()
+      .filter((entry) => !propertyFilter || String(entry.propertyId) === propertyFilter)
       .filter((entry) => entry.date >= this.fromDate() && entry.date <= this.toDate())
       .map((entry) => {
         balance += entry.type === 'income' ? entry.amount : -entry.amount;
