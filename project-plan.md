@@ -280,6 +280,14 @@ slice only, as a proof-of-pipe before committing to the full schema):
   only the expense side would leave it half-real, half-mock inside a single
   computed. Needs its own pass once Payments/Property are wired into the
   Ledger view together, not a Maintenance-scoped fix.
+  **Ledger readiness check (2026-08-19)**: Expenses and Properties are both
+  real now, so two of the three pieces `ledgerEntries()` needs are ready.
+  Blocked on one gap: `GET /api/payments` requires a `tenantId` param
+  (`BillingController.paymentsForTenant`) — there's no way to fetch every
+  payment landlord-wide for the Ledger's income side. Needs `tenantId` made
+  optional there (same pattern `GET /api/invoices` already uses — falls back
+  to `findAll()`) before Ledger can be migrated. Held for a future session;
+  not started.
 - **Real bug found and fixed: numeric `<select [(ngModel)]>` silently failed
   to sync the picked option back to the bound property.** Surfaced when you
   screenshotted "Log new issue" — dropdown visually showed a tenant selected,
