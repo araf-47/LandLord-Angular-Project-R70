@@ -309,6 +309,19 @@ slice only, as a proof-of-pipe before committing to the full schema):
   aren't affected; only numeric-id selects wired to the real backend carry
   this bug. Confirmed fixed via rebuild; not yet re-verified in a live
   browser click-through on your end.
+- **Real bug found and fixed: Expenses' free-text Category field silently broke
+  `tenant-detail.component.ts`'s Maintenance cost history.** You confirmed "Log
+  new issue" worked, then found a logged expense wasn't showing under a
+  tenant's Maintenance cost history — root cause: the Category input on
+  `expense-management.component.ts` was free text, but the tenant-detail page
+  only matches `category === 'Maintenance'` exactly (case-sensitive). An
+  expense typed as "Repair" (or any other spelling) could never show up.
+  Fixed: Category is now a dropdown (Maintenance/Repairs/Utilities/Other,
+  defaults to Maintenance), plus visible errors on the save guard clauses.
+  Also corrected one real pre-existing expense row in the DB (id 4, "He broke
+  the switch.", tenant 4) from `category: 'Repair'` to `'Maintenance'` so it
+  retroactively shows up. Confirmed working live in the browser on tenant
+  Atiqur Rahman's detail page (400 tenant-borne maintenance cost, correct).
 - **Everything else still on `MockDataService`** — Property, Units, Tenant,
   Billing/Move-out, tenant-detail/billing-views, and now Maintenance/Expenses
   are real; `ledger.component.ts`, marketplace, messages, and the rest of the

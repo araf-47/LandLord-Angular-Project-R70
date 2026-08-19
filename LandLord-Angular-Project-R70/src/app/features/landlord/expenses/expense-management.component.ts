@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MaintenanceApiService } from '../../../core/maintenance-api.service';
 import { PropertyApiService } from '../../../core/property-api.service';
@@ -45,12 +45,20 @@ import { TenantApiService } from '../../../core/tenant-api.service';
       </div>
       <div class="field">
         <label for="category">Category</label>
-        <input id="category" name="category" [(ngModel)]="category" placeholder="e.g. Repairs, Utilities" />
+        <select id="category" name="category" [(ngModel)]="category">
+          <option value="Maintenance">Maintenance</option>
+          <option value="Repairs">Repairs</option>
+          <option value="Utilities">Utilities</option>
+          <option value="Other">Other</option>
+        </select>
       </div>
       <div class="field">
         <label for="description">Description</label>
         <input id="description" name="description" [(ngModel)]="description" />
       </div>
+      @if (error()) {
+        <p class="error-text">{{ error() }}</p>
+      }
       <div class="actions-row">
         <button class="btn btn-primary" (click)="save()">Save expense</button>
       </div>
@@ -85,9 +93,10 @@ export class ExpenseManagementComponent implements OnInit {
   bearer: 'landlord' | 'tenant' = 'landlord';
   tenantId: number | null = null;
   amount = 0;
-  category = '';
+  category = 'Maintenance';
   description = '';
   expenses: Awaited<ReturnType<MaintenanceApiService['allExpenses']>> = [];
+  readonly error = signal('');
 
   async ngOnInit(): Promise<void> {
     const [, , expenses] = await Promise.all([
@@ -114,9 +123,20 @@ export class ExpenseManagementComponent implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (!this.amount || !this.category || !this.propertyId) return;
-    if (this.bearer === 'tenant' && !this.tenantId) return;
+    if (!this.propertyId) {
+      this.error.set('Choose a property.');
+      return;
+    }
+    if (!this.amount) {
+      this.error.set('Enter an amount.');
+      return;
+    }
+    if (this.bearer === 'tenant' && !this.tenantId) {
+      this.error.set('Choose a tenant.');
+      return;
+    }
 
+    this.error.set('');
     const created = await this.maintenanceApi.createExpense({
       propertyId: this.propertyId,
       category: this.category,
@@ -127,7 +147,7 @@ export class ExpenseManagementComponent implements OnInit {
     });
     this.expenses = [...this.expenses, created];
     this.amount = 0;
-    this.category = '';
+    this.category = 'Maintenance';
     this.description = '';
     this.tenantId = null;
   }
