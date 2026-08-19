@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MaintenanceApiService } from '../../core/maintenance-api.service';
 import { MockDataService, periodLabel } from '../../core/mock-data.service';
 
 @Component({
@@ -42,15 +43,23 @@ import { MockDataService, periodLabel } from '../../core/mock-data.service';
     </div>
   `,
 })
-export class LandlordDashboardComponent {
+export class LandlordDashboardComponent implements OnInit {
   private readonly data = inject(MockDataService);
+  private readonly maintenanceApi = inject(MaintenanceApiService);
 
   private readonly period = this.data.currentPeriod();
+  private readonly expensesThisPeriod = signal(0);
+
   readonly occupancy = () => this.data.occupancyStats();
   readonly collected = () => this.data.collectedInPeriod(this.period);
   readonly outstanding = () => this.data.outstandingInPeriod(this.period);
-  readonly pendingMaintenance = () => this.data.pendingMaintenanceCount();
-  readonly net = () => this.collected() - this.data.expensesInPeriod(this.period);
+  readonly pendingMaintenance = () => this.maintenanceApi.tickets().filter((t) => t.status === 'pending').length;
+  readonly net = () => this.collected() - this.expensesThisPeriod();
+
+  async ngOnInit(): Promise<void> {
+    const [, expenses] = await Promise.all([this.maintenanceApi.load(), this.maintenanceApi.allExpenses()]);
+    this.expensesThisPeriod.set(expenses.filter((e) => e.date.startsWith(this.period)).reduce((sum, e) => sum + e.amount, 0));
+  }
 
   currentPeriodLabel(): string {
     return periodLabel(this.period);

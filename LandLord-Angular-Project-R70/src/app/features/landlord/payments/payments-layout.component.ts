@@ -9,7 +9,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     <nav class="tabs">
       <a routerLink="/landlord/payments/bills" routerLinkActive="active">Bills</a>
       <a routerLink="/landlord/payments/receive" routerLinkActive="active">Receive Payment</a>
-      <a routerLink="/landlord/payments/pending" routerLinkActive="active">Pending Cash</a>
     </nav>
     <router-outlet />
   `,

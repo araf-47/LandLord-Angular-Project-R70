@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.service';
+import { CURRENT_TENANT_ID_REAL } from '../../../core/current-tenant';
+import { MaintenanceApiService } from '../../../core/maintenance-api.service';
 
 @Component({
   selector: 'app-tenant-ticket-list',
@@ -17,7 +18,7 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.serv
       <table>
         <thead><tr><th>Description</th><th>Status</th></tr></thead>
         <tbody>
-          @for (t of myTickets(); track t.id) {
+          @for (t of api.tickets(); track t.id) {
             <tr>
               <td>{{ t.description }}</td>
               <td><span class="badge" [class.badge-pending]="t.status === 'pending'" [class.badge-paid]="t.status === 'resolved'">{{ t.status }}</span></td>
@@ -31,10 +32,10 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.serv
     </div>
   `,
 })
-export class TenantTicketListComponent {
-  private readonly data = inject(MockDataService);
+export class TenantTicketListComponent implements OnInit {
+  protected readonly api = inject(MaintenanceApiService);
 
-  myTickets() {
-    return this.data.tickets().filter((t) => t.tenantId === CURRENT_TENANT_ID);
+  async ngOnInit(): Promise<void> {
+    await this.api.loadForTenant(CURRENT_TENANT_ID_REAL);
   }
 }

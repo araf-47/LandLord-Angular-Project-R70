@@ -1,6 +1,7 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-17 (tenant-detail + billing views migrated off mock)
+Last updated: 2026-08-19 (pending-cash retired; Maintenance + Expenses real end to end;
+numeric-select ngModel bug found and fixed in 3 forms)
 
 ## 1. Product summary
 
@@ -248,11 +249,71 @@ slice only, as a proof-of-pipe before committing to the full schema):
   endpoint). `pending-cash.component.ts` stays on mock — the real payment
   flow has no pending→confirm step (10.4 already simplified to
   straight-to-confirmed), so there's nothing on the backend for it to call.
+- **`pending-cash.component.ts` retired** — real `Payment` always writes
+  straight to `confirmed` (no pending state exists server-side, matches
+  10.4's simplification), so the landlord "Pending Cash" tab/route/page had
+  no backend to call and was deleted outright (not migrated). Tenant-side
+  `pay.component.ts`'s "Pay with cash" button updated to match: records
+  straight to `confirmed` instead of a `pending` status with no confirm UI
+  left anywhere to clear it.
+- **`Maintenance` + `Expense`, real end to end** — new backend package
+  (`MaintenanceTicket`: unitId/tenantId/description/status/**cost**;
+  `Expense`: propertyId/**ticketId**/category/description/amount/bearer/
+  tenantId/date — the real `ticketId` back-reference the mock never had).
+  `GET/POST /api/maintenance-tickets` (+`?tenantId=`/`?unitId=`),
+  `PUT .../{id}/status` (resolve, auto-creates a linked `Expense` when a
+  cost is given, resolving `propertyId` server-side via the ticket's unit),
+  `GET/POST/DELETE /api/expenses`. New `MaintenanceApiService` wired into
+  all 6 mock-era components: landlord ticket-list/ticket-new/ticket-detail,
+  tenant ticket-list/ticket-new, `expense-management.component.ts`. Landlord
+  dashboard's pending-maintenance count and net-this-month tile now read
+  real data too. Closes the exact gap flagged earlier: `tenant-detail.component.ts`'s
+  maintenance-cost/history cards now call the real API instead of matching
+  mock string IDs against real numeric tenants (previously always empty).
+  **Tenant-side "current user" stopgap**: real auth (Phase 7) still isn't
+  built, so tenant-side maintenance pages needed a real numeric tenant id to
+  act as — added `CURRENT_TENANT_ID_REAL = 3` (`core/current-tenant.ts`),
+  same role as the mock's `CURRENT_TENANT_ID`, explicitly commented as
+  throwaway until Phase 7 lands.
+  **Deliberately not touched**: `ledger.component.ts` — its `ledgerEntries()`
+  fuses expenses with payments *and* properties in one mock method; swapping
+  only the expense side would leave it half-real, half-mock inside a single
+  computed. Needs its own pass once Payments/Property are wired into the
+  Ledger view together, not a Maintenance-scoped fix.
+- **Real bug found and fixed: numeric `<select [(ngModel)]>` silently failed
+  to sync the picked option back to the bound property.** Surfaced when you
+  screenshotted "Log new issue" — dropdown visually showed a tenant selected,
+  but the button did nothing because the bound `tenantId` was still `null`,
+  so the (at-the-time-silent) guard clause in `save()` just returned. Root
+  cause: `<option [value]="t.id">` inside a `[(ngModel)]`-bound `<select>`
+  wasn't reliably round-tripping the numeric value on the `change` event.
+  Fixed in all three forms built with this exact pattern by replacing
+  two-way `ngModel` on the `<select>` with an explicit `(change)` handler
+  that reads `event.target.value` and does the `Number()` conversion itself
+  — `ticket-new.component.ts` (landlord maintenance),
+  `expense-management.component.ts` (both the property and tenant
+  dropdowns), and `tenant-register.component.ts` (unit-assignment dropdown
+  — this one had no placeholder option either, so the browser was
+  auto-showing the first vacant unit as selected while `unitId` stayed
+  `null`, meaning **real tenant registrations were likely silently failing**
+  whenever a landlord didn't happen to manually reselect the unit). All
+  three also gained a visible error message instead of a silent no-op when
+  validation fails.
+  **Full sweep done (2026-08-19)**: grepped every `<select [(ngModel)]>` in
+  both apps. Found a 4th real instance — `receive-payment.component.ts`'s
+  tenant dropdown, same numeric-`[value]` pattern, same fix applied
+  (explicit `(change)` handler + visible error on the silent guard clause).
+  Every other select in both apps binds to a string-typed model (category,
+  payment method, bearer, status, role, district/area/property-type,
+  BariVara's `selectedUnitId`) — those compare natively as strings and
+  aren't affected; only numeric-id selects wired to the real backend carry
+  this bug. Confirmed fixed via rebuild; not yet re-verified in a live
+  browser click-through on your end.
 - **Everything else still on `MockDataService`** — Property, Units, Tenant,
-  Billing/Move-out, and now tenant-detail/billing-views are real; pending-cash,
-  maintenance, marketplace, messages, and tenant-side payment pages are not.
-  Auth is still a stub (API wide open), no Flyway migrations yet, nothing
-  deployed anywhere (localhost only).
+  Billing/Move-out, tenant-detail/billing-views, and now Maintenance/Expenses
+  are real; `ledger.component.ts`, marketplace, messages, and the rest of the
+  tenant-side payment pages are not. Auth is still a stub (API wide open), no
+  Flyway migrations yet, nothing deployed anywhere (localhost only).
 
 **Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
 (auth, Tenants, Billing, etc. — Phase 6-20), testing, deployment. See
@@ -292,6 +353,16 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   More noticeable now that the homepage is commerce-styled and implies real photos.
   (Needs object storage — Phase 8.4/11.4, or a placeholder-image service as a cheap
   frontend-only stopgap if it bothers you before then.)
+- **Tenant-side real-backend pages now depend on a hardcoded `CURRENT_TENANT_ID_REAL`**
+  (`core/current-tenant.ts`, set to tenant id `3`) instead of a real login session —
+  same shape as the older mock `CURRENT_TENANT_ID` gap, just now also true for the
+  real API. (Resolved by Phase 7, real auth — replace every usage then.)
+- ~~**Tenant id 3's `unitId` (6) doesn't match any real `unit` row**~~ **Fixed
+  (2026-08-19)** — direct DB correction: reassigned tenant 3 to real unit 3
+  (`A2`, same property 6), flipped that unit's status to `occupied`. Was
+  orphaned data from earlier property/unit CRUD testing, not caused by the
+  Maintenance slice but surfaced by it (expenses would resolve `propertyId`
+  to `null`).
 
 ## 4. Part 1 — Frontend (both apps)
 
@@ -513,14 +584,31 @@ now functionally deeper than a route scaffold.)*
 10.8. Frontend: tenant-side pay flow wired to a real payment gateway — not
       started, no gateway chosen yet (see §6 open decisions). Landlord-side
       `receive-payment.component.ts` is real (applies to oldest unpaid
-      invoice first via `POST /api/payments`); `pending-cash.component.ts`
-      stays mock — no pending→confirm step exists server-side to back it.
+      invoice first via `POST /api/payments`). `pending-cash.component.ts`
+      **retired (2026-08-19)** — no pending→confirm step exists server-side
+      to back it (10.4 already simplified to straight-to-confirmed), so the
+      page/tab/route were deleted rather than migrated; tenant-side cash-pay
+      now records straight to `confirmed` too, matching the real endpoint.
 
-### Phase 11 — Expenses & Maintenance
-11.1. Backend: expense CRUD tagged by property/tenant
-11.2. Backend: maintenance ticket CRUD, status transitions, cost-linked expense
-11.3. Frontend: wire both modules to API
-11.4. Maintenance image upload (object storage)
+### Phase 11 — Expenses & Maintenance ✅ DONE (11.1–11.3) — 11.4 pending
+11.1. Backend: expense CRUD tagged by property/tenant — **Done**
+      (`Expense` entity, `GET/POST/DELETE /api/expenses`, filterable by
+      `propertyId`/`tenantId`).
+11.2. Backend: maintenance ticket CRUD, status transitions, cost-linked
+      expense — **Done** (`MaintenanceTicket` entity, `GET/POST
+      /api/maintenance-tickets`, `PUT .../{id}/status` auto-creates the
+      linked `Expense` with a real `ticketId` back-reference when resolved
+      with a cost — closes a gap the mock version never had).
+11.3. Frontend: wire both modules to API — **Done**. All 6 components
+      (landlord ticket-list/ticket-new/ticket-detail, tenant
+      ticket-list/ticket-new, `expense-management.component.ts`) plus the
+      landlord dashboard's maintenance/net tiles and
+      `tenant-detail.component.ts`'s maintenance history now call the real
+      `MaintenanceApiService`. `ledger.component.ts` intentionally left
+      mock (see §3 note — entangled with Payments/Property, not a clean
+      Maintenance-only swap).
+11.4. Maintenance image upload (object storage) — still pending, same as
+      8.4
 
 ### Phase 12 — Messaging & notifications
 12.1. Backend: conversations/messages schema + endpoints

@@ -47,7 +47,7 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../../core/mock-d
           <label for="date">Payment date</label>
           <input id="date" type="date" name="date" [(ngModel)]="date" />
         </div>
-        <button class="btn btn-primary" (click)="payCash()">Submit — awaiting landlord confirmation</button>
+        <button class="btn btn-primary" (click)="payCash()">Record cash payment</button>
       } @else {
         <button class="btn btn-primary" (click)="payOnline()">Open payment gateway</button>
       }
@@ -92,12 +92,13 @@ export class TenantPayComponent {
 
   payCash(): void {
     if (!this.amount) return;
-    // Balance only clears once the landlord confirms the cash arrived — see pending-cash.component.ts.
-    this.recordPayment('pending');
-    this.result.set('Saved as pending — awaiting landlord confirmation.');
+    // Matches the real backend: payments record straight to confirmed, no pending/confirm step.
+    this.data.applyPaymentToTenant(CURRENT_TENANT_ID, this.amount);
+    this.recordPayment('confirmed');
+    this.result.set('Payment recorded. Balance updated.');
   }
 
-  private recordPayment(status: 'confirmed' | 'pending'): void {
+  private recordPayment(status: 'confirmed'): void {
     this.data.payments.update((list) => [
       ...list,
       {

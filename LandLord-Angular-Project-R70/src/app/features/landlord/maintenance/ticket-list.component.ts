@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { MaintenanceApiService } from '../../../core/maintenance-api.service';
+import { TenantApiService } from '../../../core/tenant-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-landlord-ticket-list',
@@ -17,7 +19,7 @@ import { MockDataService } from '../../../core/mock-data.service';
       <table>
         <thead><tr><th>Unit</th><th>Tenant</th><th>Description</th><th>Status</th><th></th></tr></thead>
         <tbody>
-          @for (t of data.tickets(); track t.id) {
+          @for (t of api.tickets(); track t.id) {
             <tr>
               <td>{{ unitLabel(t.unitId) }}</td>
               <td>{{ tenantName(t.tenantId) }}</td>
@@ -32,13 +34,19 @@ import { MockDataService } from '../../../core/mock-data.service';
     </div>
   `,
 })
-export class LandlordTicketListComponent {
-  protected readonly data = inject(MockDataService);
+export class LandlordTicketListComponent implements OnInit {
+  protected readonly api = inject(MaintenanceApiService);
+  private readonly unitApi = inject(UnitApiService);
+  private readonly tenantApi = inject(TenantApiService);
 
-  unitLabel(unitId: string): string {
-    return this.data.units().find((u) => u.id === unitId)?.unitNumber ?? '—';
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.api.load(), this.unitApi.load(), this.tenantApi.load()]);
   }
-  tenantName(tenantId: string): string {
-    return this.data.tenants().find((t) => t.id === tenantId)?.name ?? '—';
+
+  unitLabel(unitId: number): string {
+    return this.unitApi.units().find((u) => u.id === unitId)?.unitNumber ?? '—';
+  }
+  tenantName(tenantId: number): string {
+    return this.tenantApi.tenants().find((t) => t.id === tenantId)?.name ?? '—';
   }
 }

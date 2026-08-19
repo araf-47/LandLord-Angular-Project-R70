@@ -44,9 +44,10 @@ import { UnitApiService } from '../../../core/unit-api.service';
         <h3>2. Assign unit &amp; agreement</h3>
         <div class="field">
           <label for="unit">Vacant unit</label>
-          <select id="unit" name="unit" [(ngModel)]="unitId">
+          <select id="unit" name="unit" (change)="onUnitChange($event)">
+            <option value="">— choose —</option>
             @for (u of vacantUnits(); track u.id) {
-              <option [value]="u.id">{{ propertyName(u.propertyId) }} &gt; {{ u.unitNumber }} &gt; {{ u.rent }}/mo</option>
+              <option [value]="u.id" [selected]="u.id === unitId">{{ propertyName(u.propertyId) }} &gt; {{ u.unitNumber }} &gt; {{ u.rent }}/mo</option>
             }
           </select>
         </div>
@@ -93,8 +94,20 @@ export class TenantRegisterComponent implements OnInit {
     return this.propertyApi.properties().find((p) => p.id === propertyId)?.name ?? '—';
   }
 
+  onUnitChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.unitId = value ? Number(value) : null;
+  }
+
   async save(): Promise<void> {
-    if (!this.name || !this.unitId || !this.nationalId) return;
+    if (!this.name || !this.nationalId) {
+      this.nidError.set('Fill in name and National ID.');
+      return;
+    }
+    if (!this.unitId) {
+      this.nidError.set('Choose a unit to assign.');
+      return;
+    }
 
     this.nidError.set('');
     try {

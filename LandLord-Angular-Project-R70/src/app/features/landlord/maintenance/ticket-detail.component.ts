@@ -1,7 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ExpenseRecord, MockDataService, nextId } from '../../../core/mock-data.service';
+import { MaintenanceApiService } from '../../../core/maintenance-api.service';
 
 @Component({
   selector: 'app-landlord-ticket-detail',
@@ -47,42 +47,31 @@ import { ExpenseRecord, MockDataService, nextId } from '../../../core/mock-data.
     }
   `,
 })
-export class LandlordTicketDetailComponent {
-  private readonly data = inject(MockDataService);
+export class LandlordTicketDetailComponent implements OnInit {
+  private readonly api = inject(MaintenanceApiService);
   private readonly router = inject(Router);
-  private readonly ticketId = inject(ActivatedRoute).snapshot.paramMap.get('ticketId')!;
+  private readonly ticketId = Number(inject(ActivatedRoute).snapshot.paramMap.get('ticketId'));
 
   readonly asking = signal(false);
   readonly costingForm = signal(false);
-  readonly ticket = computed(() => this.data.tickets().find((t) => t.id === this.ticketId));
+  readonly ticket = computed(() => this.api.tickets().find((t) => t.id === this.ticketId));
 
   amount = 0;
-  bearer: ExpenseRecord['bearer'] = 'landlord';
+  bearer: 'landlord' | 'tenant' = 'landlord';
+
+  async ngOnInit(): Promise<void> {
+    if (this.api.tickets().length === 0) {
+      await this.api.load();
+    }
+  }
 
   askCost(): void {
     this.asking.set(true);
   }
 
-  resolve(): void {
-    this.data.tickets.update((list) => list.map((t) => (t.id === this.ticketId ? { ...t, status: 'resolved' } : t)));
-
-    if (this.costingForm() && this.amount > 0) {
-      const t = this.ticket();
-      const propertyId = this.data.units().find((u) => u.id === t?.unitId)?.propertyId ?? '';
-      this.data.expenses.update((list) => [
-        ...list,
-        {
-          id: nextId('exp'),
-          propertyId,
-          category: 'Maintenance',
-          description: t?.description ?? '',
-          amount: this.amount,
-          bearer: this.bearer,
-          tenantId: t?.tenantId,
-          date: new Date().toISOString().slice(0, 10),
-        },
-      ]);
-    }
+  async resolve(): Promise<void> {
+    const cost = this.costingForm() && this.amount > 0 ? this.amount : undefined;
+    await this.api.updateStatus(this.ticketId, 'resolved', cost, cost ? this.bearer : undefined);
     this.router.navigateByUrl('/landlord/maintenance');
   }
 }

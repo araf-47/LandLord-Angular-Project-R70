@@ -2,7 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ApiInvoice, ApiPayment, BillingApiService } from '../../../core/billing-api.service';
-import { MockDataService, periodLabel } from '../../../core/mock-data.service';
+import { ApiExpense, MaintenanceApiService } from '../../../core/maintenance-api.service';
+import { periodLabel } from '../../../core/mock-data.service';
 import { ApiRentalAgreement, ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
 import { UnitApiService } from '../../../core/unit-api.service';
 
@@ -138,8 +139,7 @@ export class TenantDetailComponent implements OnInit {
   private readonly api = inject(TenantApiService);
   private readonly billingApi = inject(BillingApiService);
   private readonly unitApi = inject(UnitApiService);
-  // Maintenance module still mock-only (Phase 11 not built).
-  protected readonly data = inject(MockDataService);
+  private readonly maintenanceApi = inject(MaintenanceApiService);
   private readonly tenantId = +inject(ActivatedRoute).snapshot.paramMap.get('tenantId')!;
 
   readonly editing = signal(false);
@@ -149,18 +149,23 @@ export class TenantDetailComponent implements OnInit {
   readonly agreement = signal<ApiRentalAgreement | null>(null);
   readonly billingHistory = signal<ApiInvoice[]>([]);
   readonly paymentHistory = signal<ApiPayment[]>([]);
+  readonly maintenanceHistory = signal<ApiExpense[]>([]);
 
   readonly totalDue = computed(() => this.billingHistory().reduce((sum, i) => sum + i.balance, 0));
   readonly totalPaid = computed(() => this.paymentHistory().reduce((sum, p) => sum + p.amount, 0));
-  readonly totalMaintenanceCost = computed(() => this.data.maintenanceCostForTenant(String(this.tenantId)));
-  readonly maintenanceHistory = computed(() => this.data.maintenanceHistoryForTenant(String(this.tenantId)));
+  readonly totalMaintenanceCost = computed(() =>
+    this.maintenanceHistory()
+      .filter((e) => e.bearer === 'tenant')
+      .reduce((sum, e) => sum + e.amount, 0)
+  );
 
   async ngOnInit(): Promise<void> {
-    const [tenant, agreement, invoices, payments] = await Promise.all([
+    const [tenant, agreement, invoices, payments, expenses] = await Promise.all([
       this.api.get(this.tenantId),
       this.api.agreementFor(this.tenantId),
       this.billingApi.invoicesForTenant(this.tenantId),
       this.billingApi.paymentsForTenant(this.tenantId),
+      this.maintenanceApi.expensesForTenant(this.tenantId),
       this.unitApi.units().length ? Promise.resolve() : this.unitApi.load(),
     ]);
     this.tenant.set(tenant);
@@ -168,6 +173,9 @@ export class TenantDetailComponent implements OnInit {
     this.termsDraft = agreement?.terms ?? '';
     this.billingHistory.set(invoices);
     this.paymentHistory.set(payments);
+    this.maintenanceHistory.set(
+      expenses.filter((e) => e.category === 'Maintenance').sort((a, b) => b.date.localeCompare(a.date))
+    );
   }
 
   monthLabel(period: string): string {

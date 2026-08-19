@@ -12,10 +12,10 @@ import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
     <div class="card stack" style="max-width:520px;">
       <div class="field">
         <label for="tenant">Select tenant</label>
-        <select id="tenant" name="tenant" [(ngModel)]="tenantId" (ngModelChange)="onTenantChange()">
+        <select id="tenant" name="tenant" (change)="onTenantChange($event)">
           <option value="">— choose —</option>
           @for (t of tenants(); track t.id) {
-            <option [value]="t.id">{{ t.name }}</option>
+            <option [value]="t.id" [selected]="t.id === tenantId">{{ t.name }}</option>
           }
         </select>
       </div>
@@ -44,6 +44,9 @@ import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
         @if (saved()) {
           <p class="hint-text">Payment saved. {{ amount >= totalDue() ? 'Marked fully paid.' : 'Marked partially paid — remaining ' + (totalDue() - amount) + '.' }}</p>
         }
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
       }
     </div>
   `,
@@ -59,13 +62,17 @@ export class ReceivePaymentComponent implements OnInit {
   method: ApiPayment['method'] = 'cash';
   amount = 0;
   readonly saved = signal(false);
+  readonly error = signal('');
 
   async ngOnInit(): Promise<void> {
     await this.tenantApi.load();
     this.tenants.set(this.tenantApi.tenants());
   }
 
-  async onTenantChange(): Promise<void> {
+  async onTenantChange(event: Event): Promise<void> {
+    const value = (event.target as HTMLSelectElement).value;
+    this.tenantId = value ? Number(value) : '';
+
     this.saved.set(false);
     if (!this.tenantId) {
       this.unpaidInvoices.set([]);
@@ -80,8 +87,16 @@ export class ReceivePaymentComponent implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (!this.tenantId || !this.amount) return;
+    if (!this.tenantId) {
+      this.error.set('Choose a tenant first.');
+      return;
+    }
+    if (!this.amount) {
+      this.error.set('Enter an amount.');
+      return;
+    }
 
+    this.error.set('');
     let remaining = this.amount;
     const oldest = [...this.unpaidInvoices()].sort((a, b) => a.id - b.id);
     for (const invoice of oldest) {
