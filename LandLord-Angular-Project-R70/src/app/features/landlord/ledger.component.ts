@@ -138,7 +138,7 @@ export class LedgerComponent implements OnInit {
       .filter((p) => p.status === 'confirmed')
       .map((p) => ({
         id: `p-${p.id}`,
-        date: p.date,
+        date: p.date.slice(0, 10),
         type: 'income' as const,
         description: `Payment — ${tenantName.get(p.tenantId) ?? 'Tenant'}`,
         propertyId: propertyIdForTenant(p.tenantId),

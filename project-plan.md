@@ -298,6 +298,16 @@ slice only, as a proof-of-pipe before committing to the full schema):
   already existed), Net stays derived from Collected minus the
   already-real expenses total. Only kept `periodKey`/`periodLabel` (pure
   date-formatting helpers) from `mock-data.service.ts`.
+  **Real bug found and fixed (2026-08-20), caught live by you**: a payment
+  recorded the same day didn't show in the Ledger even though it showed
+  fine under the tenant's Payment history. Root cause: `Payment.date` is
+  an `Instant` (serializes with a full timestamp,
+  `"2026-08-20T13:00:00Z"`), but `Expense.date` is a `LocalDate`
+  (date-only, `"2026-08-20"`) — the date-range filter did a plain string
+  comparison against `toDate()` (also date-only), and a same-day
+  timestamp lexically sorts *after* the bare date, so it silently
+  dropped out of range. Fixed by truncating `p.date` to `yyyy-MM-dd` in
+  `ledger.component.ts` before building the income entry.
 - **Real bug found and fixed: numeric `<select [(ngModel)]>` silently failed
   to sync the picked option back to the bound property.** Surfaced when you
   screenshotted "Log new issue" — dropdown visually showed a tenant selected,
