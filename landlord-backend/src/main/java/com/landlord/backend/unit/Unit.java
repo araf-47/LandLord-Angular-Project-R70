@@ -24,6 +24,8 @@ public class Unit {
 
     private String status = "vacant";
 
+    private boolean adPaused = false;
+
     public Long getId() {
         return id;
     }
@@ -58,5 +60,13 @@ public class Unit {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isAdPaused() {
+        return adPaused;
+    }
+
+    public void setAdPaused(boolean adPaused) {
+        this.adPaused = adPaused;
     }
 }

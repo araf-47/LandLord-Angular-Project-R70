@@ -8,6 +8,7 @@ export interface ApiUnit {
   unitNumber: string;
   rent: number;
   status: 'vacant' | 'occupied';
+  adPaused: boolean;
 }
 
 const API_BASE = 'http://localhost:8080/api/units';
@@ -40,6 +41,18 @@ export class UnitApiService {
     const updated = await firstValueFrom(
       this.http.put<ApiUnit>(`${API_BASE}/${id}`, { propertyId, unitNumber, rent, status })
     );
+    this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
+    return updated;
+  }
+
+  async pauseAd(id: number): Promise<ApiUnit> {
+    const updated = await firstValueFrom(this.http.put<ApiUnit>(`${API_BASE}/${id}/ad-pause`, {}));
+    this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
+    return updated;
+  }
+
+  async repostAd(id: number): Promise<ApiUnit> {
+    const updated = await firstValueFrom(this.http.put<ApiUnit>(`${API_BASE}/${id}/ad-repost`, {}));
     this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
     return updated;
   }

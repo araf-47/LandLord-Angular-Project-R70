@@ -46,11 +46,29 @@ public class UnitController {
     @PutMapping("/{id}")
     public Unit update(@PathVariable Long id, @Valid @RequestBody Unit update) {
         Unit existing = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        boolean turningVacant = !"vacant".equals(existing.getStatus()) && "vacant".equals(update.getStatus());
         existing.setUnitNumber(update.getUnitNumber());
         existing.setRent(update.getRent());
         existing.setStatus(update.getStatus());
         existing.setPropertyId(update.getPropertyId());
+        if (turningVacant) {
+            existing.setAdPaused(false);
+        }
         return repository.save(existing);
+    }
+
+    @PutMapping("/{id}/ad-pause")
+    public Unit pauseAd(@PathVariable Long id) {
+        Unit unit = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        unit.setAdPaused(true);
+        return repository.save(unit);
+    }
+
+    @PutMapping("/{id}/ad-repost")
+    public Unit repostAd(@PathVariable Long id) {
+        Unit unit = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        unit.setAdPaused(false);
+        return repository.save(unit);
     }
 
     @DeleteMapping("/{id}")

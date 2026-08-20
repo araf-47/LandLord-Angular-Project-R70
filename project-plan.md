@@ -561,7 +561,15 @@ now functionally deeper than a route scaffold.)*
 6.3. Set up project skeleton, migrations, environment config — **skeleton done
      (`landlord-backend/`, Spring Boot 4.1); migrations still ad hoc
      (`ddl-auto: update`), Flyway on hold — no deploy planned, low payoff for
-     now, revisit right before Phase 19 deployment**
+     now, revisit right before Phase 19 deployment. **Known `ddl-auto` gotcha
+     hit during Phase 13**: adding a new `NOT NULL` boolean column
+     (`unit.ad_paused`) to a table with existing rows fails outright —
+     Hibernate emits `ADD COLUMN ... NOT NULL` with no default, Postgres
+     rejects it against populated rows, and the column silently never gets
+     added (transaction rolls back, app still boots). Fixed by hand this once
+     (`ALTER TABLE unit ADD COLUMN ad_paused boolean NOT NULL DEFAULT false;`
+     via psql). Same manual fix will be needed for any future non-nullable
+     column added to a populated table until Flyway lands.**
 6.4. Set up API auth (JWT issue/verify, password hashing, OTP delivery) — **on
      hold: no online deployment planned right now, so a wide-open localhost-only
      API is an acceptable risk for the time being. Revisit before any real
@@ -672,10 +680,28 @@ now functionally deeper than a route scaffold.)*
 12.3. Frontend: wire message list/thread to API (or socket)
 12.4. Notifications schema + endpoints, wire tenant notifications page
 
-### Phase 13 — Marketplace & Leads (LandLord side) — real backend
-13.1. Backend: ad state per unit (auto-created when unit set vacant)
-13.2. Backend: booking request CRUD, accept/reject flow, unit status side-effects
-13.3. Frontend: wire ad-management and request pages to real API
+### Phase 13 — Marketplace & Leads (LandLord side) — real backend ✅ DONE
+13.1. ✅ **Backend: ad state per unit.** `Unit` gained `adPaused` (boolean,
+      default false). `PUT /api/units/{id}/ad-pause` / `.../ad-repost` toggle it;
+      `PUT /api/units/{id}` auto-resets `adPaused` to false when a unit's status
+      transitions into `vacant` (ad "auto-created"/reposted on vacancy, no
+      separate ad entity needed — state derives from `status` + `adPaused`,
+      matching the frontend's existing model).
+13.2. ✅ **Backend: booking request CRUD, accept/reject flow, unit status
+      side-effects.** New `MarketplaceController` (`GET/POST
+      /api/marketplace-requests`, filterable by `unitId`/`status`; `PUT
+      .../{id}/status`) using the `MarketplaceRequest` entity/repository from
+      Phase 6.2. Approving a request sets the linked unit's status to
+      `occupied`; rejecting leaves the unit untouched. (Full tenant
+      registration on approval is a separate concern, same shape as the
+      existing internal-transfer gap — out of scope here.)
+13.3. ✅ **Frontend: wire ad-management and request pages to real API.**
+      `marketplace-api.service.ts` added; `ad-management.component.ts`,
+      `request-list.component.ts`, `request-detail.component.ts` now use
+      `MarketplaceApiService`/`UnitApiService` instead of `MockDataService`.
+      Verified end-to-end against the real backend: create request → approve
+      → unit flips to `occupied`; pause/repost ad toggles `adPaused` and
+      persists.
 
 ### Phase 14 — BariVara.com — real backend
 14.1. Backend: public listing search/filter endpoints

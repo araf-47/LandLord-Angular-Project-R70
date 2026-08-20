@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BARIVARA_DEV_URL } from '../../../core/cross-app.config';
-import { MockDataService } from '../../../core/mock-data.service';
+import { ApiUnit, UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-ad-management',
@@ -16,7 +16,7 @@ import { MockDataService } from '../../../core/mock-data.service';
       <table>
         <thead><tr><th>Unit</th><th>Status</th><th>Ad state</th><th></th></tr></thead>
         <tbody>
-          @for (u of data.units(); track u.id) {
+          @for (u of unitApi.units(); track u.id) {
             <tr>
               <td>{{ u.unitNumber }}</td>
               <td><span class="badge" [class.badge-vacant]="u.status === 'vacant'" [class.badge-occupied]="u.status === 'occupied'">{{ u.status }}</span></td>
@@ -44,20 +44,24 @@ import { MockDataService } from '../../../core/mock-data.service';
     </div>
   `,
 })
-export class AdManagementComponent {
-  protected readonly data = inject(MockDataService);
+export class AdManagementComponent implements OnInit {
+  protected readonly unitApi = inject(UnitApiService);
   protected readonly bariVaraUrl = BARIVARA_DEV_URL;
 
-  adStateLabel(unit: { status: string; adPaused?: boolean }): string {
+  async ngOnInit(): Promise<void> {
+    await this.unitApi.load();
+  }
+
+  adStateLabel(unit: ApiUnit): string {
     if (unit.status !== 'vacant') return 'Not listed';
     return unit.adPaused ? 'Paused' : 'Live on BariVara.com';
   }
 
-  pause(unitId: string): void {
-    this.data.units.update((list) => list.map((u) => (u.id === unitId ? { ...u, adPaused: true } : u)));
+  async pause(unitId: number): Promise<void> {
+    await this.unitApi.pauseAd(unitId);
   }
 
-  repost(unitId: string): void {
-    this.data.units.update((list) => list.map((u) => (u.id === unitId ? { ...u, adPaused: false } : u)));
+  async repost(unitId: number): Promise<void> {
+    await this.unitApi.repostAd(unitId);
   }
 }

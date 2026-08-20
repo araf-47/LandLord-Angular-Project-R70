@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { MarketplaceApiService } from '../../../core/marketplace-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-request-list',
@@ -13,7 +14,7 @@ import { MockDataService } from '../../../core/mock-data.service';
       <table>
         <thead><tr><th>Applicant</th><th>Unit</th><th>Status</th><th></th></tr></thead>
         <tbody>
-          @for (r of data.marketplaceRequests(); track r.id) {
+          @for (r of marketplaceApi.requests(); track r.id) {
             <tr>
               <td>{{ r.applicantName }}</td>
               <td>{{ unitLabel(r.unitId) }}</td>
@@ -27,10 +28,15 @@ import { MockDataService } from '../../../core/mock-data.service';
     </div>
   `,
 })
-export class RequestListComponent {
-  protected readonly data = inject(MockDataService);
+export class RequestListComponent implements OnInit {
+  protected readonly marketplaceApi = inject(MarketplaceApiService);
+  private readonly unitApi = inject(UnitApiService);
 
-  unitLabel(unitId: string): string {
-    return this.data.units().find((u) => u.id === unitId)?.unitNumber ?? '—';
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.marketplaceApi.load(), this.unitApi.load()]);
+  }
+
+  unitLabel(unitId: number): string {
+    return this.unitApi.units().find((u) => u.id === unitId)?.unitNumber ?? '—';
   }
 }

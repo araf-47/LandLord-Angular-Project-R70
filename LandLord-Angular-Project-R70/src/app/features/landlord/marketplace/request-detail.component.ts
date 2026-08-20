@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { MarketplaceApiService } from '../../../core/marketplace-api.service';
+import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
   selector: 'app-request-detail',
@@ -35,20 +36,25 @@ import { MockDataService } from '../../../core/mock-data.service';
     }
   `,
 })
-export class RequestDetailComponent {
-  private readonly data = inject(MockDataService);
+export class RequestDetailComponent implements OnInit {
+  private readonly marketplaceApi = inject(MarketplaceApiService);
+  private readonly unitApi = inject(UnitApiService);
   private readonly router = inject(Router);
-  private readonly requestId = inject(ActivatedRoute).snapshot.paramMap.get('requestId')!;
+  private readonly requestId = Number(inject(ActivatedRoute).snapshot.paramMap.get('requestId'));
 
   chatMessage = '';
-  readonly request = computed(() => this.data.marketplaceRequests().find((r) => r.id === this.requestId));
+  readonly request = computed(() => this.marketplaceApi.requests().find((r) => r.id === this.requestId));
 
-  unitLabel(): string {
-    return this.data.units().find((u) => u.id === this.request()?.unitId)?.unitNumber ?? '—';
+  async ngOnInit(): Promise<void> {
+    await Promise.all([this.marketplaceApi.load(), this.unitApi.load()]);
   }
 
-  decide(status: 'approved' | 'rejected'): void {
-    this.data.marketplaceRequests.update((list) => list.map((r) => (r.id === this.requestId ? { ...r, status } : r)));
+  unitLabel(): string {
+    return this.unitApi.units().find((u) => u.id === this.request()?.unitId)?.unitNumber ?? '—';
+  }
+
+  async decide(status: 'approved' | 'rejected'): Promise<void> {
+    await this.marketplaceApi.decide(this.requestId, status);
     this.router.navigateByUrl('/landlord/marketplace/requests');
   }
 }
