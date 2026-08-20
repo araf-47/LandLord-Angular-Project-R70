@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.service';
+import { BookingApiService } from '../../../core/booking-api.service';
+import { ListingApiService } from '../../../core/listing-api.service';
+import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 
 @Component({
   selector: 'app-owner-request-list',
@@ -30,13 +32,17 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
   `,
 })
 export class OwnerRequestListComponent {
-  protected readonly data = inject(MockDataService);
+  private readonly bookingApi = inject(BookingApiService);
+  private readonly listingApi = inject(ListingApiService);
 
-  myRequests() {
-    return this.data.requestsForOwner(CURRENT_OWNER_ID);
+  constructor() {
+    this.bookingApi.loadForOwner(CURRENT_OWNER_ID_REAL);
+    this.listingApi.search({ ownerId: CURRENT_OWNER_ID_REAL });
   }
 
-  listingTitle(listingId: string): string {
-    return this.data.listingById(listingId)?.title ?? '—';
+  readonly myRequests = computed(() => this.bookingApi.requests());
+
+  listingTitle(listingId: number): string {
+    return this.listingApi.listings().find((l) => l.id === listingId)?.title ?? '—';
   }
 }

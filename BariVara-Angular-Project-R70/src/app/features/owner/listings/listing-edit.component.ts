@@ -1,14 +1,15 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AREAS_BY_DISTRICT, DISTRICTS, MockDataService, PROPERTY_TYPES, PropertyType } from '../../../core/mock-data.service';
+import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES, PropertyType } from '../../../core/mock-data.service';
+import { ListingApiService } from '../../../core/listing-api.service';
 
 @Component({
   selector: 'app-owner-listing-edit',
   standalone: true,
   imports: [FormsModule],
   template: `
-    @if (listing) {
+    @if (loaded()) {
       <h1>Edit listing</h1>
       <div class="card stack" style="max-width:520px;">
         <div class="field">
@@ -57,33 +58,46 @@ import { AREAS_BY_DISTRICT, DISTRICTS, MockDataService, PROPERTY_TYPES, Property
   `,
 })
 export class OwnerListingEditComponent {
-  private readonly data = inject(MockDataService);
+  private readonly api = inject(ListingApiService);
   private readonly router = inject(Router);
-  private readonly listingId = inject(ActivatedRoute).snapshot.paramMap.get('listingId')!;
+  private readonly listingId = Number(inject(ActivatedRoute).snapshot.paramMap.get('listingId'));
 
-  readonly listing = this.data.listingById(this.listingId);
   readonly districts = DISTRICTS;
   readonly propertyTypes = PROPERTY_TYPES;
+  readonly loaded = signal(false);
 
-  title = this.listing?.title ?? '';
-  address = this.listing?.address ?? '';
-  district = this.listing?.district ?? DISTRICTS[0];
-  area = this.listing?.area ?? '';
-  propertyType: PropertyType = this.listing?.propertyType ?? 'apartment';
-  rent = this.listing?.rent ?? 0;
+  title = '';
+  address = '';
+  district = DISTRICTS[0];
+  area = '';
+  propertyType: PropertyType = 'apartment';
+  rent = 0;
+
+  constructor() {
+    this.api.get(this.listingId).then((listing) => {
+      this.title = listing.title;
+      this.address = listing.address;
+      this.district = listing.district;
+      this.area = listing.area;
+      this.propertyType = listing.propertyType;
+      this.rent = listing.rent;
+      this.loaded.set(true);
+    });
+  }
 
   areas(): string[] {
     return AREAS_BY_DISTRICT[this.district] ?? [];
   }
 
-  save(): void {
-    this.data.listings.update((list) =>
-      list.map((l) =>
-        l.id === this.listingId
-          ? { ...l, title: this.title, address: this.address, district: this.district, area: this.area, propertyType: this.propertyType, rent: this.rent }
-          : l
-      )
-    );
+  async save(): Promise<void> {
+    await this.api.update(this.listingId, {
+      title: this.title,
+      address: this.address,
+      district: this.district,
+      area: this.area,
+      propertyType: this.propertyType,
+      rent: this.rent,
+    });
     this.router.navigateByUrl('/owner/listings');
   }
 }

@@ -1,7 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AREAS_BY_DISTRICT, DISTRICTS, MockDataService, PROPERTY_TYPES } from '../../core/mock-data.service';
+import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES } from '../../core/mock-data.service';
+import { ListingApiService } from '../../core/listing-api.service';
 
 @Component({
   selector: 'app-browse',
@@ -59,7 +60,7 @@ import { AREAS_BY_DISTRICT, DISTRICTS, MockDataService, PROPERTY_TYPES } from '.
   `,
 })
 export class BrowseComponent {
-  protected readonly data = inject(MockDataService);
+  protected readonly api = inject(ListingApiService);
 
   readonly districts = DISTRICTS;
   readonly propertyTypes = PROPERTY_TYPES;
@@ -73,6 +74,10 @@ export class BrowseComponent {
 
   readonly areas = computed(() => (this.district() ? AREAS_BY_DISTRICT[this.district()] ?? [] : []));
 
+  constructor() {
+    this.api.search();
+  }
+
   onDistrictChange(value: string): void {
     this.district.set(value);
     this.area.set('');
@@ -80,7 +85,7 @@ export class BrowseComponent {
 
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();
-    return this.data.listings().filter((l) => {
+    return this.api.listings().filter((l) => {
       const matchesQuery = !q || l.title.toLowerCase().includes(q) || l.address.toLowerCase().includes(q);
       const matchesDistrict = !this.district() || l.district === this.district();
       const matchesArea = !this.area() || l.area === this.area();

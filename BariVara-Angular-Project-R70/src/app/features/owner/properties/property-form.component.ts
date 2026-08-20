@@ -1,7 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AREAS_BY_DISTRICT, CURRENT_OWNER_ID, DISTRICTS, MockDataService, nextId } from '../../../core/mock-data.service';
+import { AREAS_BY_DISTRICT, DISTRICTS } from '../../../core/mock-data.service';
+import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
+import { OwnerUnitApiService } from '../../../core/owner-unit-api.service';
+import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 
 @Component({
   selector: 'app-owner-property-form',
@@ -66,7 +69,8 @@ import { AREAS_BY_DISTRICT, CURRENT_OWNER_ID, DISTRICTS, MockDataService, nextId
   `,
 })
 export class OwnerPropertyFormComponent {
-  private readonly data = inject(MockDataService);
+  private readonly propertyApi = inject(OwnerPropertyApiService);
+  private readonly unitApi = inject(OwnerUnitApiService);
   private readonly router = inject(Router);
 
   readonly districts = DISTRICTS;
@@ -85,15 +89,17 @@ export class OwnerPropertyFormComponent {
   rent: number | null = null;
   imageCount = 0;
 
-  save(): void {
+  async save(): Promise<void> {
     if (!this.name || !this.address || !this.unitNumber || this.rent == null) return;
 
-    const propertyId = nextId('op');
-    this.data.ownerProperties.update((list) => [
-      ...list,
-      { id: propertyId, ownerId: CURRENT_OWNER_ID, name: this.name, address: this.address, district: this.district(), area: this.area },
-    ]);
-    this.data.ownerUnits.update((list) => [...list, { id: nextId('ou'), propertyId, unitNumber: this.unitNumber, rent: this.rent! }]);
+    const property = await this.propertyApi.create({
+      ownerId: CURRENT_OWNER_ID_REAL,
+      name: this.name,
+      address: this.address,
+      district: this.district(),
+      area: this.area,
+    });
+    await this.unitApi.create({ propertyId: property.id, unitNumber: this.unitNumber, rent: this.rent! });
 
     this.router.navigateByUrl('/owner/properties');
   }

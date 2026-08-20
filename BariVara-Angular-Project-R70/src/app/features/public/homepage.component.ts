@@ -1,7 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AREAS_BY_DISTRICT, DISTRICTS, MockDataService, PROPERTY_TYPES } from '../../core/mock-data.service';
+import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES } from '../../core/mock-data.service';
+import { ListingApiService } from '../../core/listing-api.service';
 
 @Component({
   selector: 'app-homepage',
@@ -59,7 +60,7 @@ import { AREAS_BY_DISTRICT, DISTRICTS, MockDataService, PROPERTY_TYPES } from '.
 })
 export class HomepageComponent {
   private readonly router = inject(Router);
-  private readonly data = inject(MockDataService);
+  private readonly api = inject(ListingApiService);
 
   readonly districts = DISTRICTS;
   readonly propertyTypes = PROPERTY_TYPES;
@@ -69,7 +70,11 @@ export class HomepageComponent {
 
   readonly areas = computed(() => (this.district() ? AREAS_BY_DISTRICT[this.district()] ?? [] : []));
 
-  readonly recentListings = computed(() => this.data.listings().filter((l) => l.status === 'active').slice(0, 8));
+  constructor() {
+    this.api.search();
+  }
+
+  readonly recentListings = computed(() => this.api.listings().filter((l) => l.status === 'active').slice(0, 8));
 
   onDistrictChange(value: string): void {
     this.district.set(value);

@@ -11,6 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - landlord_pg_data:/var/lib/postgresql/data
+      - ./docker-compose-init:/docker-entrypoint-initdb.d
 
 volumes:
   landlord_pg_data:

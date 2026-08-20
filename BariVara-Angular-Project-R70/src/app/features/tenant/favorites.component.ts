@@ -1,6 +1,8 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CURRENT_TENANT_ID, MockDataService } from '../../core/mock-data.service';
+import { ListingApiService } from '../../core/listing-api.service';
+import { FavoriteApiService } from '../../core/favorite-api.service';
+import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 
 @Component({
   selector: 'app-tenant-favorites',
@@ -29,14 +31,25 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../core/mock-data.service
   `,
 })
 export class TenantFavoritesComponent {
-  private readonly data = inject(MockDataService);
+  private readonly listingApi = inject(ListingApiService);
+  private readonly favoriteApi = inject(FavoriteApiService);
+
+  constructor() {
+    this.favoriteApi.loadForTenant(CURRENT_TENANT_ID_REAL).then(() => {
+      const listingIds = new Set(this.favoriteApi.favorites().map((f) => f.listingId));
+      Promise.all([...listingIds].map((id) => this.listingApi.get(id))).then((listings) => {
+        this.listingApi.listings.set(listings);
+      });
+    });
+  }
 
   readonly favoriteListings = computed(() => {
-    const listingIds = new Set(this.data.favoritesForTenant(CURRENT_TENANT_ID).map((f) => f.listingId));
-    return this.data.listings().filter((l) => listingIds.has(l.id));
+    const listingIds = new Set(this.favoriteApi.favorites().map((f) => f.listingId));
+    return this.listingApi.listings().filter((l) => listingIds.has(l.id));
   });
 
-  remove(listingId: string): void {
-    this.data.favorites.update((list) => list.filter((f) => !(f.tenantId === CURRENT_TENANT_ID && f.listingId === listingId)));
+  remove(listingId: number): void {
+    const favorite = this.favoriteApi.favorites().find((f) => f.tenantId === CURRENT_TENANT_ID_REAL && f.listingId === listingId);
+    if (favorite) this.favoriteApi.remove(favorite.id);
   }
 }

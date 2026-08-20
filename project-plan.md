@@ -1,9 +1,9 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-20 (Unit photo upload real end to end; Messaging +
-notifications, LandLord only, real end to end; Ledger + landlord dashboard
-KPI tiles real end to end; pending-cash retired; Maintenance + Expenses real
-end to end; numeric-select ngModel bug found and fixed in 3 forms)
+Last updated: 2026-08-21 (Phase 14 done — BariVara.com has its own real
+backend now, separate Spring Boot project from LandLord's, public
+listing search/favorites/booking + owner property/unit/listing management
+all real end to end)
 
 ## 1. Product summary
 
@@ -400,17 +400,26 @@ slice only, as a proof-of-pipe before committing to the full schema):
   (as opposed to `Unit`) still has no photo field either — LandLord's own
   property list is a data-forward table, not a photo card, by the Phase 4.6
   design decision, so no placeholder existed there to begin with.
-- **Everything else still on `MockDataService`** — Property, Units, Tenant,
-  Billing/Move-out, tenant-detail/billing-views, Maintenance/Expenses,
-  Ledger, landlord dashboard KPI tiles, and now Messaging/Notifications
-  (LandLord only) are real; marketplace and the rest of the tenant-side
-  payment pages are not (BariVara messaging also still mock — no BariVara
-  backend yet). Auth is still a stub (API wide open), no Flyway migrations
-  yet, nothing deployed anywhere (localhost only).
+- **BariVara.com now has its own real backend too (Phase 14, 2026-08-21)** —
+  `barivara-backend/`, a separate Spring Boot 4.1 project from
+  `landlord-backend/` (own `barivara_db` schema in the same Postgres
+  container, port 8081). Real: public listing search/filter, favorites,
+  booking requests (submit/approve/reject, approval flips listing to
+  `taken`), and the owner's property/unit/listing management. Still mock on
+  BariVara's side: messaging, notifications, tenant profile, landlord-linked
+  dashboard (no backend built for any of these yet — see Phase 14.4 note).
+  Full detail in Phase 14 below.
+- **Everything else still on `MockDataService`** (LandLord app) — Property,
+  Units, Tenant, Billing/Move-out, tenant-detail/billing-views,
+  Maintenance/Expenses, Ledger, landlord dashboard KPI tiles, Messaging/
+  Notifications (LandLord only), and Marketplace are all real; the rest of
+  the tenant-side payment pages are not. Auth is still a stub (both backends'
+  APIs wide open), no Flyway migrations yet, nothing deployed anywhere
+  (localhost only).
 
 **Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
-(auth, BariVara backend, cross-system sync, etc. — Phase 7, 14-20), testing,
-deployment. See
+(auth, real cross-system sync, BariVara's own messaging/notifications, etc. —
+Phase 7, 15-20), testing, deployment. See
 §3a for a tracked backlog of smaller gaps found during review but deliberately
 not fixed (property/unit edit-delete entry below is now resolved).
 
@@ -773,11 +782,46 @@ now functionally deeper than a route scaffold.)*
       → unit flips to `occupied`; pause/repost ad toggles `adPaused` and
       persists.
 
-### Phase 14 — BariVara.com — real backend
-14.1. Backend: public listing search/filter endpoints
-14.2. Backend: favorites, booking request submission
-14.3. Backend: apartment-owner-only flows (independent landlords, no core account)
-14.4. Frontend: replace BariVara's local mock data with real API calls
+### Phase 14 — BariVara.com — real backend ✅ DONE
+14.1. ✅ **Backend: public listing search/filter endpoints.** New
+      `barivara-backend/` (separate Spring Boot 4.1 project, own `barivara_db`
+      Postgres schema, port 8081) — deliberate architecture call, not shared
+      with `landlord-backend`: mirrors the existing frontend split (two
+      products, not one monolith) and lets `shared-contracts.ts`'s sync DTOs
+      (`VacancyAdSync`/`BookingRequestSync`/`UnitStatusSync`) do their
+      intended job at the Phase 15 boundary instead of a shared-schema join.
+      `Listing` entity denormalizes address/district/area/rent off the
+      owner's property/unit at creation (same simplification style as
+      LandLord's invoice snapshotting). `GET /api/listings` filters by
+      district/area/propertyType, always `status=active`-only unless
+      `ownerId` is passed (owner's own "manage listings" view sees
+      everything).
+14.2. ✅ **Backend: favorites, booking request submission.** `Favorite`
+      (`GET/POST/DELETE /api/favorites`) and `BookingRequest`
+      (`GET/POST /api/booking-requests`, `PUT .../{id}/status`) real.
+      Approving a request flips the listing to `taken` (mirrors LandLord's
+      marketplace-approval → unit-occupied side effect).
+14.3. ✅ **Backend: apartment-owner-only flows.** `OwnerProperty`
+      (`GET/POST/PUT/DELETE /api/owner-properties`) and `OwnerUnit`
+      (`GET/POST/PUT/DELETE /api/owner-units`) CRUD. No real signup yet
+      (Phase 7 on hold, same call as LandLord) — `TenantProfile`/`OwnerProfile`
+      got minimal `POST /api/tenant-profiles` / `POST /api/owner-profiles`
+      registration endpoints instead, seeded once with the same demo
+      identities the old mock used (Nasrin Akhter id 1, Karim Hossain id 1)
+      so `CURRENT_TENANT_ID_REAL`/`CURRENT_OWNER_ID_REAL` line up.
+14.4. ✅ **Frontend: replace BariVara's local mock data with real API calls.**
+      New API services (`listing-api`, `owner-property-api`, `owner-unit-api`,
+      `favorite-api`, `booking-api`, `profile-api`) wired into: homepage,
+      browse, listing-detail (public search + save/book), tenant favorites,
+      owner property-list/property-form, owner listing-list/listing-form/
+      listing-edit, owner request-list/request-detail. Verified end to end
+      via curl (register owner/tenant → create property/unit → post listing
+      → public search finds it → favorite → booking request → approve →
+      listing flips to `taken`) and a clean `ng build`.
+      **Deliberately left on mock** (no backend built for these — matches
+      what Phase 14 actually scoped): messaging, notifications, tenant
+      profile page, and the landlord-linked dashboard's synced-ads view
+      (stays mock until Phase 15's real cross-app sync exists to feed it).
 
 ### Phase 15 — Real cross-system integration (this is where "connected" becomes real)
 15.1. Backend: unit vacant → auto-create BariVara ad (event or shared DB read)

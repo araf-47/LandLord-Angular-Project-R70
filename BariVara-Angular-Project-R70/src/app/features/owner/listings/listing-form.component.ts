@@ -1,7 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AREAS_BY_DISTRICT, CURRENT_OWNER_ID, DISTRICTS, MockDataService, PROPERTY_TYPES, PropertyType, nextId } from '../../../core/mock-data.service';
+import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES, PropertyType } from '../../../core/mock-data.service';
+import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
+import { ApiOwnerUnit, OwnerUnitApiService } from '../../../core/owner-unit-api.service';
+import { ListingApiService } from '../../../core/listing-api.service';
+import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 
 @Component({
   selector: 'app-owner-listing-form',
@@ -99,7 +103,9 @@ import { AREAS_BY_DISTRICT, CURRENT_OWNER_ID, DISTRICTS, MockDataService, PROPER
   `,
 })
 export class OwnerListingFormComponent {
-  private readonly data = inject(MockDataService);
+  private readonly propertyApi = inject(OwnerPropertyApiService);
+  private readonly unitApi = inject(OwnerUnitApiService);
+  private readonly listingApi = inject(ListingApiService);
   private readonly router = inject(Router);
 
   readonly step = signal(1);
@@ -116,24 +122,29 @@ export class OwnerListingFormComponent {
   propertyType: PropertyType = 'apartment';
   rent: number | null = null;
 
+  constructor() {
+    this.propertyApi.loadForOwner(CURRENT_OWNER_ID_REAL).then((properties) => {
+      this.unitApi.loadForProperties(properties.map((p) => p.id));
+    });
+  }
+
   onDistrictChange(value: string): void {
     this.district.set(value);
     this.area = this.areas()[0] ?? '';
   }
 
-  myUnits() {
-    const propertyIds = new Set(this.data.ownerProperties().filter((p) => p.ownerId === CURRENT_OWNER_ID).map((p) => p.id));
-    return this.data.ownerUnits().filter((u) => propertyIds.has(u.propertyId));
+  myUnits(): ApiOwnerUnit[] {
+    return this.unitApi.units();
   }
 
-  propertyName(propertyId: string): string {
-    return this.data.ownerProperties().find((p) => p.id === propertyId)?.name ?? '—';
+  propertyName(propertyId: number): string {
+    return this.propertyApi.properties().find((p) => p.id === propertyId)?.name ?? '—';
   }
 
   continueFromAutoFill(): void {
-    const unit = this.myUnits().find((u) => u.id === this.selectedUnitId);
+    const unit = this.myUnits().find((u) => String(u.id) === this.selectedUnitId);
     if (!unit) return;
-    const property = this.data.ownerProperties().find((p) => p.id === unit.propertyId);
+    const property = this.propertyApi.properties().find((p) => p.id === unit.propertyId);
     this.title = `${property?.name ?? ''} — ${unit.unitNumber}`;
     this.address = property?.address ?? '';
     this.district.set(property?.district ?? DISTRICTS[0]);
@@ -142,24 +153,18 @@ export class OwnerListingFormComponent {
     this.step.set(3);
   }
 
-  publish(): void {
+  async publish(): Promise<void> {
     if (!this.title || !this.address || !this.rent) return;
-    this.data.listings.update((list) => [
-      ...list,
-      {
-        id: nextId('listing'),
-        ownerId: CURRENT_OWNER_ID,
-        unitId: this.autoFill ? this.selectedUnitId : undefined,
-        source: 'owner',
-        title: this.title,
-        address: this.address,
-        district: this.district(),
-        area: this.area,
-        propertyType: this.propertyType,
-        rent: this.rent!,
-        status: 'active',
-      },
-    ]);
+    await this.listingApi.create({
+      ownerId: CURRENT_OWNER_ID_REAL,
+      unitId: this.autoFill ? Number(this.selectedUnitId) : null,
+      title: this.title,
+      address: this.address,
+      district: this.district(),
+      area: this.area,
+      propertyType: this.propertyType,
+      rent: this.rent!,
+    });
     this.router.navigateByUrl('/owner/listings');
   }
 }

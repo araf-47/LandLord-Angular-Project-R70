@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.service';
+import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
+import { OwnerUnitApiService } from '../../../core/owner-unit-api.service';
+import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 
 @Component({
   selector: 'app-owner-property-list',
@@ -21,7 +23,7 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
             <tr>
               <td>{{ p.name }}</td>
               <td>{{ p.address }}</td>
-              <td>{{ data.unitsByProperty(p.id).length }}</td>
+              <td>{{ unitCount(p.id) }}</td>
             </tr>
           } @empty {
             <tr><td colspan="3" class="hint-text">No properties yet.</td></tr>
@@ -33,9 +35,18 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
   `,
 })
 export class OwnerPropertyListComponent {
-  protected readonly data = inject(MockDataService);
+  protected readonly propertyApi = inject(OwnerPropertyApiService);
+  private readonly unitApi = inject(OwnerUnitApiService);
 
-  myProperties() {
-    return this.data.ownerProperties().filter((p) => p.ownerId === CURRENT_OWNER_ID);
+  constructor() {
+    this.propertyApi.loadForOwner(CURRENT_OWNER_ID_REAL).then((properties) => {
+      this.unitApi.loadForProperties(properties.map((p) => p.id));
+    });
+  }
+
+  readonly myProperties = computed(() => this.propertyApi.properties());
+
+  unitCount(propertyId: number): number {
+    return this.unitApi.units().filter((u) => u.propertyId === propertyId).length;
   }
 }

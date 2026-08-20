@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.service';
+import { ListingApiService } from '../../../core/listing-api.service';
+import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 
 @Component({
   selector: 'app-owner-listing-list',
@@ -38,17 +39,21 @@ import { CURRENT_OWNER_ID, MockDataService } from '../../../core/mock-data.servi
   `,
 })
 export class OwnerListingListComponent {
-  protected readonly data = inject(MockDataService);
+  protected readonly api = inject(ListingApiService);
+
+  constructor() {
+    this.api.search({ ownerId: CURRENT_OWNER_ID_REAL });
+  }
 
   myListings() {
-    return this.data.listingsByOwner(CURRENT_OWNER_ID);
+    return this.api.listings();
   }
 
-  repost(id: string): void {
-    this.data.listings.update((list) => list.map((l) => (l.id === id ? { ...l, status: 'active' } : l)));
+  repost(id: number): void {
+    this.api.setStatus(id, 'active');
   }
 
-  remove(id: string): void {
-    this.data.listings.update((list) => list.filter((l) => l.id !== id));
+  remove(id: number): void {
+    this.api.delete(id);
   }
 }

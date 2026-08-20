@@ -1,7 +1,11 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
-import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data.service';
+import { ApiListing, ListingApiService } from '../../core/listing-api.service';
+import { FavoriteApiService } from '../../core/favorite-api.service';
+import { BookingApiService } from '../../core/booking-api.service';
+import { ProfileApiService } from '../../core/profile-api.service';
+import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 
 @Component({
   selector: 'app-listing-detail',
@@ -46,39 +50,48 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data
   `,
 })
 export class ListingDetailComponent {
-  protected readonly data = inject(MockDataService);
   protected readonly auth = inject(AuthService);
+  private readonly listingApi = inject(ListingApiService);
+  private readonly favoriteApi = inject(FavoriteApiService);
+  private readonly bookingApi = inject(BookingApiService);
+  private readonly profileApi = inject(ProfileApiService);
   private readonly router = inject(Router);
-  private readonly listingId = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
+  private readonly listingId = Number(inject(ActivatedRoute).snapshot.paramMap.get('id'));
 
-  readonly listing = computed(() => this.data.listingById(this.listingId));
+  readonly listing = signal<ApiListing | undefined>(undefined);
+
   readonly alreadyRequested = computed(() =>
-    this.data.bookingRequests().some((r) => r.listingId === this.listingId && r.tenantId === CURRENT_TENANT_ID && r.status !== 'rejected')
+    this.bookingApi.requests().some((r) => r.listingId === this.listingId && r.tenantId === CURRENT_TENANT_ID_REAL && r.status !== 'rejected')
   );
 
-  isFavorite(): boolean {
-    return this.data.favorites().some((f) => f.tenantId === CURRENT_TENANT_ID && f.listingId === this.listingId);
-  }
-
-  toggleFavorite(): void {
-    if (this.isFavorite()) {
-      this.data.favorites.update((list) => list.filter((f) => !(f.tenantId === CURRENT_TENANT_ID && f.listingId === this.listingId)));
-    } else {
-      this.data.favorites.update((list) => [...list, { id: nextId('fav'), tenantId: CURRENT_TENANT_ID, listingId: this.listingId }]);
+  constructor() {
+    this.listingApi.get(this.listingId).then((l) => this.listing.set(l));
+    if (this.auth.isAuthenticated() && this.auth.role() === 'tenant') {
+      this.favoriteApi.loadForTenant(CURRENT_TENANT_ID_REAL);
+      this.bookingApi.loadForTenant(CURRENT_TENANT_ID_REAL);
     }
   }
 
-  book(): void {
-    this.data.bookingRequests.update((list) => [
-      ...list,
-      {
-        id: nextId('br'),
-        listingId: this.listingId,
-        tenantId: CURRENT_TENANT_ID,
-        applicantName: this.data.tenantProfile().name,
-        status: 'pending',
-      },
-    ]);
+  isFavorite(): boolean {
+    return this.favoriteApi.favorites().some((f) => f.tenantId === CURRENT_TENANT_ID_REAL && f.listingId === this.listingId);
+  }
+
+  toggleFavorite(): void {
+    const existing = this.favoriteApi.favorites().find((f) => f.tenantId === CURRENT_TENANT_ID_REAL && f.listingId === this.listingId);
+    if (existing) {
+      this.favoriteApi.remove(existing.id);
+    } else {
+      this.favoriteApi.add(CURRENT_TENANT_ID_REAL, this.listingId);
+    }
+  }
+
+  async book(): Promise<void> {
+    const tenant = await this.profileApi.tenant(CURRENT_TENANT_ID_REAL);
+    await this.bookingApi.create({
+      listingId: this.listingId,
+      tenantId: CURRENT_TENANT_ID_REAL,
+      applicantName: tenant.name,
+    });
   }
 
   promptSignup(): void {

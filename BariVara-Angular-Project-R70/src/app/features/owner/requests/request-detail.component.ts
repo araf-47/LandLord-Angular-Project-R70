@@ -1,7 +1,8 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { ApiBookingRequest, BookingApiService } from '../../../core/booking-api.service';
+import { ListingApiService } from '../../../core/listing-api.service';
 
 @Component({
   selector: 'app-owner-request-detail',
@@ -33,24 +34,29 @@ import { MockDataService } from '../../../core/mock-data.service';
   `,
 })
 export class OwnerRequestDetailComponent {
-  private readonly data = inject(MockDataService);
+  private readonly bookingApi = inject(BookingApiService);
+  private readonly listingApi = inject(ListingApiService);
   private readonly router = inject(Router);
-  private readonly requestId = inject(ActivatedRoute).snapshot.paramMap.get('requestId')!;
+  private readonly requestId = Number(inject(ActivatedRoute).snapshot.paramMap.get('requestId'));
 
   chatMessage = '';
-  readonly request = computed(() => this.data.bookingRequests().find((r) => r.id === this.requestId));
+  readonly request = signal<ApiBookingRequest | undefined>(undefined);
+  private listingTitleValue = '—';
 
-  listingTitle(): string {
-    return this.data.listingById(this.request()?.listingId ?? '')?.title ?? '—';
+  constructor() {
+    this.bookingApi.get(this.requestId).then(async (r) => {
+      this.request.set(r);
+      const listing = await this.listingApi.get(r.listingId);
+      this.listingTitleValue = listing.title;
+    });
   }
 
-  decide(status: 'approved' | 'rejected'): void {
-    const req = this.request();
-    this.data.bookingRequests.update((list) => list.map((r) => (r.id === this.requestId ? { ...r, status } : r)));
+  listingTitle(): string {
+    return this.listingTitleValue;
+  }
 
-    if (status === 'approved' && req) {
-      this.data.listings.update((list) => list.map((l) => (l.id === req.listingId ? { ...l, status: 'taken' } : l)));
-    }
+  async decide(status: 'approved' | 'rejected'): Promise<void> {
+    await this.bookingApi.decide(this.requestId, status);
     this.router.navigateByUrl('/owner/requests');
   }
 }
