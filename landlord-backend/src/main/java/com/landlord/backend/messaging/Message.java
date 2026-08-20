@@ -15,9 +15,11 @@ public class Message {
 
     private Long conversationId;
 
-    private String fromName;
+    private String senderRole;
 
     private String text;
+
+    private boolean read = false;
 
     private Instant sentAt = Instant.now();
 
@@ -33,12 +35,12 @@ public class Message {
         this.conversationId = conversationId;
     }
 
-    public String getFromName() {
-        return fromName;
+    public String getSenderRole() {
+        return senderRole;
     }
 
-    public void setFromName(String fromName) {
-        this.fromName = fromName;
+    public void setSenderRole(String senderRole) {
+        this.senderRole = senderRole;
     }
 
     public String getText() {
@@ -47,6 +49,14 @@ public class Message {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
     }
 
     public Instant getSentAt() {

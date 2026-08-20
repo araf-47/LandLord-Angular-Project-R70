@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
-import { MockDataService } from '../../core/mock-data.service';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
+import { MessagingApiService } from '../../core/messaging-api.service';
 
 @Component({
   selector: 'app-tenant-notifications',
@@ -7,7 +8,7 @@ import { MockDataService } from '../../core/mock-data.service';
   template: `
     <h1>Notifications</h1>
     <div class="card stack">
-      @for (n of data.notifications(); track n.id) {
+      @for (n of api.notifications(); track n.id) {
         <div class="card" (click)="open(n.id)" style="cursor:pointer;">
           <strong>{{ n.title }}</strong>
           @if (opened() === n.id) {
@@ -21,16 +22,23 @@ import { MockDataService } from '../../core/mock-data.service';
     </div>
   `,
 })
-export class TenantNotificationsComponent {
-  protected readonly data = inject(MockDataService);
-  readonly opened = signal('');
+export class TenantNotificationsComponent implements OnInit {
+  protected readonly api = inject(MessagingApiService);
+  readonly opened = signal(-1);
 
-  open(id: string): void {
-    this.opened.set(this.opened() === id ? '' : id);
-    this.data.notifications.update((list) => list.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  async ngOnInit(): Promise<void> {
+    await this.api.loadNotificationsForTenant(CURRENT_TENANT_ID_REAL);
   }
 
-  remove(id: string): void {
-    this.data.notifications.update((list) => list.filter((n) => n.id !== id));
+  async open(id: number): Promise<void> {
+    const wasOpen = this.opened() === id;
+    this.opened.set(wasOpen ? -1 : id);
+    if (!wasOpen) {
+      await this.api.markNotificationRead(id);
+    }
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.api.deleteNotification(id);
   }
 }

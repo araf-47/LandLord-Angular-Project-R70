@@ -1,8 +1,9 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiInvoice, ApiPayment, BillingApiService } from '../../../core/billing-api.service';
 import { ApiExpense, MaintenanceApiService } from '../../../core/maintenance-api.service';
+import { MessagingApiService } from '../../../core/messaging-api.service';
 import { periodLabel } from '../../../core/mock-data.service';
 import { ApiRentalAgreement, ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
 import { UnitApiService } from '../../../core/unit-api.service';
@@ -20,6 +21,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
         <p><strong>Email:</strong> {{ tenant()!.email }}</p>
         <p><strong>Unit:</strong> {{ unitLabel() }}</p>
         <p><strong>Status:</strong> {{ tenant()!.status }}</p>
+        <button class="btn" (click)="messageTenant()">Message tenant</button>
       </div>
 
       @if (agreement()) {
@@ -140,6 +142,8 @@ export class TenantDetailComponent implements OnInit {
   private readonly billingApi = inject(BillingApiService);
   private readonly unitApi = inject(UnitApiService);
   private readonly maintenanceApi = inject(MaintenanceApiService);
+  private readonly messagingApi = inject(MessagingApiService);
+  private readonly router = inject(Router);
   private readonly tenantId = +inject(ActivatedRoute).snapshot.paramMap.get('tenantId')!;
 
   readonly editing = signal(false);
@@ -196,5 +200,14 @@ export class TenantDetailComponent implements OnInit {
     const updated = await this.api.updateAgreement(this.tenantId, this.termsDraft);
     this.agreement.set(updated);
     this.editing.set(false);
+  }
+
+  async messageTenant(): Promise<void> {
+    await this.messagingApi.loadConversationsForTenant(this.tenantId);
+    let conversation = this.messagingApi.conversations()[0];
+    if (!conversation) {
+      conversation = await this.messagingApi.createConversation(this.tenantId, this.tenant()!.name);
+    }
+    this.router.navigate(['/landlord/messages', conversation.id]);
   }
 }

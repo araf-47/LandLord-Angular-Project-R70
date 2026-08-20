@@ -1,8 +1,9 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-20 (Ledger + landlord dashboard KPI tiles real end to
-end; pending-cash retired; Maintenance + Expenses real end to end;
-numeric-select ngModel bug found and fixed in 3 forms)
+Last updated: 2026-08-20 (Messaging + notifications, LandLord only, real end
+to end; Ledger + landlord dashboard KPI tiles real end to end; pending-cash
+retired; Maintenance + Expenses real end to end; numeric-select ngModel bug
+found and fixed in 3 forms)
 
 ## 1. Product summary
 
@@ -350,15 +351,47 @@ slice only, as a proof-of-pipe before committing to the full schema):
   the switch.", tenant 4) from `category: 'Repair'` to `'Maintenance'` so it
   retroactively shows up. Confirmed working live in the browser on tenant
   Atiqur Rahman's detail page (400 tenant-borne maintenance cost, correct).
+- **Messaging + notifications (Phase 12), LandLord only, real end to end
+  (2026-08-20)** — `Conversation` gained `tenantId`, `Message` gained
+  `senderRole` (landlord/tenant) + `read`, `Notification` gained `tenantId`
+  + `type` (entities existed bare-bones since Phase 6.2, now filled in). New
+  `MessagingController` (`GET/POST /api/conversations`, `GET/POST
+  /api/conversations/{id}/messages`) and `NotificationController`
+  (`GET/POST /api/notifications`, `PUT .../{id}/read`, `DELETE .../{id}`).
+  New `MessagingApiService`; landlord + tenant message-list/thread and
+  tenant notifications all migrated off `MockDataService`. Thread pages
+  poll every 10s (chosen over WebSocket — light two-user demo traffic
+  doesn't justify socket infra yet, revisit at Phase 16 if that changes).
+  Landlord's `tenant-detail.component.ts` gained a **"Message tenant"**
+  button (finds or creates that tenant's conversation, navigates to it) —
+  **closes the §3a "no start a new conversation anywhere" gap.**
+  **Scope call, your decision**: BariVara messaging left on mock — no
+  BariVara backend exists yet (Phase 14 not started), wiring it now would
+  mean building a whole separate backend early, out of order. BariVara's
+  and the LandLord marketplace's decorative "Send" chat stubs are
+  unaffected, still stubs.
+  **Verified live**: curl round-trip (create conversation → send both
+  directions → mark notification read → delete) plus a real message sent
+  landlord→tenant and confirmed visible on the tenant dashboard — but only
+  after finding out *why* the first test message didn't show (see gap
+  note below).
+  **Gap surfaced, not a bug**: first test message was sent to tenant id 5,
+  but tenant-side pages are hardcoded to `CURRENT_TENANT_ID_REAL = 3`
+  (`core/current-tenant.ts`, Phase 7 auth stopgap, same known issue already
+  tracked in §3a) — so it never appeared for whoever "logged in" as tenant.
+  Not a messaging bug; expected until real auth lands. Resent to tenant 3
+  ("T1") to confirm the feature itself works, and it does.
 - **Everything else still on `MockDataService`** — Property, Units, Tenant,
   Billing/Move-out, tenant-detail/billing-views, Maintenance/Expenses,
-  Ledger, and now the landlord dashboard KPI tiles are real; marketplace,
-  messages, and the rest of the tenant-side payment pages are not. Auth is
-  still a stub (API wide open), no Flyway migrations yet,
-  nothing deployed anywhere (localhost only).
+  Ledger, landlord dashboard KPI tiles, and now Messaging/Notifications
+  (LandLord only) are real; marketplace and the rest of the tenant-side
+  payment pages are not (BariVara messaging also still mock — no BariVara
+  backend yet). Auth is still a stub (API wide open), no Flyway migrations
+  yet, nothing deployed anywhere (localhost only).
 
 **Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
-(auth, Tenants, Billing, etc. — Phase 6-20), testing, deployment. See
+(auth, BariVara backend, cross-system sync, etc. — Phase 7, 14-20), testing,
+deployment. See
 §3a for a tracked backlog of smaller gaps found during review but deliberately
 not fixed (property/unit edit-delete entry below is now resolved).
 
@@ -674,11 +707,23 @@ now functionally deeper than a route scaffold.)*
       tickets only — Phase 8.4 (property/unit listing photos) is a separate,
       still-pending gap.
 
-### Phase 12 — Messaging & notifications
-12.1. Backend: conversations/messages schema + endpoints
-12.2. Decide: polling vs. WebSocket/real-time (Open Decision)
-12.3. Frontend: wire message list/thread to API (or socket)
-12.4. Notifications schema + endpoints, wire tenant notifications page
+### Phase 12 — Messaging & notifications ✅ DONE (LandLord only)
+12.1. ✅ **Backend: conversations/messages schema + endpoints.** `Conversation`
+      (`tenantId`, `withName`) and `Message` (`conversationId`, `senderRole`,
+      `text`, `read`) real, `MessagingController`
+      (`GET/POST /api/conversations`, `GET/POST
+      /api/conversations/{id}/messages`).
+12.2. ✅ **Decided: polling** (10s refresh on thread pages), not WebSocket —
+      light two-user demo traffic doesn't justify socket infra yet; revisit
+      at Phase 16 if real usage needs push.
+12.3. ✅ **Frontend: wire message list/thread to API.** LandLord
+      landlord-side and tenant-side message-list/thread components on
+      `MessagingApiService`. BariVara messaging deliberately left on mock —
+      no BariVara backend yet (Phase 14).
+12.4. ✅ **Notifications schema + endpoints, wired tenant notifications page.**
+      `Notification` gained `tenantId`/`type`; `NotificationController`
+      (`GET/POST /api/notifications`, `PUT .../{id}/read`, `DELETE
+      .../{id}`); `notifications.component.ts` (tenant) migrated off mock.
 
 ### Phase 13 — Marketplace & Leads (LandLord side) — real backend ✅ DONE
 13.1. ✅ **Backend: ad state per unit.** `Unit` gained `adPaused` (boolean,

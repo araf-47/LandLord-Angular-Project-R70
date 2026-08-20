@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MockDataService } from '../../../core/mock-data.service';
+import { CURRENT_TENANT_ID_REAL } from '../../../core/current-tenant';
+import { MessagingApiService } from '../../../core/messaging-api.service';
 
 @Component({
   selector: 'app-tenant-message-list',
@@ -9,15 +10,20 @@ import { MockDataService } from '../../../core/mock-data.service';
   template: `
     <h1>Messages</h1>
     <div class="card stack">
-      @for (c of data.conversations(); track c.id) {
+      @for (c of api.conversations(); track c.id) {
         <a class="module-tile" [routerLink]="['/tenant/messages', c.id]">
           <div class="module-title">{{ c.withName }}</div>
-          <p>{{ c.messages[c.messages.length - 1]?.text }}</p>
         </a>
+      } @empty {
+        <p class="hint-text">No conversations yet.</p>
       }
     </div>
   `,
 })
-export class TenantMessageListComponent {
-  protected readonly data = inject(MockDataService);
+export class TenantMessageListComponent implements OnInit {
+  protected readonly api = inject(MessagingApiService);
+
+  async ngOnInit(): Promise<void> {
+    await this.api.loadConversationsForTenant(CURRENT_TENANT_ID_REAL);
+  }
 }
