@@ -432,10 +432,16 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   (2026-08-16), ahead of schedule, alongside the Property backend slice —
   real edit/delete now backed by Postgres. BariVara's owner side still add-only
   (unaffected, no backend there yet).
-- **BariVara owner side has no unit-management page.** LandLord has "Manage units"
-  per property (list/add/edit); BariVara can only add one unit bundled into property
-  creation, no way to add a second unit or edit rent later. (Phase 4 or earlier —
-  frontend-only fix, doesn't need backend.)
+- ~~**BariVara owner side has no unit-management page.**~~ **Resolved (2026-08-21)**
+  — frontend-only, backend (`OwnerUnitController`) already had `GET/{id}`, `PUT`,
+  `DELETE`; `OwnerUnitApiService` only exposed `create`/`loadForProperties`. Added
+  `get`/`update`/`delete`, plus new `unit-list.component.ts` /
+  `unit-form.component.ts` under `features/owner/properties/`, routed at
+  `/owner/properties/:propertyId/units[/new|/:unitId/edit]`, mirroring LandLord's
+  own unit-management pattern (no photo/status fields — real `OwnerUnit` entity
+  doesn't have them, unlike LandLord's `Unit`). Property list gained a
+  "Manage units" link per row. Property creation's bundled first-unit flow
+  (`property-form.component.ts`) left untouched.
 - **No "start a new conversation" anywhere.** Messaging only works by replying
   inside conversations that already exist in seed data — no compose/new-thread entry
   point from a listing, tenant record, or applicant profile. (Natural fit: Phase 12,
