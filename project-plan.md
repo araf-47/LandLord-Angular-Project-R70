@@ -549,19 +549,26 @@ now functionally deeper than a route scaffold.)*
 ### Phase 6 — Backend foundation
 6.1. ~~Choose backend stack + hosting~~ **Decided: Java + Spring Boot, PostgreSQL.
      No hosting yet — localhost-only for now.**
-6.2. Design relational schema: users, properties, units, tenants, agreements,
-     invoices, payments, expenses, maintenance_tickets, conversations, messages,
-     marketplace_requests, notifications, listings — **`properties` and `units`
-     done so far (see Phase 8 below), rest still pending**
+6.2. ✅ **Design relational schema: `properties`, `units` (Phase 8), `tenants`,
+     `rental_agreements` (Phase 9), `invoices`, `payments` (Phase 10), `expenses`,
+     `maintenance_tickets` (Phase 11), `conversations`, `messages`,
+     `marketplace_requests`, `notifications` — all entities + repositories now in
+     `landlord-backend/` (`messaging`, `marketplace`, `notification` packages added
+     this pass, no controllers yet — those land with Phase 12/13). `users` skipped
+     (tied to held Phase 6.4/7 auth work), `listings` skipped (belongs to Phase 14's
+     separate BariVara backend, not this repo).**
 6.3. Set up project skeleton, migrations, environment config — **skeleton done
      (`landlord-backend/`, Spring Boot 4.1); migrations still ad hoc
-     (`ddl-auto: update`), Flyway not yet introduced**
-6.4. Set up API auth (JWT issue/verify, password hashing, OTP delivery) — not
-     started, API currently wide open
+     (`ddl-auto: update`), Flyway on hold — no deploy planned, low payoff for
+     now, revisit right before Phase 19 deployment**
+6.4. Set up API auth (JWT issue/verify, password hashing, OTP delivery) — **on
+     hold: no online deployment planned right now, so a wide-open localhost-only
+     API is an acceptable risk for the time being. Revisit before any real
+     deployment (Phase 19). Same hold applies to Phase 7.**
 6.5. ✅ **Local dev environment: `docker-compose.yml` at repo root, official
      `postgres:16` image, `landlord_db`, port 5432, named volume**
 
-### Phase 7 — Real authentication (both apps)
+### Phase 7 — Real authentication (both apps) — **ON HOLD, see Phase 6.4 note**
 7.1. Backend: signup/login/OTP/forgot-password/reset-password endpoints
 7.2. Backend: account lockout after failed attempts (per login diagram)
 7.3. Frontend (both apps): replace `AuthService` stub with real HTTP calls + token
