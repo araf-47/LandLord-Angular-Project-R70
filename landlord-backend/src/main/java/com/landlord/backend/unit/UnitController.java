@@ -1,7 +1,13 @@
 package com.landlord.backend.unit;
 
 import jakarta.validation.Valid;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -22,6 +29,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class UnitController {
 
     private final UnitRepository repository;
+
+    @Value("${app.uploads.dir}")
+    private String uploadsDir;
 
     public UnitController(UnitRepository repository) {
         this.repository = repository;
@@ -69,6 +79,31 @@ public class UnitController {
         Unit unit = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         unit.setAdPaused(false);
         return repository.save(unit);
+    }
+
+    @PostMapping("/{id}/photo")
+    public ResponseEntity<Unit> uploadPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        Unit unit = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file uploaded");
+        }
+
+        String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
+        String extension = original.contains(".") ? original.substring(original.lastIndexOf('.')) : "";
+        String filename = UUID.randomUUID() + extension;
+
+        try {
+            Path targetDir = Path.of(uploadsDir, "units", String.valueOf(id));
+            Files.createDirectories(targetDir);
+            Path target = targetDir.resolve(filename);
+            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store photo", e);
+        }
+
+        unit.setPhotoUrl("/uploads/units/" + id + "/" + filename);
+        return ResponseEntity.ok(repository.save(unit));
     }
 
     @DeleteMapping("/{id}")

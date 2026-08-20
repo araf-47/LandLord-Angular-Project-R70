@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { API_ORIGIN } from '../../../core/maintenance-api.service';
 import { PropertyApiService } from '../../../core/property-api.service';
 import { UnitApiService } from '../../../core/unit-api.service';
 
@@ -17,11 +18,18 @@ import { UnitApiService } from '../../../core/unit-api.service';
       <div class="table-scroll">
       <table>
         <thead>
-          <tr><th>Unit</th><th>Rent</th><th>Status</th><th></th></tr>
+          <tr><th>Photo</th><th>Unit</th><th>Rent</th><th>Status</th><th></th></tr>
         </thead>
         <tbody>
           @for (u of unitApi.units(); track u.id) {
             <tr>
+              <td>
+                @if (u.photoUrl) {
+                  <img [src]="photoOrigin + u.photoUrl" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+                } @else {
+                  <span class="hint-text">No photo</span>
+                }
+              </td>
               <td>{{ u.unitNumber }}</td>
               <td>{{ u.rent }}</td>
               <td><span class="badge" [class.badge-vacant]="u.status === 'vacant'" [class.badge-occupied]="u.status === 'occupied'">{{ u.status }}</span></td>
@@ -41,6 +49,7 @@ export class UnitListComponent implements OnInit {
   protected readonly propertyApi = inject(PropertyApiService);
   protected readonly unitApi = inject(UnitApiService);
   protected readonly propertyId = inject(ActivatedRoute).snapshot.paramMap.get('propertyId')!;
+  protected readonly photoOrigin = API_ORIGIN;
 
   async ngOnInit(): Promise<void> {
     if (this.propertyApi.properties().length === 0) {

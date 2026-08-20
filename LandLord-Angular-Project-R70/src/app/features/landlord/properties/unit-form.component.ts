@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { API_ORIGIN } from '../../../core/maintenance-api.service';
 import { ApiUnit, UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
@@ -25,6 +26,16 @@ import { ApiUnit, UnitApiService } from '../../../core/unit-api.service';
           <option value="occupied">Occupied</option>
         </select>
       </div>
+      <div class="field">
+        <label for="photo">Photo (optional)</label>
+        @if (existingPhotoUrl) {
+          <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" style="max-width:200px;display:block;margin-bottom:0.5rem;" />
+        }
+        <input id="photo" type="file" name="photo" accept="image/*" (change)="onFileSelected($event)" />
+        @if (fileName) {
+          <span class="hint-text">{{ fileName }}</span>
+        }
+      </div>
 
       <div class="actions-row">
         <button class="btn btn-primary" (click)="save()">Save unit</button>
@@ -44,6 +55,10 @@ export class UnitFormComponent implements OnInit {
   unitNumber = '';
   rent: number | null = null;
   status: ApiUnit['status'] = 'vacant';
+  existingPhotoUrl: string | null = null;
+  fileName = '';
+  private selectedFile: File | null = null;
+  readonly photoOrigin = API_ORIGIN;
 
   async ngOnInit(): Promise<void> {
     if (this.unitId) {
@@ -51,16 +66,30 @@ export class UnitFormComponent implements OnInit {
       this.unitNumber = unit.unitNumber;
       this.rent = unit.rent;
       this.status = unit.status;
+      this.existingPhotoUrl = unit.photoUrl;
     }
+  }
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.selectedFile = file;
+    this.fileName = file?.name ?? '';
   }
 
   async save(): Promise<void> {
     if (!this.unitNumber || this.rent == null) return;
 
+    let unitId: number;
     if (this.editing && this.unitId) {
-      await this.api.update(+this.unitId, +this.propertyId, this.unitNumber, this.rent, this.status);
+      unitId = +this.unitId;
+      await this.api.update(unitId, +this.propertyId, this.unitNumber, this.rent, this.status);
     } else {
-      await this.api.create(+this.propertyId, this.unitNumber, this.rent, this.status);
+      const created = await this.api.create(+this.propertyId, this.unitNumber, this.rent, this.status);
+      unitId = created.id;
+    }
+
+    if (this.selectedFile) {
+      await this.api.uploadPhoto(unitId, this.selectedFile);
     }
 
     this.router.navigate(['/landlord/properties', this.propertyId, 'units']);

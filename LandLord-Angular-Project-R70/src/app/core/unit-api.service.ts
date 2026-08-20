@@ -9,6 +9,7 @@ export interface ApiUnit {
   rent: number;
   status: 'vacant' | 'occupied';
   adPaused: boolean;
+  photoUrl: string | null;
 }
 
 const API_BASE = 'http://localhost:8080/api/units';
@@ -53,6 +54,14 @@ export class UnitApiService {
 
   async repostAd(id: number): Promise<ApiUnit> {
     const updated = await firstValueFrom(this.http.put<ApiUnit>(`${API_BASE}/${id}/ad-repost`, {}));
+    this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
+    return updated;
+  }
+
+  async uploadPhoto(id: number, file: File): Promise<ApiUnit> {
+    const form = new FormData();
+    form.append('file', file);
+    const updated = await firstValueFrom(this.http.post<ApiUnit>(`${API_BASE}/${id}/photo`, form));
     this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
     return updated;
   }

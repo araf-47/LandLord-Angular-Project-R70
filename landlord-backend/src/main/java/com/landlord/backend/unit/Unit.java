@@ -26,6 +26,8 @@ public class Unit {
 
     private boolean adPaused = false;
 
+    private String photoUrl;
+
     public Long getId() {
         return id;
     }
@@ -68,5 +70,13 @@ public class Unit {
 
     public void setAdPaused(boolean adPaused) {
         this.adPaused = adPaused;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

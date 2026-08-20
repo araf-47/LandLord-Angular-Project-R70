@@ -1,9 +1,9 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-20 (Messaging + notifications, LandLord only, real end
-to end; Ledger + landlord dashboard KPI tiles real end to end; pending-cash
-retired; Maintenance + Expenses real end to end; numeric-select ngModel bug
-found and fixed in 3 forms)
+Last updated: 2026-08-20 (Unit photo upload real end to end; Messaging +
+notifications, LandLord only, real end to end; Ledger + landlord dashboard
+KPI tiles real end to end; pending-cash retired; Maintenance + Expenses real
+end to end; numeric-select ngModel bug found and fixed in 3 forms)
 
 ## 1. Product summary
 
@@ -381,6 +381,25 @@ slice only, as a proof-of-pipe before committing to the full schema):
   tracked in §3a) — so it never appeared for whoever "logged in" as tenant.
   Not a messaging bug; expected until real auth lands. Resent to tenant 3
   ("T1") to confirm the feature itself works, and it does.
+- **Unit photo upload (Phase 8.4), real end to end (2026-08-20)** — same
+  local-disk pattern as Maintenance ticket photos (Phase 11.4). Real `Unit`
+  gained `photoUrl`; `POST /api/units/{id}/photo` (multipart) saves to
+  `uploads/units/{id}/`, served back at `/uploads/**` (existing generic
+  `WebConfig` handler reused as-is, no changes needed there). `unit-form.
+  component.ts` gained a file picker (uploads right after create/update,
+  same create-then-upload sequencing as the tenant maintenance-ticket-new
+  flow); `unit-list.component.ts` gained a photo thumbnail column instead
+  of "No photo" text. Verified live: uploaded a real PNG to a real unit via
+  curl, confirmed it persisted (`GET /api/units/3` returned the new
+  `photoUrl`) and served back correctly (`/uploads/units/3/...` → 200).
+  Test photo removed afterward so demo data stays clean.
+  **Scope note**: this is the Unit/LandLord side only. The §3a "listing/
+  property cards show no images" gap was really about BariVara's browse/
+  listing cards — those still show the placeholder because BariVara has no
+  backend yet (Phase 14) to read this `photoUrl` from. `Property` itself
+  (as opposed to `Unit`) still has no photo field either — LandLord's own
+  property list is a data-forward table, not a photo card, by the Phase 4.6
+  design decision, so no placeholder existed there to begin with.
 - **Everything else still on `MockDataService`** — Property, Units, Tenant,
   Billing/Move-out, tenant-detail/billing-views, Maintenance/Expenses,
   Ledger, landlord dashboard KPI tiles, and now Messaging/Notifications
@@ -424,11 +443,13 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   BariVara's equivalent are still decorative — no handler.** Left as-is because
   fixing it properly means building "start a new conversation" first (see above),
   not just wiring a button.
-- **Listing/property cards still show no images** — every listing card shows a gray
-  "No photo" placeholder. More noticeable now that the homepage is commerce-styled
-  and implies real photos. (Needs object storage — Phase 8.4, still pending.
-  Maintenance ticket photos are solved, see Phase 11.4 — same local-disk pattern
-  can be reused here.)
+- **BariVara listing/property cards still show no images** — every listing card
+  shows a gray "No photo" placeholder. LandLord's real `Unit` now has a real
+  `photoUrl` (Phase 8.4, done 2026-08-20), but BariVara has no backend yet
+  (Phase 14) to read it from, so its cards stay on mock data with no photo
+  field at all. Resolved once Phase 14 wires BariVara to the real API (or
+  Phase 15 syncs the photo across via `VacancyAdSync`, which doesn't carry a
+  photo field yet either — add it then).
 - **Tenant-side real-backend pages now depend on a hardcoded `CURRENT_TENANT_ID_REAL`**
   (`core/current-tenant.ts`, set to tenant id `3`) instead of a real login session —
   same shape as the older mock `CURRENT_TENANT_ID` gap, just now also true for the
@@ -630,7 +651,11 @@ now functionally deeper than a route scaffold.)*
      effect of tenant registration (Phase 9.1). Still possible to set status
      directly via `PUT /api/units/{id}` with no tenant behind it — no
      move-out flow yet to reverse `occupied → vacant`.
-8.4. Unit photo upload (object storage integration) — pending
+8.4. ✅ **Unit photo upload — Done.** Local-disk, same pattern as Maintenance
+     (11.4): `photoUrl` on `Unit`, `POST /api/units/{id}/photo`, thumbnail
+     in `unit-list.component.ts`, upload field in `unit-form.component.ts`.
+     Property (as opposed to Unit) photos and BariVara's own display of
+     these photos are still separate, still-pending gaps (see §3 log).
 
 ### Phase 9 — Tenant management & rental agreements
 9.1. Backend: tenant CRUD, rental agreement CRUD, move-out flow — **Done**
