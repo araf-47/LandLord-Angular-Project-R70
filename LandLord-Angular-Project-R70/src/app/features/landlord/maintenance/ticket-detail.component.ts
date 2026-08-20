@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MaintenanceApiService } from '../../../core/maintenance-api.service';
+import { API_ORIGIN, MaintenanceApiService } from '../../../core/maintenance-api.service';
 
 @Component({
   selector: 'app-landlord-ticket-detail',
@@ -12,6 +12,10 @@ import { MaintenanceApiService } from '../../../core/maintenance-api.service';
       <h1>Ticket — {{ ticket()!.description }}</h1>
       <div class="card stack" style="max-width:520px;">
         <p><strong>Status:</strong> {{ ticket()!.status }}</p>
+
+        @if (ticket()!.photoUrl) {
+          <img [src]="photoUrl()" alt="Ticket photo" style="max-width:100%;border-radius:8px;" />
+        }
 
         @if (ticket()!.status === 'pending') {
           <button class="btn btn-primary" (click)="askCost()">Update status: Resolved</button>
@@ -55,6 +59,7 @@ export class LandlordTicketDetailComponent implements OnInit {
   readonly asking = signal(false);
   readonly costingForm = signal(false);
   readonly ticket = computed(() => this.api.tickets().find((t) => t.id === this.ticketId));
+  readonly photoUrl = computed(() => `${API_ORIGIN}${this.ticket()!.photoUrl}`);
 
   amount = 0;
   bearer: 'landlord' | 'tenant' = 'landlord';

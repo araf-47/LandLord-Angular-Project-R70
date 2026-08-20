@@ -9,6 +9,7 @@ export interface ApiMaintenanceTicket {
   description: string;
   status: 'pending' | 'resolved';
   cost: number | null;
+  photoUrl: string | null;
   createdAt: string;
 }
 
@@ -24,7 +25,8 @@ export interface ApiExpense {
   date: string;
 }
 
-const BASE = 'http://localhost:8080/api';
+export const API_ORIGIN = 'http://localhost:8080';
+const BASE = `${API_ORIGIN}/api`;
 
 @Injectable({ providedIn: 'root' })
 export class MaintenanceApiService {
@@ -55,6 +57,14 @@ export class MaintenanceApiService {
     const created = await firstValueFrom(this.http.post<ApiMaintenanceTicket>(`${BASE}/maintenance-tickets`, { unitId, tenantId, description }));
     this.tickets.update((list) => [...list, created]);
     return created;
+  }
+
+  async uploadPhoto(id: number, file: File): Promise<ApiMaintenanceTicket> {
+    const form = new FormData();
+    form.append('file', file);
+    const updated = await firstValueFrom(this.http.post<ApiMaintenanceTicket>(`${BASE}/maintenance-tickets/${id}/photo`, form));
+    this.tickets.update((list) => list.map((t) => (t.id === id ? updated : t)));
+    return updated;
   }
 
   async updateStatus(id: number, status: 'pending' | 'resolved', cost?: number, bearer?: 'landlord' | 'tenant'): Promise<ApiMaintenanceTicket> {

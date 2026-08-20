@@ -391,10 +391,11 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   BariVara's equivalent are still decorative — no handler.** Left as-is because
   fixing it properly means building "start a new conversation" first (see above),
   not just wiring a button.
-- **No images anywhere.** Every listing card shows a gray "No photo" placeholder.
-  More noticeable now that the homepage is commerce-styled and implies real photos.
-  (Needs object storage — Phase 8.4/11.4, or a placeholder-image service as a cheap
-  frontend-only stopgap if it bothers you before then.)
+- **Listing/property cards still show no images** — every listing card shows a gray
+  "No photo" placeholder. More noticeable now that the homepage is commerce-styled
+  and implies real photos. (Needs object storage — Phase 8.4, still pending.
+  Maintenance ticket photos are solved, see Phase 11.4 — same local-disk pattern
+  can be reused here.)
 - **Tenant-side real-backend pages now depend on a hardcoded `CURRENT_TENANT_ID_REAL`**
   (`core/current-tenant.ts`, set to tenant id `3`) instead of a real login session —
   same shape as the older mock `CURRENT_TENANT_ID` gap, just now also true for the
@@ -639,7 +640,7 @@ now functionally deeper than a route scaffold.)*
       page/tab/route were deleted rather than migrated; tenant-side cash-pay
       now records straight to `confirmed` too, matching the real endpoint.
 
-### Phase 11 — Expenses & Maintenance ✅ DONE (11.1–11.3) — 11.4 pending
+### Phase 11 — Expenses & Maintenance ✅ DONE (11.1–11.4)
 11.1. Backend: expense CRUD tagged by property/tenant — **Done**
       (`Expense` entity, `GET/POST/DELETE /api/expenses`, filterable by
       `propertyId`/`tenantId`).
@@ -655,8 +656,15 @@ now functionally deeper than a route scaffold.)*
       `tenant-detail.component.ts`'s maintenance history now call the real
       `MaintenanceApiService`. `ledger.component.ts` migrated separately,
       2026-08-19 (see §3 note) once Payments/Property/Expenses were all real.
-11.4. Maintenance image upload (object storage) — still pending, same as
-      8.4
+11.4. ✅ **Maintenance image upload — Done.** Local-disk object storage (no
+      cloud, matches localhost-only stance): `MaintenanceTicket` gained
+      `photoUrl`; `POST /api/maintenance-tickets/{id}/photo` (multipart) saves
+      to `uploads/maintenance/{id}/` and is served back at `/uploads/**`
+      (`WebConfig` resource handler). Tenant `ticket-new` now actually uploads
+      the picked file (was decorative before — filename-only); landlord
+      `ticket-detail` renders the photo when present. Scope is maintenance
+      tickets only — Phase 8.4 (property/unit listing photos) is a separate,
+      still-pending gap.
 
 ### Phase 12 — Messaging & notifications
 12.1. Backend: conversations/messages schema + endpoints

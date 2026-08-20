@@ -27,7 +27,7 @@ import { TenantApiService } from '../../../core/tenant-api.service';
       </div>
       <div class="field">
         <label for="image">Upload image (optional)</label>
-        <input id="image" type="file" name="image" (change)="fileName = $any($event.target).files?.[0]?.name ?? ''" />
+        <input id="image" type="file" name="image" accept="image/*" (change)="onFileSelected($event)" />
         @if (fileName) {
           <span class="hint-text">{{ fileName }}</span>
         }
@@ -46,13 +46,23 @@ export class TenantTicketNewComponent {
   category = 'plumbing';
   description = '';
   fileName = '';
+  private selectedFile: File | null = null;
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.selectedFile = file;
+    this.fileName = file?.name ?? '';
+  }
 
   async submit(): Promise<void> {
     if (!this.description) return;
     const tenant = await this.tenantApi.get(CURRENT_TENANT_ID_REAL);
     if (!tenant?.unitId) return;
 
-    await this.api.createTicket(tenant.unitId, tenant.id, `[${this.category}] ${this.description}`);
+    const ticket = await this.api.createTicket(tenant.unitId, tenant.id, `[${this.category}] ${this.description}`);
+    if (this.selectedFile) {
+      await this.api.uploadPhoto(ticket.id, this.selectedFile);
+    }
     this.router.navigateByUrl('/tenant/maintenance');
   }
 }

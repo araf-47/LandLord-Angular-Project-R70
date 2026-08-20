@@ -23,6 +23,8 @@ public class MaintenanceTicket {
 
     private Double cost;
 
+    private String photoUrl;
+
     private Instant createdAt = Instant.now();
 
     public Long getId() {
@@ -71,5 +73,13 @@ public class MaintenanceTicket {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }
