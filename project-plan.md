@@ -443,11 +443,19 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   doesn't have them, unlike LandLord's `Unit`). Property list gained a
   "Manage units" link per row. Property creation's bundled first-unit flow
   (`property-form.component.ts`) left untouched.
-- **No "start a new conversation" anywhere.** Messaging only works by replying
-  inside conversations that already exist in seed data — no compose/new-thread entry
-  point from a listing, tenant record, or applicant profile. (Natural fit: Phase 12,
-  when messaging gets wired to a real backend anyway — but could be done sooner if
-  it undermines demos.)
+- ~~**No "start a new conversation" anywhere.**~~ **Resolved (2026-08-21), both
+  apps.** LandLord: reused the existing find-or-create pattern from
+  `tenant-detail.component.ts`'s "Message tenant" button —
+  `MessagingApiService.createConversation`'s `tenantId` param widened to
+  `number | null` (backend already accepted a nullable `Long`, frontend type
+  just hadn't caught up) so a request from an unconverted applicant
+  (`tenantId` still `null`) can start a conversation too, not just registered
+  tenants. BariVara: messaging is still mock-only (no backend, Phase 14
+  scoped it out), so added a `contextId?: string` field to the shared
+  `Conversation` type (`shared-contracts.ts`, both copies) plus
+  `MockDataService.findOrCreateConversation(contextId, withName)` — same
+  find-or-create shape as LandLord's real version, just against the mock
+  signal instead of an API.
 - **Single hardcoded demo user per role.** `CURRENT_TENANT_ID` / `CURRENT_OWNER_ID`
   mean login always lands on the same mock person regardless of email typed — can't
   demo "two different tenants" without editing code. (Resolved naturally by Phase 7,
@@ -455,10 +463,14 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
 - **No data persistence across page reload.** In-memory signals reset on F5. Known
   demo trap — mention before any live walkthrough. (Resolved by Phase 6/8+, real
   backend.)
-- **LandLord's "Send" chat stub (Marketplace & Leads → request detail) and
-  BariVara's equivalent are still decorative — no handler.** Left as-is because
-  fixing it properly means building "start a new conversation" first (see above),
-  not just wiring a button.
+- ~~**LandLord's "Send" chat stub (Marketplace & Leads → request detail) and
+  BariVara's equivalent are still decorative — no handler.**~~ **Resolved
+  (2026-08-21)**, alongside the gap above — both "Send" buttons now call
+  find-or-create (real API for LandLord, mock helper for BariVara), post the
+  typed message, and navigate to the resulting thread. Scoped to exactly
+  these two named entry points (Marketplace & Leads / owner Requests
+  request-detail pages) — a broader "start conversation from a listing" isn't
+  built, wasn't part of this gap's original scope.
 - **BariVara listing/property cards still show no images** — every listing card
   shows a gray "No photo" placeholder. LandLord's real `Unit` now has a real
   `photoUrl` (Phase 8.4, done 2026-08-20), but BariVara has no backend yet

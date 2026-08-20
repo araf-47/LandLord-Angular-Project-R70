@@ -21,6 +21,10 @@
 
 export interface Conversation {
   id: string;
+  /** Booking request (or other originating context) id this conversation was
+   *  started from, so a repeat "start conversation" click finds the existing
+   *  thread instead of creating a duplicate. Absent on older seed conversations. */
+  contextId?: string;
   withName: string;
   messages: { from: string; text: string; date: string }[];
 }

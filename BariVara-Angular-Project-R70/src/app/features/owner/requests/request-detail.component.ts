@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiBookingRequest, BookingApiService } from '../../../core/booking-api.service';
 import { ListingApiService } from '../../../core/listing-api.service';
+import { MockDataService } from '../../../core/mock-data.service';
 
 @Component({
   selector: 'app-owner-request-detail',
@@ -21,7 +22,10 @@ import { ListingApiService } from '../../../core/listing-api.service';
         <div class="field">
           <textarea rows="3" name="chat" [(ngModel)]="chatMessage" placeholder="Write a message..."></textarea>
         </div>
-        <button class="btn btn-sm">Send</button>
+        @if (chatError) {
+          <p class="hint-text" style="color:var(--color-danger, #c0392b);">{{ chatError }}</p>
+        }
+        <button class="btn btn-sm" (click)="sendChat()">Send</button>
       </div>
 
       @if (request()!.status === 'pending') {
@@ -36,10 +40,12 @@ import { ListingApiService } from '../../../core/listing-api.service';
 export class OwnerRequestDetailComponent {
   private readonly bookingApi = inject(BookingApiService);
   private readonly listingApi = inject(ListingApiService);
+  private readonly data = inject(MockDataService);
   private readonly router = inject(Router);
   private readonly requestId = Number(inject(ActivatedRoute).snapshot.paramMap.get('requestId'));
 
   chatMessage = '';
+  chatError = '';
   readonly request = signal<ApiBookingRequest | undefined>(undefined);
   private listingTitleValue = '—';
 
@@ -58,5 +64,24 @@ export class OwnerRequestDetailComponent {
   async decide(status: 'approved' | 'rejected'): Promise<void> {
     await this.bookingApi.decide(this.requestId, status);
     this.router.navigateByUrl('/owner/requests');
+  }
+
+  sendChat(): void {
+    const text = this.chatMessage.trim();
+    if (!text) {
+      this.chatError = 'Write a message first.';
+      return;
+    }
+    const req = this.request()!;
+
+    const conversation = this.data.findOrCreateConversation(String(req.id), req.applicantName);
+    this.data.conversations.update((list) =>
+      list.map((c) =>
+        c.id === conversation.id
+          ? { ...c, messages: [...c.messages, { from: 'You', text, date: new Date().toISOString().slice(0, 10) }] }
+          : c
+      )
+    );
+    this.router.navigate(['/owner/messages', conversation.id]);
   }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MarketplaceApiService } from '../../../core/marketplace-api.service';
+import { MessagingApiService } from '../../../core/messaging-api.service';
 import { UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
@@ -24,7 +25,10 @@ import { UnitApiService } from '../../../core/unit-api.service';
         <div class="field">
           <textarea rows="3" name="chat" [(ngModel)]="chatMessage" placeholder="Write a message..."></textarea>
         </div>
-        <button class="btn btn-sm">Send</button>
+        @if (chatError) {
+          <p class="hint-text" style="color:var(--color-danger, #c0392b);">{{ chatError }}</p>
+        }
+        <button class="btn btn-sm" (click)="sendChat()">Send</button>
       </div>
 
       @if (request()!.status === 'pending') {
@@ -39,10 +43,12 @@ import { UnitApiService } from '../../../core/unit-api.service';
 export class RequestDetailComponent implements OnInit {
   private readonly marketplaceApi = inject(MarketplaceApiService);
   private readonly unitApi = inject(UnitApiService);
+  private readonly messagingApi = inject(MessagingApiService);
   private readonly router = inject(Router);
   private readonly requestId = Number(inject(ActivatedRoute).snapshot.paramMap.get('requestId'));
 
   chatMessage = '';
+  chatError = '';
   readonly request = computed(() => this.marketplaceApi.requests().find((r) => r.id === this.requestId));
 
   async ngOnInit(): Promise<void> {
@@ -56,5 +62,26 @@ export class RequestDetailComponent implements OnInit {
   async decide(status: 'approved' | 'rejected'): Promise<void> {
     await this.marketplaceApi.decide(this.requestId, status);
     this.router.navigateByUrl('/landlord/marketplace/requests');
+  }
+
+  async sendChat(): Promise<void> {
+    const text = this.chatMessage.trim();
+    if (!text) {
+      this.chatError = 'Write a message first.';
+      return;
+    }
+    const req = this.request()!;
+
+    let conversation;
+    if (req.tenantId) {
+      await this.messagingApi.loadConversationsForTenant(req.tenantId);
+      conversation = this.messagingApi.conversations()[0];
+    }
+    if (!conversation) {
+      conversation = await this.messagingApi.createConversation(req.tenantId, req.applicantName);
+    }
+
+    await this.messagingApi.sendMessage(conversation.id, 'landlord', text);
+    this.router.navigate(['/landlord/messages', conversation.id]);
   }
 }

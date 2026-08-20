@@ -170,6 +170,17 @@ export class MockDataService {
     { id: 'note-1', title: 'Booking request submitted', body: 'Your request for Lakeview Residence — B-201 was sent to the owner.', read: false },
   ]);
 
+  /** Finds the conversation already started from this context (e.g. a booking
+   *  request), or starts a new one addressed to `withName`. */
+  findOrCreateConversation(contextId: string, withName: string): Conversation {
+    const existing = this.conversations().find((c) => c.contextId === contextId);
+    if (existing) return existing;
+
+    const created: Conversation = { id: nextId('conv'), contextId, withName, messages: [] };
+    this.conversations.update((list) => [...list, created]);
+    return created;
+  }
+
   listingById(id: string): Listing | undefined {
     return this.listings().find((l) => l.id === id);
   }

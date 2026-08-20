@@ -48,7 +48,7 @@ export class MessagingApiService {
     this.conversations.set(result);
   }
 
-  async createConversation(tenantId: number, withName: string): Promise<ApiConversation> {
+  async createConversation(tenantId: number | null, withName: string): Promise<ApiConversation> {
     const created = await firstValueFrom(this.http.post<ApiConversation>(`${BASE}/conversations`, { tenantId, withName }));
     this.conversations.update((list) => [...list, created]);
     return created;
