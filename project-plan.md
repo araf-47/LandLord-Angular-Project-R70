@@ -1,9 +1,10 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-21 (Phase 14 done — BariVara.com has its own real
-backend now, separate Spring Boot project from LandLord's, public
-listing search/favorites/booking + owner property/unit/listing management
-all real end to end)
+Last updated: 2026-08-21 (Phase 10.3 done — monthly bills now auto-generate
+on the 1st via a real cron job, no manual click needed; Phase 14 done —
+BariVara.com has its own real backend now, separate Spring Boot project
+from LandLord's, public listing search/favorites/booking + owner
+property/unit/listing management all real end to end)
 
 ## 1. Product summary
 
@@ -691,8 +692,22 @@ now functionally deeper than a route scaffold.)*
 10.2. Backend: bill generation logic — rent + utilities + prior unpaid
       rollover — **Done** (`POST /api/invoices/generate`, manually
       triggered per tenant).
-10.3. Backend: scheduled job (cron) to auto-generate bills on the 1st of each
-      month — not started (10.2 is manual-trigger only so far)
+10.3. ✅ **Backend: scheduled job (cron) to auto-generate bills on the 1st of
+      each month — Done (2026-08-21).** Bill-generation math extracted out of
+      `BillingController` into a shared `BillingService` (`generateInvoice`),
+      used by both the manual "Generate bills" button (unchanged behavior)
+      and the new `MonthlyBillingScheduler` (`@Scheduled(cron = "0 0 0 1 * *")`,
+      `@EnableScheduling` on the main application class). Same eligibility
+      rule as the manual bulk-generate: active tenants with a unit assigned
+      and no invoice yet for the current period. Auto-generated bills carry
+      rent + rollover only (no utilities total — that's a per-bill landlord
+      input, still addable after generation). Verified live: temporarily
+      dropped the cron to every 10s, registered a throwaway test tenant with
+      no invoice, watched the job pick it up on the very next tick and skip
+      it on the one after (already billed), then reverted to the real
+      monthly schedule and cleaned up the test data.
+      **10.8 (payment gateway) explicitly held for now** — user's call, "sounds
+      complicated"; revisit whenever ready.
 10.4. Backend: payment recording — **Done, simplified**: `POST /api/payments`
       records straight to `confirmed` status (no pending → landlord-confirms
       step yet), applies to invoice balance, flips unpaid/partial/paid.

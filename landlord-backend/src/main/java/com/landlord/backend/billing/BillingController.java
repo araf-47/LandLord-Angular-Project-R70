@@ -1,14 +1,6 @@
 package com.landlord.backend.billing;
 
-import com.landlord.backend.tenant.Tenant;
-import com.landlord.backend.tenant.TenantRepository;
-import com.landlord.backend.unit.Unit;
-import com.landlord.backend.unit.UnitRepository;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,18 +17,14 @@ import org.springframework.web.server.ResponseStatusException;
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201"})
 public class BillingController {
 
-    private static final DateTimeFormatter PERIOD_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM");
-
     private final InvoiceRepository invoices;
     private final PaymentRepository payments;
-    private final TenantRepository tenants;
-    private final UnitRepository units;
+    private final BillingService billingService;
 
-    public BillingController(InvoiceRepository invoices, PaymentRepository payments, TenantRepository tenants, UnitRepository units) {
+    public BillingController(InvoiceRepository invoices, PaymentRepository payments, BillingService billingService) {
         this.invoices = invoices;
         this.payments = payments;
-        this.tenants = tenants;
-        this.units = units;
+        this.billingService = billingService;
     }
 
     @GetMapping("/api/invoices")
@@ -56,35 +44,8 @@ public class BillingController {
 
     @PostMapping("/api/invoices/generate")
     public ResponseEntity<Invoice> generate(@RequestBody GenerateInvoiceRequest request) {
-        Tenant tenant = tenants.findById(request.tenantId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tenant not found"));
-        if (tenant.getUnitId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant has no assigned unit");
-        }
-        Unit unit = units.findById(tenant.getUnitId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unit not found"));
-
-        String period = YearMonth.now().format(PERIOD_FORMAT);
-        double prevUnpaidRolled = invoices.findByTenantIdAndStatusNot(tenant.getId(), "paid").stream()
-            .mapToDouble(Invoice::getBalance)
-            .sum();
-        double rent = unit.getRent() == null ? 0 : unit.getRent();
-        double utilitiesTotal = request.utilitiesTotal() == null ? 0 : request.utilitiesTotal();
-        double amount = rent + utilitiesTotal + prevUnpaidRolled;
-
-        Invoice invoice = new Invoice();
-        invoice.setTenantId(tenant.getId());
-        invoice.setUnitId(unit.getId());
-        invoice.setPeriod(period);
-        invoice.setRent(rent);
-        invoice.setUtilitiesTotal(utilitiesTotal);
-        invoice.setPrevUnpaidRolled(prevUnpaidRolled);
-        invoice.setAmount(amount);
-        invoice.setBalance(amount);
-        invoice.setStatus("unpaid");
-        invoice.setDueDate(LocalDate.now().withDayOfMonth(Math.min(5, LocalDate.now().lengthOfMonth())));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(invoices.save(invoice));
+        Invoice invoice = billingService.generateInvoice(request.tenantId(), request.utilitiesTotal());
+        return ResponseEntity.status(HttpStatus.CREATED).body(invoice);
     }
 
     public record RecordPaymentRequest(Long tenantId, Long invoiceId, Double amount, String method) {}
