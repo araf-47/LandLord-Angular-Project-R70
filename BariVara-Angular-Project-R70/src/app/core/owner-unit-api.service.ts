@@ -33,4 +33,21 @@ export class OwnerUnitApiService {
     this.units.update((list) => [...list, created]);
     return created;
   }
+
+  async get(id: number): Promise<ApiOwnerUnit> {
+    return firstValueFrom(this.http.get<ApiOwnerUnit>(`${API_BASE}/${id}`));
+  }
+
+  async update(id: number, propertyId: number, unitNumber: string, rent: number): Promise<ApiOwnerUnit> {
+    const updated = await firstValueFrom(
+      this.http.put<ApiOwnerUnit>(`${API_BASE}/${id}`, { propertyId, unitNumber, rent })
+    );
+    this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
+    return updated;
+  }
+
+  async delete(id: number): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${API_BASE}/${id}`));
+    this.units.update((list) => list.filter((u) => u.id !== id));
+  }
 }
