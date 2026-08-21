@@ -7,9 +7,11 @@ export interface ApiOwnerUnit {
   propertyId: number;
   unitNumber: string;
   rent: number;
+  photoUrl: string | null;
 }
 
-const API_BASE = 'http://localhost:8081/api/owner-units';
+export const API_ORIGIN = 'http://localhost:8081';
+const API_BASE = `${API_ORIGIN}/api/owner-units`;
 
 @Injectable({ providedIn: 'root' })
 export class OwnerUnitApiService {
@@ -28,7 +30,7 @@ export class OwnerUnitApiService {
     return result;
   }
 
-  async create(payload: Omit<ApiOwnerUnit, 'id'>): Promise<ApiOwnerUnit> {
+  async create(payload: Omit<ApiOwnerUnit, 'id' | 'photoUrl'>): Promise<ApiOwnerUnit> {
     const created = await firstValueFrom(this.http.post<ApiOwnerUnit>(API_BASE, payload));
     this.units.update((list) => [...list, created]);
     return created;
@@ -42,6 +44,14 @@ export class OwnerUnitApiService {
     const updated = await firstValueFrom(
       this.http.put<ApiOwnerUnit>(`${API_BASE}/${id}`, { propertyId, unitNumber, rent })
     );
+    this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
+    return updated;
+  }
+
+  async uploadPhoto(id: number, file: File): Promise<ApiOwnerUnit> {
+    const form = new FormData();
+    form.append('file', file);
+    const updated = await firstValueFrom(this.http.post<ApiOwnerUnit>(`${API_BASE}/${id}/photo`, form));
     this.units.update((list) => list.map((u) => (u.id === id ? updated : u)));
     return updated;
   }

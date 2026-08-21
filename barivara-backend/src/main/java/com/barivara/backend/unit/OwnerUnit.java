@@ -23,6 +23,8 @@ public class OwnerUnit {
     @NotNull
     private Double rent;
 
+    private String photoUrl;
+
     public Long getId() {
         return id;
     }
@@ -49,5 +51,13 @@ public class OwnerUnit {
 
     public void setRent(Double rent) {
         this.rent = rent;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

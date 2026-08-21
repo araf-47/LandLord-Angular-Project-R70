@@ -121,6 +121,7 @@ export class OwnerListingFormComponent {
   address = '';
   propertyType: PropertyType = 'apartment';
   rent: number | null = null;
+  photoUrl: string | null = null;
 
   constructor() {
     this.propertyApi.loadForOwner(CURRENT_OWNER_ID_REAL).then((properties) => {
@@ -150,6 +151,7 @@ export class OwnerListingFormComponent {
     this.district.set(property?.district ?? DISTRICTS[0]);
     this.area = property?.area ?? this.areas()[0] ?? '';
     this.rent = unit.rent;
+    this.photoUrl = unit.photoUrl;
     this.step.set(3);
   }
 
@@ -164,6 +166,7 @@ export class OwnerListingFormComponent {
       area: this.area,
       propertyType: this.propertyType,
       rent: this.rent!,
+      photoUrl: this.photoUrl,
     });
     this.router.navigateByUrl('/owner/listings');
   }

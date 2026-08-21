@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { OwnerUnitApiService } from '../../../core/owner-unit-api.service';
+import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.service';
 
 @Component({
   selector: 'app-owner-unit-form',
@@ -17,6 +17,16 @@ import { OwnerUnitApiService } from '../../../core/owner-unit-api.service';
       <div class="field">
         <label for="rent">Rent</label>
         <input id="rent" type="number" name="rent" [(ngModel)]="rent" required />
+      </div>
+      <div class="field">
+        <label for="photo">Photo (optional)</label>
+        @if (existingPhotoUrl) {
+          <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" style="max-width:200px;display:block;margin-bottom:0.5rem;" />
+        }
+        <input id="photo" type="file" name="photo" accept="image/*" (change)="onFileSelected($event)" />
+        @if (fileName) {
+          <span class="hint-text">{{ fileName }}</span>
+        }
       </div>
       @if (error) {
         <p class="hint-text" style="color:var(--color-danger, #c0392b);">{{ error }}</p>
@@ -39,6 +49,10 @@ export class OwnerUnitFormComponent implements OnInit {
 
   unitNumber = '';
   rent: number | null = null;
+  existingPhotoUrl: string | null = null;
+  fileName = '';
+  private selectedFile: File | null = null;
+  readonly photoOrigin = API_ORIGIN;
   error = '';
 
   async ngOnInit(): Promise<void> {
@@ -46,7 +60,14 @@ export class OwnerUnitFormComponent implements OnInit {
       const unit = await this.api.get(+this.unitId);
       this.unitNumber = unit.unitNumber;
       this.rent = unit.rent;
+      this.existingPhotoUrl = unit.photoUrl;
     }
+  }
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.selectedFile = file;
+    this.fileName = file?.name ?? '';
   }
 
   async save(): Promise<void> {
@@ -55,10 +76,17 @@ export class OwnerUnitFormComponent implements OnInit {
       return;
     }
 
+    let unitId: number;
     if (this.editing && this.unitId) {
-      await this.api.update(+this.unitId, +this.propertyId, this.unitNumber, this.rent);
+      unitId = +this.unitId;
+      await this.api.update(unitId, +this.propertyId, this.unitNumber, this.rent);
     } else {
-      await this.api.create({ propertyId: +this.propertyId, unitNumber: this.unitNumber, rent: this.rent });
+      const created = await this.api.create({ propertyId: +this.propertyId, unitNumber: this.unitNumber, rent: this.rent });
+      unitId = created.id;
+    }
+
+    if (this.selectedFile) {
+      await this.api.uploadPhoto(unitId, this.selectedFile);
     }
 
     this.router.navigate(['/owner/properties', this.propertyId, 'units']);

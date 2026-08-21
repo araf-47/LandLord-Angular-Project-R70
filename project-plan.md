@@ -471,13 +471,23 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   these two named entry points (Marketplace & Leads / owner Requests
   request-detail pages) — a broader "start conversation from a listing" isn't
   built, wasn't part of this gap's original scope.
-- **BariVara listing/property cards still show no images** — every listing card
-  shows a gray "No photo" placeholder. LandLord's real `Unit` now has a real
-  `photoUrl` (Phase 8.4, done 2026-08-20), but BariVara has no backend yet
-  (Phase 14) to read it from, so its cards stay on mock data with no photo
-  field at all. Resolved once Phase 14 wires BariVara to the real API (or
-  Phase 15 syncs the photo across via `VacancyAdSync`, which doesn't carry a
-  photo field yet either — add it then).
+- ~~**BariVara listing/property cards still show no images.**~~ **Resolved
+  (2026-08-21)** — real `OwnerUnit` gained `photoUrl` + `POST
+  /api/owner-units/{id}/photo` (same local-disk pattern as LandLord's Unit,
+  Phase 8.4), owner unit-form gained the same file-picker UI, unit-list
+  gained a thumbnail column. `Listing` also gained `photoUrl`, denormalized
+  from the source unit at creation time (same snapshotting style as its
+  other denormalized fields) — populated only via the autofill-from-unit
+  path in `listing-form.component.ts`, stays `null` for manually-entered
+  listings (nothing to denormalize from). All four public card views
+  (homepage, browse, listing-detail, tenant favorites) plus owner's own
+  listing-list now render the real photo when present, falling back to the
+  "No photo" placeholder otherwise. New `WebConfig` added to
+  `barivara-backend` (didn't exist before — no `/uploads/**` static handler
+  was wired up at all until now) to actually serve the files.
+  **Not covered**: `VacancyAdSync` (Phase 15 cross-app sync) still has no
+  photo field, so a LandLord-originated ad synced into BariVara won't carry
+  a photo yet — add it when Phase 15 is built.
 - **Tenant-side real-backend pages now depend on a hardcoded `CURRENT_TENANT_ID_REAL`**
   (`core/current-tenant.ts`, set to tenant id `3`) instead of a real login session —
   same shape as the older mock `CURRENT_TENANT_ID` gap, just now also true for the

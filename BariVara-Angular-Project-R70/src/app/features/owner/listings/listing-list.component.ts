@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ListingApiService } from '../../../core/listing-api.service';
+import { API_ORIGIN, ListingApiService } from '../../../core/listing-api.service';
 import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 
 @Component({
@@ -16,10 +16,17 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
     <div class="card">
       <div class="table-scroll">
       <table>
-        <thead><tr><th>Title</th><th>Rent</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th>Photo</th><th>Title</th><th>Rent</th><th>Status</th><th></th></tr></thead>
         <tbody>
           @for (l of myListings(); track l.id) {
             <tr>
+              <td>
+                @if (l.photoUrl) {
+                  <img [src]="photoOrigin + l.photoUrl" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+                } @else {
+                  <span class="hint-text">No photo</span>
+                }
+              </td>
               <td>{{ l.title }}</td>
               <td>৳{{ l.rent }}</td>
               <td><span class="badge" [class.badge-vacant]="l.status === 'active'" [class.badge-occupied]="l.status === 'taken'" [class.badge-pending]="l.status === 'paused'">{{ l.status }}</span></td>
@@ -30,7 +37,7 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="hint-text">No listings posted yet.</td></tr>
+            <tr><td colspan="5" class="hint-text">No listings posted yet.</td></tr>
           }
         </tbody>
       </table>
@@ -40,6 +47,7 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 })
 export class OwnerListingListComponent {
   protected readonly api = inject(ListingApiService);
+  protected readonly photoOrigin = API_ORIGIN;
 
   constructor() {
     this.api.search({ ownerId: CURRENT_OWNER_ID_REAL });

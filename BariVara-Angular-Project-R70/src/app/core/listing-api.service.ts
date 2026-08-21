@@ -15,6 +15,7 @@ export interface ApiListing {
   propertyType: PropertyType;
   rent: number;
   status: 'active' | 'paused' | 'taken';
+  photoUrl: string | null;
 }
 
 export interface NewListing {
@@ -26,9 +27,11 @@ export interface NewListing {
   area: string;
   propertyType: PropertyType;
   rent: number;
+  photoUrl?: string | null;
 }
 
-const API_BASE = 'http://localhost:8081/api/listings';
+export const API_ORIGIN = 'http://localhost:8081';
+const API_BASE = `${API_ORIGIN}/api/listings`;
 
 @Injectable({ providedIn: 'root' })
 export class ListingApiService {

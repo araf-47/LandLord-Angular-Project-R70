@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
-import { ApiListing, ListingApiService } from '../../core/listing-api.service';
+import { API_ORIGIN, ApiListing, ListingApiService } from '../../core/listing-api.service';
 import { FavoriteApiService } from '../../core/favorite-api.service';
 import { BookingApiService } from '../../core/booking-api.service';
 import { ProfileApiService } from '../../core/profile-api.service';
@@ -14,7 +14,11 @@ import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
     @if (listing()) {
       <div class="public-content">
         <div class="card">
-          <div class="listing-card-image" style="height:220px; border-radius:var(--radius); margin-bottom:1rem;">No photo</div>
+          @if (listing()!.photoUrl) {
+            <img class="listing-card-image" [src]="photoOrigin + listing()!.photoUrl" alt="" style="height:220px; width:100%; border-radius:var(--radius); margin-bottom:1rem; object-fit:cover;" />
+          } @else {
+            <div class="listing-card-image" style="height:220px; border-radius:var(--radius); margin-bottom:1rem;">No photo</div>
+          }
           <h1>{{ listing()!.title }}</h1>
           <p>{{ listing()!.address }}</p>
           <span class="badge" [class.badge-owner]="listing()!.source === 'owner'" [class.badge-landlord-linked]="listing()!.source === 'landlord-linked'">
@@ -51,6 +55,7 @@ import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 })
 export class ListingDetailComponent {
   protected readonly auth = inject(AuthService);
+  protected readonly photoOrigin = API_ORIGIN;
   private readonly listingApi = inject(ListingApiService);
   private readonly favoriteApi = inject(FavoriteApiService);
   private readonly bookingApi = inject(BookingApiService);

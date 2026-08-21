@@ -50,6 +50,8 @@ public class Listing {
     @NotBlank
     private String status = "active";
 
+    private String photoUrl;
+
     public Long getId() {
         return id;
     }
@@ -132,5 +134,13 @@ public class Listing {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 }

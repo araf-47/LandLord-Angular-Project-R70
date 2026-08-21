@@ -68,6 +68,7 @@ public class ListingController {
         existing.setArea(update.getArea());
         existing.setPropertyType(update.getPropertyType());
         existing.setRent(update.getRent());
+        existing.setPhotoUrl(update.getPhotoUrl());
         return repository.save(existing);
     }
 

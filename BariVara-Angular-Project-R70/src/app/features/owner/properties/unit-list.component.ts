@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
-import { OwnerUnitApiService } from '../../../core/owner-unit-api.service';
+import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.service';
 import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 
 @Component({
@@ -18,11 +18,18 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
       <div class="table-scroll">
       <table>
         <thead>
-          <tr><th>Unit</th><th>Rent</th><th></th></tr>
+          <tr><th>Photo</th><th>Unit</th><th>Rent</th><th></th></tr>
         </thead>
         <tbody>
           @for (u of unitsForProperty(); track u.id) {
             <tr>
+              <td>
+                @if (u.photoUrl) {
+                  <img [src]="photoOrigin + u.photoUrl" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+                } @else {
+                  <span class="hint-text">No photo</span>
+                }
+              </td>
               <td>{{ u.unitNumber }}</td>
               <td>{{ u.rent }}</td>
               <td class="actions-row">
@@ -31,7 +38,7 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="3" class="hint-text">No units yet.</td></tr>
+            <tr><td colspan="4" class="hint-text">No units yet.</td></tr>
           }
         </tbody>
       </table>
@@ -43,6 +50,7 @@ export class OwnerUnitListComponent implements OnInit {
   protected readonly propertyApi = inject(OwnerPropertyApiService);
   protected readonly unitApi = inject(OwnerUnitApiService);
   protected readonly propertyId = inject(ActivatedRoute).snapshot.paramMap.get('propertyId')!;
+  protected readonly photoOrigin = API_ORIGIN;
 
   async ngOnInit(): Promise<void> {
     if (this.propertyApi.properties().length === 0) {

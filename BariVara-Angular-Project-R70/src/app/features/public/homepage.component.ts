@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES } from '../../core/mock-data.service';
-import { ListingApiService } from '../../core/listing-api.service';
+import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
 
 @Component({
   selector: 'app-homepage',
@@ -41,7 +41,11 @@ import { ListingApiService } from '../../core/listing-api.service';
       <div class="listing-grid">
         @for (l of recentListings(); track l.id) {
           <a class="listing-card" [routerLink]="['/listings', l.id]">
-            <div class="listing-card-image">No photo</div>
+            @if (l.photoUrl) {
+              <img class="listing-card-image" [src]="photoOrigin + l.photoUrl" alt="" style="width:100%;object-fit:cover;" />
+            } @else {
+              <div class="listing-card-image">No photo</div>
+            }
             <div class="listing-card-body">
               <div class="listing-card-title">{{ l.title }}</div>
               <p>{{ l.area }}, {{ l.district }}</p>
@@ -61,6 +65,7 @@ import { ListingApiService } from '../../core/listing-api.service';
 export class HomepageComponent {
   private readonly router = inject(Router);
   private readonly api = inject(ListingApiService);
+  protected readonly photoOrigin = API_ORIGIN;
 
   readonly districts = DISTRICTS;
   readonly propertyTypes = PROPERTY_TYPES;

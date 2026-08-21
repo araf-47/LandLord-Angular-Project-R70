@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ListingApiService } from '../../core/listing-api.service';
+import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
 import { FavoriteApiService } from '../../core/favorite-api.service';
 import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 
@@ -13,7 +13,11 @@ import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
     <div class="listing-grid">
       @for (l of favoriteListings(); track l.id) {
         <div class="listing-card">
-          <div class="listing-card-image">No photo</div>
+          @if (l.photoUrl) {
+            <img class="listing-card-image" [src]="photoOrigin + l.photoUrl" alt="" style="width:100%;object-fit:cover;" />
+          } @else {
+            <div class="listing-card-image">No photo</div>
+          }
           <div class="listing-card-body">
             <div class="listing-card-title">{{ l.title }}</div>
             <p>{{ l.address }}</p>
@@ -33,6 +37,7 @@ import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 export class TenantFavoritesComponent {
   private readonly listingApi = inject(ListingApiService);
   private readonly favoriteApi = inject(FavoriteApiService);
+  protected readonly photoOrigin = API_ORIGIN;
 
   constructor() {
     this.favoriteApi.loadForTenant(CURRENT_TENANT_ID_REAL).then(() => {
