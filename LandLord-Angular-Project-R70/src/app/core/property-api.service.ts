@@ -6,6 +6,9 @@ export interface ApiProperty {
   id: number;
   name: string;
   address: string;
+  district: string | null;
+  area: string | null;
+  propertyType: 'apartment' | 'room' | 'office' | null;
   landlordId: number | null;
   createdAt: string;
 }
@@ -23,9 +26,15 @@ export class PropertyApiService {
     this.properties.set(result);
   }
 
-  async create(name: string, address: string): Promise<ApiProperty> {
+  async create(
+    name: string,
+    address: string,
+    district: string | null,
+    area: string | null,
+    propertyType: ApiProperty['propertyType']
+  ): Promise<ApiProperty> {
     const created = await firstValueFrom(
-      this.http.post<ApiProperty>(API_BASE, { name, address, landlordId: null })
+      this.http.post<ApiProperty>(API_BASE, { name, address, district, area, propertyType, landlordId: null })
     );
     this.properties.update((list) => [...list, created]);
     return created;
@@ -35,9 +44,16 @@ export class PropertyApiService {
     return firstValueFrom(this.http.get<ApiProperty>(`${API_BASE}/${id}`));
   }
 
-  async update(id: number, name: string, address: string): Promise<ApiProperty> {
+  async update(
+    id: number,
+    name: string,
+    address: string,
+    district: string | null,
+    area: string | null,
+    propertyType: ApiProperty['propertyType']
+  ): Promise<ApiProperty> {
     const updated = await firstValueFrom(
-      this.http.put<ApiProperty>(`${API_BASE}/${id}`, { name, address, landlordId: null })
+      this.http.put<ApiProperty>(`${API_BASE}/${id}`, { name, address, district, area, propertyType, landlordId: null })
     );
     this.properties.update((list) => list.map((p) => (p.id === id ? updated : p)));
     return updated;

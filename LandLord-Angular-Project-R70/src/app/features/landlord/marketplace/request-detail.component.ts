@@ -15,6 +15,12 @@ import { UnitApiService } from '../../../core/unit-api.service';
       <div class="card">
         <p><strong>Unit requested:</strong> {{ unitLabel() }}</p>
         <p><strong>Status:</strong> {{ request()!.status }}</p>
+        @if (request()!.barivaraTenantId) {
+          <p class="hint-text">Synced from a BariVara.com booking request.</p>
+        }
+        @if (request()!.message) {
+          <p><strong>Message:</strong> {{ request()!.message }}</p>
+        }
         @if (request()!.tenantId) {
           <a [routerLink]="['/landlord/tenants', request()!.tenantId]">View tenant profile</a>
         }

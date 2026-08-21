@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES, PropertyType } from '../../../core/mock-data.service';
 import { PropertyApiService } from '../../../core/property-api.service';
 
 @Component({
@@ -18,6 +19,36 @@ import { PropertyApiService } from '../../../core/property-api.service';
         <label for="address">Address</label>
         <input id="address" name="address" [(ngModel)]="address" required />
       </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="district">District</label>
+          <select id="district" name="district" [ngModel]="district()" (ngModelChange)="onDistrictChange($event)">
+            @for (d of districts; track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label for="area">Area</label>
+          <select id="area" name="area" [(ngModel)]="area">
+            @for (a of areas(); track a) {
+              <option [value]="a">{{ a }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="propertyType">Property type</label>
+        <select id="propertyType" name="propertyType" [(ngModel)]="propertyType">
+          @for (t of propertyTypes; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+      <p class="hint-text">
+        District/area/property type are what let this property's vacant units
+        auto-post to BariVara.com — leave them set so that keeps working.
+      </p>
       <div class="actions-row">
         <button class="btn btn-primary" (click)="save()">Validate & save</button>
       </div>
@@ -34,21 +65,35 @@ export class PropertyFormComponent implements OnInit {
 
   name = '';
   address = '';
+  readonly districts = DISTRICTS;
+  readonly propertyTypes = PROPERTY_TYPES;
+  readonly district = signal(DISTRICTS[0]);
+  readonly areas = computed(() => AREAS_BY_DISTRICT[this.district()] ?? []);
+  area = this.areas()[0] ?? '';
+  propertyType: PropertyType = 'apartment';
 
   async ngOnInit(): Promise<void> {
     if (this.propertyId) {
       const property = await this.api.get(+this.propertyId);
       this.name = property.name;
       this.address = property.address;
+      if (property.district) this.district.set(property.district);
+      if (property.area) this.area = property.area;
+      if (property.propertyType) this.propertyType = property.propertyType;
     }
+  }
+
+  onDistrictChange(value: string): void {
+    this.district.set(value);
+    this.area = this.areas()[0] ?? '';
   }
 
   async save(): Promise<void> {
     if (!this.name || !this.address) return;
     if (this.editing && this.propertyId) {
-      await this.api.update(+this.propertyId, this.name, this.address);
+      await this.api.update(+this.propertyId, this.name, this.address, this.district(), this.area, this.propertyType);
     } else {
-      await this.api.create(this.name, this.address);
+      await this.api.create(this.name, this.address, this.district(), this.area, this.propertyType);
     }
     this.router.navigateByUrl('/landlord/properties');
   }

@@ -72,6 +72,48 @@ public class ListingController {
         return repository.save(existing);
     }
 
+    /** Phase 15 inbound: c3040 "Auto-post ad to BariVara.com". LandLord calls this
+     *  when a unit goes vacant. Idempotent — updates the existing landlord-linked
+     *  listing for that unit if one already exists (e.g. a unit that's cycled
+     *  vacant → occupied → vacant again) instead of creating a duplicate. */
+    public record VacancyAdSyncRequest(
+            Long unitId, String propertyName, String address, String district,
+            String area, String propertyType, Double rent, String photoUrl) {}
+
+    @PostMapping("/sync/vacancy-ad")
+    public ResponseEntity<Listing> syncVacancyAd(@RequestBody VacancyAdSyncRequest body) {
+        Listing listing = repository.findByLandlordUnitId(body.unitId()).orElseGet(Listing::new);
+        listing.setLandlordUnitId(body.unitId());
+        listing.setOwnerId(null);
+        listing.setSource("landlord-linked");
+        listing.setTitle(body.propertyName());
+        listing.setAddress(body.address());
+        listing.setDistrict(body.district());
+        listing.setArea(body.area());
+        listing.setPropertyType(body.propertyType());
+        listing.setRent(body.rent());
+        listing.setPhotoUrl(body.photoUrl());
+        listing.setStatus("active");
+        return ResponseEntity.ok(repository.save(listing));
+    }
+
+    /** Phase 15 inbound: e5125 "Approve, mark unit filled, take down ad" (also used
+     *  for manual ad-pause/repost). No-ops (404, swallowed by the caller) if this
+     *  unit was never synced here in the first place. */
+    public record UnitStatusSyncRequest(Long unitId, String status, boolean adPaused) {}
+
+    @PutMapping("/sync/unit-status")
+    public ResponseEntity<Listing> syncUnitStatus(@RequestBody UnitStatusSyncRequest body) {
+        Listing listing = repository.findByLandlordUnitId(body.unitId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if ("occupied".equals(body.status())) {
+            listing.setStatus("taken");
+        } else {
+            listing.setStatus(body.adPaused() ? "paused" : "active");
+        }
+        return ResponseEntity.ok(repository.save(listing));
+    }
+
     public record StatusUpdate(String status) {}
 
     @PutMapping("/{id}/status")

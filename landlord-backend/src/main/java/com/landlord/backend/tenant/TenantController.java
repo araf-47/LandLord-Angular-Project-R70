@@ -2,6 +2,8 @@ package com.landlord.backend.tenant;
 
 import com.landlord.backend.billing.Invoice;
 import com.landlord.backend.billing.InvoiceRepository;
+import com.landlord.backend.property.PropertyRepository;
+import com.landlord.backend.sync.BariVaraSyncService;
 import com.landlord.backend.unit.Unit;
 import com.landlord.backend.unit.UnitRepository;
 import jakarta.validation.Valid;
@@ -30,12 +32,17 @@ public class TenantController {
     private final RentalAgreementRepository agreements;
     private final UnitRepository units;
     private final InvoiceRepository invoices;
+    private final PropertyRepository properties;
+    private final BariVaraSyncService syncService;
 
-    public TenantController(TenantRepository tenants, RentalAgreementRepository agreements, UnitRepository units, InvoiceRepository invoices) {
+    public TenantController(TenantRepository tenants, RentalAgreementRepository agreements, UnitRepository units,
+            InvoiceRepository invoices, PropertyRepository properties, BariVaraSyncService syncService) {
         this.tenants = tenants;
         this.agreements = agreements;
         this.units = units;
         this.invoices = invoices;
+        this.properties = properties;
+        this.syncService = syncService;
     }
 
     @GetMapping
@@ -129,7 +136,8 @@ public class TenantController {
         if (tenant.getUnitId() != null) {
             units.findById(tenant.getUnitId()).ifPresent(unit -> {
                 unit.setStatus("vacant");
-                units.save(unit);
+                Unit saved = units.save(unit);
+                properties.findById(saved.getPropertyId()).ifPresent(property -> syncService.postVacancyAd(saved, property));
             });
         }
 

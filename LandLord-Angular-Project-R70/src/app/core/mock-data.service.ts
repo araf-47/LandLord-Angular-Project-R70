@@ -13,6 +13,25 @@ export interface Property {
  *  payload (shared-contracts.ts) has somewhere to actually get this value from. */
 export type PropertyType = 'apartment' | 'room' | 'office';
 
+/** Mirrors BariVara's own copy exactly (mock-data.service.ts there) — same district/
+ *  area vocabulary on both sides so a Property's district/area picks values that
+ *  BariVara's search/filter can actually match against once synced (Phase 15). */
+export const DISTRICTS = ['Dhaka', 'Chattogram', 'Sylhet', 'Khulna', 'Rajshahi'];
+
+export const AREAS_BY_DISTRICT: Record<string, string[]> = {
+  Dhaka: ['Dhanmondi', 'Banani', 'Gulshan', 'Mirpur', 'Bashundhara R/A', 'Mogbazar', 'Uttara'],
+  Chattogram: ['Agrabad', 'Nasirabad', 'Khulshi'],
+  Sylhet: ['Zindabazar', 'Shahjalal Upashahar'],
+  Khulna: ['Sonadanga', 'Khalishpur'],
+  Rajshahi: ['Shaheb Bazar', 'Uposhohor'],
+};
+
+export const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
+  { value: 'apartment', label: 'Flat / Apartment' },
+  { value: 'room', label: 'Room / Sublet' },
+  { value: 'office', label: 'Office Space' },
+];
+
 /**
  * A utility charge a landlord bills alongside rent for a unit, with a usual
  * monthly amount so it doesn't need retyping every month. Deliberately just a

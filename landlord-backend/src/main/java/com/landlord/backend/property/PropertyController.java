@@ -49,6 +49,9 @@ public class PropertyController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         existing.setName(update.getName());
         existing.setAddress(update.getAddress());
+        existing.setDistrict(update.getDistrict());
+        existing.setArea(update.getArea());
+        existing.setPropertyType(update.getPropertyType());
         existing.setLandlordId(update.getLandlordId());
         return repository.save(existing);
     }

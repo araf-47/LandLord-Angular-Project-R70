@@ -1,5 +1,8 @@
 package com.landlord.backend.unit;
 
+import com.landlord.backend.property.Property;
+import com.landlord.backend.property.PropertyRepository;
+import com.landlord.backend.sync.BariVaraSyncService;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,12 +32,16 @@ import org.springframework.web.server.ResponseStatusException;
 public class UnitController {
 
     private final UnitRepository repository;
+    private final PropertyRepository properties;
+    private final BariVaraSyncService syncService;
 
     @Value("${app.uploads.dir}")
     private String uploadsDir;
 
-    public UnitController(UnitRepository repository) {
+    public UnitController(UnitRepository repository, PropertyRepository properties, BariVaraSyncService syncService) {
         this.repository = repository;
+        this.properties = properties;
+        this.syncService = syncService;
     }
 
     @GetMapping
@@ -64,21 +71,29 @@ public class UnitController {
         if (turningVacant) {
             existing.setAdPaused(false);
         }
-        return repository.save(existing);
+        Unit saved = repository.save(existing);
+        if (turningVacant) {
+            properties.findById(saved.getPropertyId()).ifPresent(property -> syncService.postVacancyAd(saved, property));
+        }
+        return saved;
     }
 
     @PutMapping("/{id}/ad-pause")
     public Unit pauseAd(@PathVariable Long id) {
         Unit unit = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         unit.setAdPaused(true);
-        return repository.save(unit);
+        Unit saved = repository.save(unit);
+        syncService.pushUnitStatus(saved.getId(), saved.getStatus(), true);
+        return saved;
     }
 
     @PutMapping("/{id}/ad-repost")
     public Unit repostAd(@PathVariable Long id) {
         Unit unit = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         unit.setAdPaused(false);
-        return repository.save(unit);
+        Unit saved = repository.save(unit);
+        syncService.pushUnitStatus(saved.getId(), saved.getStatus(), false);
+        return saved;
     }
 
     @PostMapping("/{id}/photo")

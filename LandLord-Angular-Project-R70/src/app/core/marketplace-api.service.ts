@@ -7,6 +7,8 @@ export interface ApiMarketplaceRequest {
   unitId: number;
   applicantName: string;
   tenantId: number | null;
+  barivaraTenantId: number | null;
+  message: string | null;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
 }

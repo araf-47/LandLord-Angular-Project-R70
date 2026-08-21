@@ -410,6 +410,14 @@ slice only, as a proof-of-pipe before committing to the full schema):
   BariVara's side: messaging, notifications, tenant profile, landlord-linked
   dashboard (no backend built for any of these yet — see Phase 14.4 note).
   Full detail in Phase 14 below.
+- **BariVara photo gap closed (2026-08-21)** — `OwnerUnit`/`Listing` gained real
+  `photoUrl`, same local-disk upload pattern as LandLord's Unit (Phase 8.4). All
+  BariVara card views (homepage/browse/listing-detail/favorites/owner's own
+  listing-list) render it, falling back to the placeholder otherwise.
+- **The two backends now actually talk to each other (Phase 15, 2026-08-21)** —
+  vacate a unit and a real BariVara ad appears; book it and the request lands in
+  LandLord's Marketplace & Leads inbox; approve it and the ad disappears. Full
+  detail in Phase 15 below.
 - **Everything else still on `MockDataService`** (LandLord app) — Property,
   Units, Tenant, Billing/Move-out, tenant-detail/billing-views,
   Maintenance/Expenses, Ledger, landlord dashboard KPI tiles, Messaging/
@@ -419,8 +427,8 @@ slice only, as a proof-of-pipe before committing to the full schema):
   (localhost only).
 
 **Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
-(auth, real cross-system sync, BariVara's own messaging/notifications, etc. —
-Phase 7, 15-20), testing, deployment. See
+(auth, BariVara's own messaging/notifications, etc. — Phase 7, 16-20), testing,
+deployment. See
 §3a for a tracked backlog of smaller gaps found during review but deliberately
 not fixed (property/unit edit-delete entry below is now resolved).
 
@@ -866,12 +874,58 @@ now functionally deeper than a route scaffold.)*
       profile page, and the landlord-linked dashboard's synced-ads view
       (stays mock until Phase 15's real cross-app sync exists to feed it).
 
-### Phase 15 — Real cross-system integration (this is where "connected" becomes real)
-15.1. Backend: unit vacant → auto-create BariVara ad (event or shared DB read)
-15.2. Backend: BariVara booking request → sync into LandLord Marketplace & Leads inbox
-15.3. Backend: unit filled/ad taken down → propagate back to BariVara listing state
-15.4. End-to-end test of the full loop, now for real: vacate unit → ad appears →
-      booking request → landlord approves → tenant registered → ad removed
+### Phase 15 — Real cross-system integration ✅ DONE (2026-08-21) — this is where "connected" became real
+Two backends now genuinely talk over HTTP (`RestClient`, one small sync service on
+each side) using the `VacancyAdSync`/`BookingRequestSync`/`UnitStatusSync` DTOs that
+had sat unused in `shared-contracts.ts` since Phase 3. Both directions are
+best-effort — if the other backend is down, the local request still succeeds and a
+warning gets logged, never a hard failure.
+
+- **Prerequisite found and fixed first**: LandLord's real `Property` never had
+  `district`/`area`/`propertyType` (not even the old mock did) — no way to build a
+  meaningful BariVara ad without them. Added all three to `Property` (nullable,
+  existing rows stay null until edited) plus a property-form UI for them, reusing
+  BariVara's own `DISTRICTS`/`AREAS_BY_DISTRICT`/`PROPERTY_TYPES` constants
+  (mirrored into LandLord's `mock-data.service.ts` for the first time). Auto-post
+  skips (logs why, doesn't error) for any property still missing these.
+- 15.1. ✅ **Unit vacant → auto-create BariVara ad.** New `BariVaraSyncService`
+  (landlord-backend) posts to a new `POST /api/listings/sync/vacancy-ad`
+  (barivara-backend) whenever a unit turns vacant — wired into both places that can
+  do that: `UnitController.update()` and `TenantController`'s move-out flow.
+  Idempotent (updates the existing landlord-linked listing for that unit instead of
+  duplicating if it cycles vacant→occupied→vacant again). Creates `Listing` with
+  `source: "landlord-linked"`, new `landlordUnitId` field (BariVara's correlation
+  key back to LandLord's real `Unit.id`), `ownerId` left null (no BariVara owner
+  account involved) — required dropping `Listing.ownerId`'s `@NotNull`, including a
+  manual `ALTER TABLE ... DROP NOT NULL` since Hibernate's `ddl-auto=update` adds
+  columns but never relaxes an existing constraint.
+- 15.2. ✅ **BariVara booking request → LandLord's Marketplace & Leads inbox.** New
+  `LandlordSyncService` (barivara-backend) posts to a new
+  `POST /api/marketplace-requests/from-barivara` (landlord-backend) whenever
+  `BookingController.create()` runs against a `source: "landlord-linked"` listing.
+  `MarketplaceRequest` gained `barivaraTenantId` (BariVara's own tenant id, kept
+  separate from this app's `tenantId` which stays null until/unless approved) and
+  `message`, both surfaced on `request-detail.component.ts`.
+- 15.3. ✅ **Unit filled / ad taken down → propagates back to BariVara.** Same
+  `pushUnitStatus` call wired into three places: `MarketplaceController.decide()`
+  on approval (marks the BariVara listing `taken`), and `UnitController`'s
+  `ad-pause`/`ad-repost` endpoints (marks it `paused`/`active`). All three call a
+  new `PUT /api/listings/sync/unit-status`, which no-ops harmlessly (404, swallowed
+  by the caller) if that unit was never synced to BariVara in the first place.
+- 15.4. ✅ **Full loop verified live**, both backends actually running against real
+  Postgres: created a property with district/area/type → created a unit → marked it
+  vacant → confirmed the BariVara listing appeared (`source: landlord-linked`,
+  correct `landlordUnitId`) → submitted a real booking request against it →
+  confirmed it landed in LandLord's `/api/marketplace-requests` with the message and
+  `barivaraTenantId` intact → approved it → confirmed the unit flipped `occupied`
+  *and* the BariVara listing flipped `taken`. Test rows deleted afterward, demo seed
+  data untouched.
+- **Not covered, deliberately out of scope**: `VacancyAdSync` still carries no photo
+  field — a landlord-linked listing has no image even if the source `Unit` has one
+  (`Unit.photoUrl`, Phase 8.4). Auto-registering a real LandLord tenant when a
+  BariVara booking gets approved isn't wired either — approval today only flips the
+  unit `occupied`; turning the applicant into a real `Tenant` record still needs a
+  landlord to walk through `tenant-register.component.ts` by hand.
 
 ### Phase 16 — Background jobs & notifications
 16.1. Monthly bill generation job — verify reliability, retries, logging

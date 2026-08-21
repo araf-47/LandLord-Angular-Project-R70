@@ -1,5 +1,6 @@
 package com.landlord.backend.marketplace;
 
+import com.landlord.backend.sync.BariVaraSyncService;
 import com.landlord.backend.unit.Unit;
 import com.landlord.backend.unit.UnitRepository;
 import java.util.List;
@@ -23,10 +24,12 @@ public class MarketplaceController {
 
     private final MarketplaceRequestRepository requests;
     private final UnitRepository units;
+    private final BariVaraSyncService syncService;
 
-    public MarketplaceController(MarketplaceRequestRepository requests, UnitRepository units) {
+    public MarketplaceController(MarketplaceRequestRepository requests, UnitRepository units, BariVaraSyncService syncService) {
         this.requests = requests;
         this.units = units;
+        this.syncService = syncService;
     }
 
     @GetMapping
@@ -54,6 +57,25 @@ public class MarketplaceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(requests.save(marketplaceRequest));
     }
 
+    /**
+     * e5045 "Sync to LandLord core Marketplace & Leads" — BariVara calls this when
+     * someone requests a landlord-linked listing. `barivaraTenantId` is BariVara's
+     * own tenant id, not a real LandLord tenant (this app has no record of them
+     * unless/until approved), so `tenantId` stays null on the created request.
+     */
+    public record FromBariVaraRequest(Long unitId, String applicantName, Long barivaraTenantId, String message) {}
+
+    @PostMapping("/from-barivara")
+    public ResponseEntity<MarketplaceRequest> createFromBariVara(@RequestBody FromBariVaraRequest request) {
+        MarketplaceRequest marketplaceRequest = new MarketplaceRequest();
+        marketplaceRequest.setUnitId(request.unitId());
+        marketplaceRequest.setApplicantName(request.applicantName());
+        marketplaceRequest.setBarivaraTenantId(request.barivaraTenantId());
+        marketplaceRequest.setMessage(request.message());
+        marketplaceRequest.setStatus("pending");
+        return ResponseEntity.status(HttpStatus.CREATED).body(requests.save(marketplaceRequest));
+    }
+
     public record DecisionRequest(String status) {}
 
     @PutMapping("/{id}/status")
@@ -69,6 +91,9 @@ public class MarketplaceController {
             if (unit != null) {
                 unit.setStatus("occupied");
                 units.save(unit);
+                // e5125 "Approve, mark unit filled, take down ad" — no-ops on BariVara's
+                // side if this unit was never synced there (owner-posted / not vacant-synced).
+                syncService.pushUnitStatus(unit.getId(), unit.getStatus(), unit.isAdPaused());
             }
         }
 

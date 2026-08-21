@@ -10,9 +10,11 @@ import jakarta.validation.constraints.NotNull;
 /**
  * The public-facing ad. Denormalizes address/district/area/rent off the owner's
  * property/unit at creation time (same simplification style as LandLord's invoice
- * snapshotting) so search/filter never needs a join. `source` is always "owner" for
- * real data today — "landlord-linked" listings only start existing once Phase 15
- * wires real VacancyAdSync from the LandLord backend.
+ * snapshotting) so search/filter never needs a join. `source` is "owner" for
+ * BariVara-native listings (real `ownerId`, no `landlordUnitId`) or
+ * "landlord-linked" for ones synced in from the LandLord backend (Phase 15's
+ * VacancyAdSync — real `landlordUnitId`, `ownerId` stays null since no BariVara
+ * owner account created it).
  */
 @Entity
 public class Listing {
@@ -21,10 +23,15 @@ public class Listing {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     private Long ownerId;
 
     private Long unitId;
+
+    /** LandLord's own `Unit.id` — set only for source="landlord-linked" listings,
+     *  the correlation key Phase 15's sync endpoints look up by. */
+    private Long landlordUnitId;
+
+    private String photoUrl;
 
     @NotBlank
     private String source = "owner";
@@ -50,8 +57,6 @@ public class Listing {
     @NotBlank
     private String status = "active";
 
-    private String photoUrl;
-
     public Long getId() {
         return id;
     }
@@ -70,6 +75,14 @@ public class Listing {
 
     public void setUnitId(Long unitId) {
         this.unitId = unitId;
+    }
+
+    public Long getLandlordUnitId() {
+        return landlordUnitId;
+    }
+
+    public void setLandlordUnitId(Long landlordUnitId) {
+        this.landlordUnitId = landlordUnitId;
     }
 
     public String getSource() {

@@ -21,6 +21,13 @@ public class MarketplaceRequest {
      *  request). Left unset for external BariVara marketplace applicants. */
     private Long tenantId;
 
+    /** Set for requests synced in from BariVara (Phase 15's BookingRequestSync) —
+     *  BariVara's own tenant id, unrelated to this app's `tenantId`. Null for
+     *  requests created locally (internal transfer, walk-in via marketplace UI). */
+    private Long barivaraTenantId;
+
+    private String message;
+
     private String status = "pending";
 
     private Instant createdAt = Instant.now();
@@ -51,6 +58,22 @@ public class MarketplaceRequest {
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public Long getBarivaraTenantId() {
+        return barivaraTenantId;
+    }
+
+    public void setBarivaraTenantId(Long barivaraTenantId) {
+        this.barivaraTenantId = barivaraTenantId;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getStatus() {

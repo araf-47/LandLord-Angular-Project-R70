@@ -20,6 +20,15 @@ public class Property {
     @NotBlank
     private String address;
 
+    /** District/area/propertyType (BariVara's vocabulary) — added for Phase 15's
+     *  VacancyAdSync; null on properties created before that. Auto-post skips a
+     *  unit's ad until these are filled in. */
+    private String district;
+
+    private String area;
+
+    private String propertyType;
+
     private Long landlordId;
 
     private Instant createdAt = Instant.now();
@@ -42,6 +51,30 @@ public class Property {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    public String getPropertyType() {
+        return propertyType;
+    }
+
+    public void setPropertyType(String propertyType) {
+        this.propertyType = propertyType;
     }
 
     public Long getLandlordId() {

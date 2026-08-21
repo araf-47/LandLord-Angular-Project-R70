@@ -2,6 +2,7 @@ package com.barivara.backend.booking;
 
 import com.barivara.backend.listing.Listing;
 import com.barivara.backend.listing.ListingRepository;
+import com.barivara.backend.sync.LandlordSyncService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,12 @@ public class BookingController {
 
     private final BookingRequestRepository requests;
     private final ListingRepository listings;
+    private final LandlordSyncService syncService;
 
-    public BookingController(BookingRequestRepository requests, ListingRepository listings) {
+    public BookingController(BookingRequestRepository requests, ListingRepository listings, LandlordSyncService syncService) {
         this.requests = requests;
         this.listings = listings;
+        this.syncService = syncService;
     }
 
     /** tenantId → that tenant's own requests. ownerId → every request against that owner's listings. */
@@ -54,7 +57,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingRequest> create(@RequestBody NewBookingRequest body) {
-        listings.findById(body.listingId())
+        Listing listing = listings.findById(body.listingId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found"));
         BookingRequest request = new BookingRequest();
         request.setListingId(body.listingId());
@@ -62,7 +65,13 @@ public class BookingController {
         request.setApplicantName(body.applicantName());
         request.setMessage(body.message());
         request.setStatus("pending");
-        return ResponseEntity.status(HttpStatus.CREATED).body(requests.save(request));
+        BookingRequest saved = requests.save(request);
+
+        if ("landlord-linked".equals(listing.getSource()) && listing.getLandlordUnitId() != null) {
+            syncService.pushBookingRequest(listing.getLandlordUnitId(), body.applicantName(), body.tenantId(), body.message());
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     public record DecisionRequest(String status) {}
