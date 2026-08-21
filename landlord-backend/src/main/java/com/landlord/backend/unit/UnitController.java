@@ -58,6 +58,12 @@ public class UnitController {
     @PostMapping
     public ResponseEntity<Unit> create(@Valid @RequestBody Unit unit) {
         Unit saved = repository.save(unit);
+        if ("vacant".equals(saved.getStatus())) {
+            saved.setVacantSince(Instant.now());
+            saved = repository.save(saved);
+            Unit toSync = saved;
+            properties.findById(saved.getPropertyId()).ifPresent(property -> syncService.postVacancyAd(toSync, property));
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
