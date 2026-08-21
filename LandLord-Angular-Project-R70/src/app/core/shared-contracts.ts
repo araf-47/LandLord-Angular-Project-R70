@@ -41,7 +41,7 @@ export interface AppNotification {
  * BariVara.com"). BariVara turns this into a Listing with source: 'landlord-linked'.
  */
 export interface VacancyAdSync {
-  unitId: string;
+  unitId: number;
   propertyName: string;
   address: string;
   district: string;
@@ -57,9 +57,9 @@ export interface VacancyAdSync {
  * LandLord has no record of this person unless/until it approves them.
  */
 export interface BookingRequestSync {
-  unitId: string;
+  unitId: number;
   applicantName: string;
-  barivaraTenantId: string;
+  barivaraTenantId: number;
   message?: string;
 }
 
@@ -69,7 +69,7 @@ export interface BookingRequestSync {
  * corresponding listing.
  */
 export interface UnitStatusSync {
-  unitId: string;
+  unitId: number;
   status: 'vacant' | 'occupied';
   adPaused: boolean;
 }
