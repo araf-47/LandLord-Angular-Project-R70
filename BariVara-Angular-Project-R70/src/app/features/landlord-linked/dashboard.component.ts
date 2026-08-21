@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { LANDLORD_CORE_DEV_URL } from '../../core/cross-app.config';
-import { MockDataService } from '../../core/mock-data.service';
+import { ListingApiService } from '../../core/listing-api.service';
 
 @Component({
   selector: 'app-landlord-linked-dashboard',
@@ -33,16 +33,21 @@ import { MockDataService } from '../../core/mock-data.service';
         Redirect to LandLord core → Marketplace &amp; Leads
       </a>
       <p class="hint-text" style="margin-top:0.5rem;">
-        Opens the LandLord dev site in a new tab — separate mock data until Phase 15's real sync (Part 1 Phase 3 caveat: no live link between two frontend-only mock apps yet).
+        Opens the LandLord dev site in a new tab — a separate app, so this just jumps
+        over there rather than embedding it here.
       </p>
     </div>
   `,
 })
 export class LandlordLinkedDashboardComponent {
-  private readonly data = inject(MockDataService);
+  private readonly api = inject(ListingApiService);
   protected readonly landlordCoreUrl = LANDLORD_CORE_DEV_URL;
 
+  constructor() {
+    this.api.search();
+  }
+
   syncedListings() {
-    return this.data.listings().filter((l) => l.source === 'landlord-linked');
+    return this.api.listings().filter((l) => l.source === 'landlord-linked');
   }
 }

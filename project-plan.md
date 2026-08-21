@@ -933,11 +933,15 @@ warning gets logged, never a hard failure.
   (`Unit.photoUrl`, Phase 8.4). Auto-registering a real LandLord tenant when a
   BariVara booking gets approved isn't wired either — approval today only flips the
   unit `occupied`; turning the applicant into a real `Tenant` record still needs a
-  landlord to walk through `tenant-register.component.ts` by hand. BariVara's own
-  landlord-linked dashboard (`features/landlord-linked/dashboard.component.ts`) is
-  still on `MockDataService` too — the backends now sync real data end to end, but
-  nothing reads it into that specific page yet; it'd need wiring to the real
-  `ListingApiService` filtered on `source: 'landlord-linked'`.
+  landlord to walk through `tenant-register.component.ts` by hand.
+- ~~**BariVara's landlord-linked dashboard still on `MockDataService`.**~~
+  **Resolved (2026-08-21)** — `dashboard.component.ts` swapped to the real
+  `ListingApiService`, filtered client-side on `source: 'landlord-linked'`, same
+  `title`/`rent`/`status` fields the template already read. Stale "Phase 15's real
+  sync" caveat in the redirect-to-LandLord-core hint text also removed, since that's
+  no longer true. Not re-verified in a live browser click-through — the underlying
+  `GET /api/listings` → `source: landlord-linked` shape was already proven correct
+  during 15.4's end-to-end test, so this was a same-shape mock→API swap, low risk.
 
 ### Phase 16 — Background jobs & notifications
 16.1. Monthly bill generation job — verify reliability, retries, logging
