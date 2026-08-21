@@ -493,9 +493,10 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   "No photo" placeholder otherwise. New `WebConfig` added to
   `barivara-backend` (didn't exist before — no `/uploads/**` static handler
   was wired up at all until now) to actually serve the files.
-  **Not covered**: `VacancyAdSync` (Phase 15 cross-app sync) still has no
-  photo field, so a LandLord-originated ad synced into BariVara won't carry
-  a photo yet — add it when Phase 15 is built.
+  **Still not covered**: Phase 15 (cross-app sync) is now built, but
+  `VacancyAdSync` still has no photo field, so a LandLord-originated ad
+  synced into BariVara doesn't carry a photo — same gap, deliberately not
+  closed yet, see Phase 15's "Not covered" note below.
 - **Tenant-side real-backend pages now depend on a hardcoded `CURRENT_TENANT_ID_REAL`**
   (`core/current-tenant.ts`, set to tenant id `3`) instead of a real login session —
   same shape as the older mock `CURRENT_TENANT_ID` gap, just now also true for the
@@ -881,7 +882,14 @@ had sat unused in `shared-contracts.ts` since Phase 3. Both directions are
 best-effort — if the other backend is down, the local request still succeeds and a
 warning gets logged, never a hard failure.
 
-- **Prerequisite found and fixed first**: LandLord's real `Property` never had
+- **Prerequisite found and fixed first**: `VacancyAdSync`/`BookingRequestSync`/
+  `UnitStatusSync` (`shared-contracts.ts`, both hand-synced copies) still typed
+  `unitId`/`barivaraTenantId` as `string` — a leftover from the mock era, written
+  before either backend existed. Real `Unit`/`TenantProfile` ids are numeric `Long`
+  now, so this would have been a silent type mismatch the moment real sync traffic
+  flowed. Fixed to `number` in both copies before writing any sync code against
+  them; nothing else referenced these DTOs yet, so the fix was zero-blast-radius.
+- **Prerequisite found and fixed second**: LandLord's real `Property` never had
   `district`/`area`/`propertyType` (not even the old mock did) — no way to build a
   meaningful BariVara ad without them. Added all three to `Property` (nullable,
   existing rows stay null until edited) plus a property-form UI for them, reusing
@@ -925,7 +933,11 @@ warning gets logged, never a hard failure.
   (`Unit.photoUrl`, Phase 8.4). Auto-registering a real LandLord tenant when a
   BariVara booking gets approved isn't wired either — approval today only flips the
   unit `occupied`; turning the applicant into a real `Tenant` record still needs a
-  landlord to walk through `tenant-register.component.ts` by hand.
+  landlord to walk through `tenant-register.component.ts` by hand. BariVara's own
+  landlord-linked dashboard (`features/landlord-linked/dashboard.component.ts`) is
+  still on `MockDataService` too — the backends now sync real data end to end, but
+  nothing reads it into that specific page yet; it'd need wiring to the real
+  `ListingApiService` filtered on `source: 'landlord-linked'`.
 
 ### Phase 16 — Background jobs & notifications
 16.1. Monthly bill generation job — verify reliability, retries, logging
@@ -963,13 +975,17 @@ warning gets logged, never a hard failure.
 
 ## 6. Open decisions (need your input before the relevant phase starts)
 
+Decided along the way (kept here for the record, not open anymore):
+- **Backend language/framework** → Spring Boot 4.1 / Java 21, both backends (Phase 6).
+- **Messaging transport** → Polling, 10s interval (Phase 12) — revisit at Phase 16 if traffic ever justifies WebSocket infra.
+
+Still open:
+
 | Decision | Needed before | Options |
 |---|---|---|
-| Backend language/framework | Phase 6 | Node.js/NestJS, Node/Express, Django, Laravel, etc. |
-| Hosting/infra | Phase 6, 19 | Self-managed VPS, AWS, GCP, Vercel+Supabase, Firebase |
-| Payment gateway | Phase 10 | bKash/Nagad (BD market), Stripe, SSLCommerz |
-| Messaging transport | Phase 12 | Polling (simpler) vs. WebSocket (real-time) |
-| Email/OTP provider | Phase 6–7 | e.g. SendGrid, SES, Twilio (for SMS OTP if needed) |
+| Hosting/infra | Phase 19 | Self-managed VPS, AWS, GCP, Vercel+Supabase, Firebase |
+| Payment gateway | Phase 10.8 — **on hold**, your call ("sounds complicated") | bKash/Nagad (BD market), Stripe, SSLCommerz |
+| Email/OTP provider | Phase 6–7 — **on hold** alongside real auth | e.g. SendGrid, SES, Twilio (for SMS OTP if needed) |
 
 ## 7. Assumptions
 
