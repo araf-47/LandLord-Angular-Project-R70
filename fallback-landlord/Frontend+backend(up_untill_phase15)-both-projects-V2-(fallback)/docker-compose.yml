@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: landlord_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: landlord_db
+      POSTGRES_USER: Araf
+      POSTGRES_PASSWORD: 47araf47
+    ports:
+      - "5432:5432"
+    volumes:
+      - landlord_pg_data:/var/lib/postgresql/data
+      - ./docker-compose-init:/docker-entrypoint-initdb.d
+
+volumes:
+  landlord_pg_data:

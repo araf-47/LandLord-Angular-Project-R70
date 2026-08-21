@@ -1,0 +1,67 @@
+import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { API_ORIGIN, ListingApiService } from '../../../core/listing-api.service';
+import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
+
+@Component({
+  selector: 'app-owner-listing-list',
+  standalone: true,
+  imports: [RouterLink],
+  template: `
+    <div class="topbar" style="background:transparent;border:none;padding:0;margin-bottom:1rem;">
+      <h1>My Listings</h1>
+      <a class="btn btn-primary" routerLink="/owner/listings/new">Add Post Ad</a>
+    </div>
+
+    <div class="card">
+      <div class="table-scroll">
+      <table>
+        <thead><tr><th>Photo</th><th>Title</th><th>Rent</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          @for (l of myListings(); track l.id) {
+            <tr>
+              <td>
+                @if (l.photoUrl) {
+                  <img [src]="photoOrigin + l.photoUrl" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+                } @else {
+                  <span class="hint-text">No photo</span>
+                }
+              </td>
+              <td>{{ l.title }}</td>
+              <td>৳{{ l.rent }}</td>
+              <td><span class="badge" [class.badge-vacant]="l.status === 'active'" [class.badge-occupied]="l.status === 'taken'" [class.badge-pending]="l.status === 'paused'">{{ l.status }}</span></td>
+              <td class="actions-row" style="margin:0;">
+                <a class="btn btn-sm" [routerLink]="['/owner/listings', l.id, 'edit']">Edit</a>
+                <button class="btn btn-sm" (click)="repost(l.id)">Repost</button>
+                <button class="btn btn-sm btn-danger" (click)="remove(l.id)">Delete</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="hint-text">No listings posted yet.</td></tr>
+          }
+        </tbody>
+      </table>
+      </div>
+    </div>
+  `,
+})
+export class OwnerListingListComponent {
+  protected readonly api = inject(ListingApiService);
+  protected readonly photoOrigin = API_ORIGIN;
+
+  constructor() {
+    this.api.search({ ownerId: CURRENT_OWNER_ID_REAL });
+  }
+
+  myListings() {
+    return this.api.listings();
+  }
+
+  repost(id: number): void {
+    this.api.setStatus(id, 'active');
+  }
+
+  remove(id: number): void {
+    this.api.delete(id);
+  }
+}
