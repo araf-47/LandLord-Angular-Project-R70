@@ -1,8 +1,9 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-21 (Phase 10.3 done — monthly bills now auto-generate
-on the 1st via a real cron job, no manual click needed; Phase 14 done —
-BariVara.com has its own real backend now, separate Spring Boot project
+Last updated: 2026-08-21 (Phase 16.1–16.3 done — monthly-bill startup catch-up,
+real rent-due tenant reminders, and ad-expiry landlord reminders all live and
+verified against the real DB; 16.4 deferred until Phase 7 auth exists. Phase 14
+done — BariVara.com has its own real backend now, separate Spring Boot project
 from LandLord's, public listing search/favorites/booking + owner
 property/unit/listing management all real end to end)
 
@@ -943,11 +944,55 @@ warning gets logged, never a hard failure.
   `GET /api/listings` → `source: landlord-linked` shape was already proven correct
   during 15.4's end-to-end test, so this was a same-shape mock→API swap, low risk.
 
-### Phase 16 — Background jobs & notifications
-16.1. Monthly bill generation job — verify reliability, retries, logging
-16.2. Rent due reminder notifications
-16.3. Ad expiry / repost reminders
-16.4. Failed OTP / lockout cleanup jobs
+### Phase 16 — Background jobs & notifications ✅ DONE (16.1–16.3) — 16.4 deferred
+16.1. ✅ **Monthly bill generation job — reliability pass.** Core logic extracted
+      into a shared `run(trigger)` so the `@Scheduled` cron path and a new
+      `@EventListener(ApplicationReadyEvent.class)` startup catch-up path share
+      identical, idempotent logic — closes the gap where a server down at
+      midnight on the 1st would silently skip a month until someone noticed and
+      clicked "Generate bills" by hand. Per-tenant failures were already
+      isolated (try/catch inside the loop, one bad tenant doesn't block the
+      rest); logging now also reports a fail count, not just a success count,
+      and tags every log line with which trigger fired it. Verified live: real
+      startup run against the seed DB, `INFO ... Monthly bill generation
+      (startup-catchup) for 2026-08: 0 invoice(s) created, 0 failed` (correctly
+      a no-op — all seed tenants already billed for the current period).
+16.2. ✅ **Rent due reminder notifications.** New `RentDueReminderScheduler`
+      (daily, 8am), one-shot per invoice via a new `Invoice.reminderSentAt`
+      guard — fires once an unpaid/partial invoice's `dueDate` arrives or has
+      passed, writes a real tenant `Notification` (`type: "rent-due"`), same
+      channel the tenant Notifications page already renders. Verified live
+      against the real seed data: startup run correctly reminded all 4
+      already-overdue seed invoices (tenants 2/3/5/6, `dueDate: 2026-08-05`)
+      exactly once, confirmed no duplicate on a second sweep; test
+      notifications and `reminderSentAt` stamps cleared afterward, demo data
+      untouched.
+16.3. ✅ **Ad expiry / repost reminders.** No `Listing`/ad-expiry concept
+      existed anywhere, and — bigger gap found along the way — there was no
+      landlord-facing notification channel at all (`Notification.tenantId`
+      was tenant-only; landlord had no notifications page in either app).
+      Scoped to LandLord-linked ads only (BariVara-native owner listings have
+      no notification backend yet, would be new scope, not a background job).
+      Built: `Unit` gained `vacantSince`/`adReminderSentAt`, set/cleared at
+      every vacant↔occupied transition (`UnitController.update`,
+      `TenantController.moveOut`/`register`, `MarketplaceController.decide`
+      on approval). New `AdReminderScheduler` (daily, 9am) flags any vacant,
+      non-paused unit vacant 14+ days with a one-shot landlord `Notification`
+      (`tenantId: null` — this app has no landlord-user table, so a null
+      tenantId doubles as "for the landlord", reusing the same trick
+      `Notification` already had). `NotificationController`/`Repository`
+      gained `audience=landlord` filtering (`findByTenantIdIsNull`).
+      `ad-management.component.ts` gained a small reminders panel (title/body/
+      Dismiss, reusing `MessagingApiService`) — the "minimal landlord
+      notifications" UI this needed to land somewhere real, per your call over
+      the log-only alternative. Verified live: backdated a real unit's
+      `vacantSince` 20 days via psql, confirmed the sweep created the
+      notification with the correct property/unit name, confirmed it's
+      idempotent (no duplicate on a second sweep), confirmed dismiss (`DELETE
+      /api/notifications/{id}`) clears it. All test data and reminder-sent
+      timestamps cleaned up afterward.
+16.4. **Deferred — no OTP/lockout mechanism exists to clean up** (Phase 7 auth
+      still on hold). Revisit once Phase 7 lands.
 
 ### Phase 17 — Testing & QA
 17.1. Unit tests for backend business logic (billing calc, move-out calc, lockout)

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { BARIVARA_DEV_URL } from '../../../core/cross-app.config';
+import { MessagingApiService } from '../../../core/messaging-api.service';
 import { ApiUnit, UnitApiService } from '../../../core/unit-api.service';
 
 @Component({
@@ -11,6 +12,18 @@ import { ApiUnit, UnitApiService } from '../../../core/unit-api.service';
       Repost/Pause only affects this app's own data — two separate mock worlds until Phase 15's real
       sync, so BariVara's copy of a listing won't change when you click these here.
     </p>
+    @if (messaging.notifications().length > 0) {
+      <div class="card stack">
+        <strong>Reminders</strong>
+        @for (n of messaging.notifications(); track n.id) {
+          <div class="card">
+            <strong>{{ n.title }}</strong>
+            <p>{{ n.body }}</p>
+            <button class="btn btn-sm" (click)="dismiss(n.id)">Dismiss</button>
+          </div>
+        }
+      </div>
+    }
     <div class="card">
       <div class="table-scroll">
       <table>
@@ -46,10 +59,16 @@ import { ApiUnit, UnitApiService } from '../../../core/unit-api.service';
 })
 export class AdManagementComponent implements OnInit {
   protected readonly unitApi = inject(UnitApiService);
+  protected readonly messaging = inject(MessagingApiService);
   protected readonly bariVaraUrl = BARIVARA_DEV_URL;
 
   async ngOnInit(): Promise<void> {
     await this.unitApi.load();
+    await this.messaging.loadLandlordNotifications();
+  }
+
+  async dismiss(id: number): Promise<void> {
+    await this.messaging.deleteNotification(id);
   }
 
   adStateLabel(unit: ApiUnit): string {

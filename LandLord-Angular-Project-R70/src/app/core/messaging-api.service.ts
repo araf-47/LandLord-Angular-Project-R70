@@ -72,6 +72,11 @@ export class MessagingApiService {
     this.notifications.set(result);
   }
 
+  async loadLandlordNotifications(): Promise<void> {
+    const result = await firstValueFrom(this.http.get<ApiNotification[]>(`${BASE}/notifications`, { params: { audience: 'landlord' } }));
+    this.notifications.set(result);
+  }
+
   async markNotificationRead(id: number): Promise<void> {
     const updated = await firstValueFrom(this.http.put<ApiNotification>(`${BASE}/notifications/${id}/read`, {}));
     this.notifications.update((list) => list.map((n) => (n.id === id ? updated : n)));

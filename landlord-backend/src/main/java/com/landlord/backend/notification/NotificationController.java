@@ -24,9 +24,13 @@ public class NotificationController {
         this.notifications = notifications;
     }
 
+    /** `audience=landlord` (Phase 16.3) returns tenantId-less notifications — this
+     *  app has no landlord-user table, so a null tenantId doubles as "for the
+     *  landlord", same trick Notification already used for its optional field. */
     @GetMapping("/api/notifications")
-    public List<Notification> list(@RequestParam(required = false) Long tenantId) {
+    public List<Notification> list(@RequestParam(required = false) Long tenantId, @RequestParam(required = false) String audience) {
         if (tenantId != null) return notifications.findByTenantId(tenantId);
+        if ("landlord".equals(audience)) return notifications.findByTenantIdIsNull();
         return notifications.findAll();
     }
 

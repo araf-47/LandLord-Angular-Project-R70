@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 
 @Entity
 public class Unit {
@@ -27,6 +28,14 @@ public class Unit {
     private boolean adPaused = false;
 
     private String photoUrl;
+
+    /** Set whenever status flips to "vacant"; cleared once occupied again.
+     *  Phase 16.3's ad-expiry reminder job reads this to find stale ads. */
+    private Instant vacantSince;
+
+    /** One-shot guard so the ad-expiry reminder fires once per vacancy stretch,
+     *  not every day the job runs. Cleared alongside vacantSince. */
+    private Instant adReminderSentAt;
 
     public Long getId() {
         return id;
@@ -78,5 +87,21 @@ public class Unit {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public Instant getVacantSince() {
+        return vacantSince;
+    }
+
+    public void setVacantSince(Instant vacantSince) {
+        this.vacantSince = vacantSince;
+    }
+
+    public Instant getAdReminderSentAt() {
+        return adReminderSentAt;
+    }
+
+    public void setAdReminderSentAt(Instant adReminderSentAt) {
+        this.adReminderSentAt = adReminderSentAt;
     }
 }

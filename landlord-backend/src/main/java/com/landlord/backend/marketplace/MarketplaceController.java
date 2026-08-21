@@ -90,6 +90,8 @@ public class MarketplaceController {
             Unit unit = units.findById(marketplaceRequest.getUnitId()).orElse(null);
             if (unit != null) {
                 unit.setStatus("occupied");
+                unit.setVacantSince(null);
+                unit.setAdReminderSentAt(null);
                 units.save(unit);
                 // e5125 "Approve, mark unit filled, take down ad" — no-ops on BariVara's
                 // side if this unit was never synced there (owner-posted / not vacant-synced).

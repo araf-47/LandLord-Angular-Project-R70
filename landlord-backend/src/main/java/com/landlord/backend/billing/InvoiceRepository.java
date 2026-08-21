@@ -1,5 +1,6 @@
 package com.landlord.backend.billing;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Optional<Invoice> findFirstByTenantIdOrderByCreatedAtDesc(Long tenantId);
 
     List<Invoice> findByPeriod(String period);
+
+    List<Invoice> findByStatusNotAndReminderSentAtIsNullAndDueDateLessThanEqual(String status, LocalDate date);
 }

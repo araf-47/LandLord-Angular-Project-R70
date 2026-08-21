@@ -37,6 +37,10 @@ public class Invoice {
 
     private Instant createdAt = Instant.now();
 
+    /** Phase 16.2: one-shot guard so the rent-due reminder job fires once per
+     *  invoice, not every day it stays unpaid. */
+    private Instant reminderSentAt;
+
     public Long getId() {
         return id;
     }
@@ -123,5 +127,13 @@ public class Invoice {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public Instant getReminderSentAt() {
+        return reminderSentAt;
+    }
+
+    public void setReminderSentAt(Instant reminderSentAt) {
+        this.reminderSentAt = reminderSentAt;
     }
 }

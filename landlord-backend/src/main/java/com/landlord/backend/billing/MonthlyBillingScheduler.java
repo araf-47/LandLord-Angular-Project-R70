@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +40,22 @@ public class MonthlyBillingScheduler {
     /** Midnight on the 1st of every month, server-local time. */
     @Scheduled(cron = "0 0 0 1 * *")
     public void generateMonthlyBills() {
+        run("scheduled");
+    }
+
+    /**
+     * Catch-up safety net: if the server was down at midnight on the 1st, the cron
+     * trigger above never fires and nobody gets billed until someone notices and
+     * clicks "Generate bills" by hand. Running the same idempotent logic once on
+     * every app startup closes that gap for free — tenants already billed for the
+     * current period are skipped exactly like a normal run.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void catchUpOnStartup() {
+        run("startup-catchup");
+    }
+
+    private void run(String trigger) {
         String period = YearMonth.now().format(PERIOD_FORMAT);
         Set<Long> alreadyBilled = new HashSet<>();
         for (Invoice invoice : invoices.findByPeriod(period)) {
@@ -45,6 +63,7 @@ public class MonthlyBillingScheduler {
         }
 
         int generated = 0;
+        int failed = 0;
         for (Tenant tenant : tenants.findAll()) {
             boolean due = "active".equals(tenant.getStatus()) && tenant.getUnitId() != null && !alreadyBilled.contains(tenant.getId());
             if (!due) continue;
@@ -52,9 +71,10 @@ public class MonthlyBillingScheduler {
                 billingService.generateInvoice(tenant.getId(), null);
                 generated++;
             } catch (Exception e) {
-                log.error("Auto bill generation failed for tenant {}: {}", tenant.getId(), e.getMessage());
+                failed++;
+                log.error("Auto bill generation ({}) failed for tenant {}: {}", trigger, tenant.getId(), e.getMessage());
             }
         }
-        log.info("Monthly bill generation for {}: {} invoice(s) created", period, generated);
+        log.info("Monthly bill generation ({}) for {}: {} invoice(s) created, {} failed", trigger, period, generated, failed);
     }
 }

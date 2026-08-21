@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,12 +65,18 @@ public class UnitController {
     public Unit update(@PathVariable Long id, @Valid @RequestBody Unit update) {
         Unit existing = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         boolean turningVacant = !"vacant".equals(existing.getStatus()) && "vacant".equals(update.getStatus());
+        boolean turningOccupied = !"vacant".equals(update.getStatus()) && "vacant".equals(existing.getStatus());
         existing.setUnitNumber(update.getUnitNumber());
         existing.setRent(update.getRent());
         existing.setStatus(update.getStatus());
         existing.setPropertyId(update.getPropertyId());
         if (turningVacant) {
             existing.setAdPaused(false);
+            existing.setVacantSince(Instant.now());
+            existing.setAdReminderSentAt(null);
+        } else if (turningOccupied) {
+            existing.setVacantSince(null);
+            existing.setAdReminderSentAt(null);
         }
         Unit saved = repository.save(existing);
         if (turningVacant) {

@@ -7,6 +7,7 @@ import com.landlord.backend.sync.BariVaraSyncService;
 import com.landlord.backend.unit.Unit;
 import com.landlord.backend.unit.UnitRepository;
 import jakarta.validation.Valid;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
@@ -96,6 +97,8 @@ public class TenantController {
 
         Unit unit = units.findById(request.unitId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unit not found"));
         unit.setStatus("occupied");
+        unit.setVacantSince(null);
+        unit.setAdReminderSentAt(null);
         units.save(unit);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTenant);
@@ -136,6 +139,8 @@ public class TenantController {
         if (tenant.getUnitId() != null) {
             units.findById(tenant.getUnitId()).ifPresent(unit -> {
                 unit.setStatus("vacant");
+                unit.setVacantSince(Instant.now());
+                unit.setAdReminderSentAt(null);
                 Unit saved = units.save(unit);
                 properties.findById(saved.getPropertyId()).ifPresent(property -> syncService.postVacancyAd(saved, property));
             });
