@@ -1,0 +1,81 @@
+{
+  "version": "1.0.0.1",
+  "clearExistingPermissions": true,
+  "permissions": {
+    "MANAGE_PERMISSIONS": {
+      "route": "/dashboard/permissions",
+      "url": "/api/v3/permission/role-permissions",
+      "roles": ["ADMIN"]
+    },
+    "VIEW_PERMISSIONS": {
+      "route": "/dashboard/permissions",
+      "url": "/api/v3/permission/get-user-permissions",
+      "roles": ["ADMIN", "USER"]
+    },
+    "LIST_ROLES": {
+      "route": "/dashboard/roles",
+      "url": "/api/v3/role/list",
+      "roles": ["ADMIN"]
+    },
+    "REGISTER_USER": {
+      "route": "/dashboard/users/add",
+      "url": "/api/v3/user/register",
+      "roles": ["ADMIN"]
+    },
+    "UPDATE_USER": {
+      "route": "/dashboard/users/edit",
+      "url": "/api/v3/user/update",
+      "roles": ["ADMIN"]
+    },
+    "MANAGE_PASSWORD": {
+      "route": "/account/password",
+      "url": "/api/v3/user/change-password",
+      "roles": ["ADMIN", "USER"]
+    },
+    "CLEAR_OTP_CACHE": {
+      "route": "",
+      "url": "/api/v3/user/clear-otp-cache",
+      "roles": ["ADMIN"]
+    },
+    "TOGGLE_2FA": {
+      "route": "/account/security",
+      "url": "/api/v3/user/toggle-2fa",
+      "roles": ["ADMIN", "USER"]
+    },
+    "LOGOUT_ALL": {
+      "route": "",
+      "url": "/api/v3/user/logout-all",
+      "roles": ["ADMIN", "USER"]
+    },
+    "MANAGE_USER_BLOCKS": {
+      "route": "/dashboard/blocked-users",
+      "url": "/api/v3/user-block/**",
+      "roles": ["ADMIN"]
+    },
+    "MANAGE_IP_BLOCKS": {
+      "route": "/dashboard/blocked-ips",
+      "url": "/api/v3/ip-block/**",
+      "roles": ["ADMIN"]
+    },
+    "TEST_ADMIN_ONLY": {
+      "route": "",
+      "url": "/api/v3/test/admin-only",
+      "roles": ["ADMIN"]
+    },
+    "TEST_USER_ONLY": {
+      "route": "",
+      "url": "/api/v3/test/user-only",
+      "roles": ["USER"]
+    },
+    "TEST_METHOD_SECURED": {
+      "route": "",
+      "url": "/api/v3/test/method-secured",
+      "roles": ["ADMIN", "USER"]
+    },
+    "TEST_ANY": {
+      "route": "",
+      "url": "/api/v3/test/any",
+      "roles": ["ADMIN", "USER"]
+    }
+  }
+}

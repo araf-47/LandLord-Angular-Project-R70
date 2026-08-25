@@ -1,0 +1,20 @@
+package com.idb.auth.common.constant;
+
+public enum OperationStatus {
+    SUCCESS,
+    ERROR,
+    VALIDATION_ERROR,
+    BAD_CREDENTIALS,
+    USER_NOT_FOUND,
+    USER_INACTIVE,
+    USER_LOCKED,
+    USER_EXPIRED,
+    CREDENTIALS_EXPIRED,
+    INVALID_TOKEN_IN_HEADER,
+    ACCESS_DENIED,
+    SESSION_EXPIRED,
+    OTP_REQUIRED,
+    INVALID_OTP,
+    IP_BLOCKED,
+    ACCOUNT_LOCKED
+}

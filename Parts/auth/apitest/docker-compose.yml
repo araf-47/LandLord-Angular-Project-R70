@@ -1,0 +1,26 @@
+# PostgreSQL for the Playwright API suite.
+#
+# Two databases: the main suite gets auth_apitest, and the IP-blocking instance
+# gets auth_apitest_ipblock, because a block is persistent state that would
+# otherwise leak between the two.
+#
+#   docker compose up -d
+#   npx playwright test
+#   docker compose down -v
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: auth-apitest-pg
+    environment:
+      POSTGRES_DB: auth_apitest
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+    ports:
+      - "5462:5432"
+    volumes:
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth_apitest"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
