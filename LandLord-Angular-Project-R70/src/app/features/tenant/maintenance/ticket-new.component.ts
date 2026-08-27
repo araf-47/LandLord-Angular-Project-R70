@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CURRENT_TENANT_ID_REAL } from '../../../core/current-tenant';
 import { MaintenanceApiService } from '../../../core/maintenance-api.service';
 import { TenantApiService } from '../../../core/tenant-api.service';
 
@@ -56,7 +55,7 @@ export class TenantTicketNewComponent {
 
   async submit(): Promise<void> {
     if (!this.description) return;
-    const tenant = await this.tenantApi.get(CURRENT_TENANT_ID_REAL);
+    const tenant = await this.tenantApi.me();
     if (!tenant?.unitId) return;
 
     const ticket = await this.api.createTicket(tenant.unitId, tenant.id, `[${this.category}] ${this.description}`);

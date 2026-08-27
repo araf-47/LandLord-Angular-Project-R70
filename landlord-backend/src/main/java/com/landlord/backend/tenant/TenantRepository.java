@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TenantRepository extends JpaRepository<Tenant, Long> {
     Optional<Tenant> findFirstByNationalIdAndStatus(String nationalId, String status);
+    Optional<Tenant> findFirstByAuthUserId(Long authUserId);
 }

@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CURRENT_TENANT_ID_REAL } from '../../../core/current-tenant';
 import { MessagingApiService } from '../../../core/messaging-api.service';
 
 @Component({
@@ -24,6 +23,8 @@ export class TenantMessageListComponent implements OnInit {
   protected readonly api = inject(MessagingApiService);
 
   async ngOnInit(): Promise<void> {
-    await this.api.loadConversationsForTenant(CURRENT_TENANT_ID_REAL);
+    // No id needed: the backend derives "which tenant" from the auth token
+    // for a TENANT-role caller and ignores any client-supplied id anyway.
+    await this.api.loadConversations();
   }
 }

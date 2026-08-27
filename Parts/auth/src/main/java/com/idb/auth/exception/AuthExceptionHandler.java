@@ -37,10 +37,14 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>Ordered HIGHEST so these win over {@code BaseExceptionHandler}'s
  * {@code @ExceptionHandler(Exception.class)}.
+ *
+ * <p>Scoped to {@code com.idb.auth} only - see {@code BaseExceptionHandler}'s
+ * javadoc for why an unscoped advice is unsafe on a module embedded as a
+ * library into a host application.
  */
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.idb.auth")
 public class AuthExceptionHandler {
 
     @ExceptionHandler(InsufficientAuthenticationException.class)

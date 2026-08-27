@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CURRENT_TENANT_ID_REAL } from '../../../core/current-tenant';
 import { MaintenanceApiService } from '../../../core/maintenance-api.service';
 
 @Component({
@@ -36,6 +35,8 @@ export class TenantTicketListComponent implements OnInit {
   protected readonly api = inject(MaintenanceApiService);
 
   async ngOnInit(): Promise<void> {
-    await this.api.loadForTenant(CURRENT_TENANT_ID_REAL);
+    // No id needed: the backend derives "which tenant" from the auth token
+    // for a TENANT-role caller and ignores any client-supplied id anyway.
+    await this.api.load();
   }
 }

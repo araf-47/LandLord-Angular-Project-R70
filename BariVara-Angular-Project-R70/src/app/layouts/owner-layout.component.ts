@@ -35,7 +35,7 @@ import { LogoComponent } from '../shared/logo.component';
             </button>
             <strong>Apartment Owner Dashboard</strong>
           </div>
-          <span class="hint-text">{{ auth.user()?.name }} ({{ auth.user()?.email }})</span>
+          <span class="hint-text">{{ auth.user()?.username }}</span>
         </header>
         <div class="page-content">
           <router-outlet />

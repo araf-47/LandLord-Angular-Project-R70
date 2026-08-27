@@ -5,7 +5,6 @@ import { API_ORIGIN, ApiListing, ListingApiService } from '../../core/listing-ap
 import { FavoriteApiService } from '../../core/favorite-api.service';
 import { BookingApiService } from '../../core/booking-api.service';
 import { ProfileApiService } from '../../core/profile-api.service';
-import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 
 @Component({
   selector: 'app-listing-detail',
@@ -64,37 +63,47 @@ export class ListingDetailComponent {
   private readonly listingId = Number(inject(ActivatedRoute).snapshot.paramMap.get('id'));
 
   readonly listing = signal<ApiListing | undefined>(undefined);
+  private readonly tenantId = signal<number | null>(null);
 
-  readonly alreadyRequested = computed(() =>
-    this.bookingApi.requests().some((r) => r.listingId === this.listingId && r.tenantId === CURRENT_TENANT_ID_REAL && r.status !== 'rejected')
-  );
+  readonly alreadyRequested = computed(() => {
+    const id = this.tenantId();
+    return id !== null && this.bookingApi.requests().some((r) => r.listingId === this.listingId && r.tenantId === id && r.status !== 'rejected');
+  });
 
   constructor() {
     this.listingApi.get(this.listingId).then((l) => this.listing.set(l));
     if (this.auth.isAuthenticated() && this.auth.role() === 'tenant') {
-      this.favoriteApi.loadForTenant(CURRENT_TENANT_ID_REAL);
-      this.bookingApi.loadForTenant(CURRENT_TENANT_ID_REAL);
+      this.profileApi.myTenantProfile().then((profile) => {
+        this.tenantId.set(profile.id);
+        this.favoriteApi.loadForTenant(profile.id);
+        this.bookingApi.loadForTenant(profile.id);
+      });
     }
   }
 
   isFavorite(): boolean {
-    return this.favoriteApi.favorites().some((f) => f.tenantId === CURRENT_TENANT_ID_REAL && f.listingId === this.listingId);
+    const id = this.tenantId();
+    return id !== null && this.favoriteApi.favorites().some((f) => f.tenantId === id && f.listingId === this.listingId);
   }
 
   toggleFavorite(): void {
-    const existing = this.favoriteApi.favorites().find((f) => f.tenantId === CURRENT_TENANT_ID_REAL && f.listingId === this.listingId);
+    const id = this.tenantId();
+    if (id === null) return;
+    const existing = this.favoriteApi.favorites().find((f) => f.tenantId === id && f.listingId === this.listingId);
     if (existing) {
       this.favoriteApi.remove(existing.id);
     } else {
-      this.favoriteApi.add(CURRENT_TENANT_ID_REAL, this.listingId);
+      this.favoriteApi.add(id, this.listingId);
     }
   }
 
   async book(): Promise<void> {
-    const tenant = await this.profileApi.tenant(CURRENT_TENANT_ID_REAL);
+    const id = this.tenantId();
+    if (id === null) return;
+    const tenant = await this.profileApi.myTenantProfile();
     await this.bookingApi.create({
       listingId: this.listingId,
-      tenantId: CURRENT_TENANT_ID_REAL,
+      tenantId: id,
       applicantName: tenant.name,
     });
   }

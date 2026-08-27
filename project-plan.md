@@ -1,11 +1,17 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-21 (Phase 16.1–16.3 done — monthly-bill startup catch-up,
-real rent-due tenant reminders, and ad-expiry landlord reminders all live and
-verified against the real DB; 16.4 deferred until Phase 7 auth exists. Phase 14
-done — BariVara.com has its own real backend now, separate Spring Boot project
-from LandLord's, public listing search/favorites/booking + owner
-property/unit/listing management all real end to end)
+Last updated: 2026-08-27 (Phase 7 — real auth — now fully done, backend and
+frontend, both apps. `Parts/auth` embedded separately into each backend, no
+SSO; both Angular apps' `AuthService`/`roleGuard` replaced with real
+login/token/role handling; the `CURRENT_TENANT_ID_REAL`/`CURRENT_OWNER_ID_REAL`
+stopgaps deleted entirely. Login pages no longer ask "sign in as" — role comes
+from the account. Phase 16.1–16.3 done — monthly-bill startup catch-up, real
+rent-due tenant reminders, and ad-expiry landlord reminders all live and
+verified against the real DB; 16.4 still deferred (needs OTP, which needs a
+real mail provider, §6 open decision). Phase 14 done — BariVara.com has its
+own real backend now, separate Spring Boot project from LandLord's, public
+listing search/favorites/booking + owner property/unit/listing management all
+real end to end)
 
 ## 1. Product summary
 
@@ -419,6 +425,126 @@ slice only, as a proof-of-pipe before committing to the full schema):
   vacate a unit and a real BariVara ad appears; book it and the request lands in
   LandLord's Marketplace & Leads inbox; approve it and the ad disappears. Full
   detail in Phase 15 below.
+- **Phase 7 (real auth) started, backend half done (2026-08-27)** — you had a
+  separately-built, fully tested Spring Boot auth module (`Parts/auth`,
+  `com.idb.auth`: JWT login, 2FA/OTP, per-account lockout, IP blocking,
+  role/permission RBAC via `permissions.json`, 337 unit/integration tests + 66
+  Playwright tests) and wanted it used as-is rather than a new auth system
+  built from scratch. Explicit product decision: **no SSO between the two
+  apps** — a LandLord tenant and a BariVara tenant are different accounts even
+  if it's the same person, BariVara always requires its own signup.
+  - **Embedded twice, independently.** `Parts/auth` added as a Maven
+    dependency to both `landlord-backend` and `barivara-backend`, each with
+    its own `users`/`roles`/`permissions` rows living inside that backend's
+    own existing database (`landlord_db`, `barivara_db`) — no third auth
+    service, no shared identity table, no network hop for token
+    verification. Required bumping both backends from Java 21 → 25 and Boot
+    4.1.0 → 4.1.1 to match; JDK 25 (Eclipse Temurin) installed via SDKMAN
+    (user-space, no root needed).
+  - **Roles**: `landlord-backend` gets `LANDLORD`+`TENANT`; `barivara-backend`
+    gets `LANDLORD`+`TENANT`+`OWNER`. Real `permissions.json` written for both
+    (the shipped one only covered the auth module's own user-management
+    URLs) — one seeded account per backend (`landlord` / `landlord-linked`,
+    the same human, two separate accounts by design, matching the no-SSO
+    call).
+  - **Two real defects found and fixed in `Parts/auth` itself** while wiring
+    it in (both documented in `Parts/auth/AUTH.md`-style, since they'll bite
+    anyone else embedding this module): (1) its global exception advice was
+    unscoped, so embedding it silently turned every existing 404/409 in
+    *this* app's own controllers into an HTTP 200 with a generic body — fixed
+    by scoping the advice to `com.idb.auth` only. (2) once fixed, a plain
+    `ResponseStatusException` thrown by a host-app controller triggered a
+    container error-dispatch to `/error` that re-entered the security chain
+    with no SecurityContext, turning real 404s into misleading 401s — the
+    same defect class AUTH.md already documents for the module's own
+    `AccessDeniedHandler`, just not covered for host-app exceptions. Fixed
+    with a small `ApiExceptionHandler` added to each backend.
+  - **Guest browsing preserved on BariVara.** The shipped permission model
+    could only make a whole URL fully public or fully role-gated (all HTTP
+    verbs together), which would have broken public listing search/detail
+    (must stay reachable with zero login) the moment real auth landed. Added
+    a small, contained extension to `Parts/auth` itself — `PUBLIC_GET_URLS`,
+    a GET-only public-route list alongside its existing `PUBLIC_URLS` — so
+    `GET /api/listings` stays open to anyone while `POST/PUT/DELETE` on the
+    same path stay `OWNER`-gated.
+  - **Identity bridge**: nullable `authUserId` added to `Tenant`
+    (landlord-backend) and `TenantProfile`/`OwnerProfile` (barivara-backend),
+    plus new `GET /api/tenants/me`, `GET /api/tenant-profiles/me`,
+    `GET /api/owner-profiles/me` — the real replacement for the
+    `CURRENT_TENANT_ID_REAL`/`CURRENT_OWNER_ID_REAL` frontend stopgaps (not
+    yet wired into the frontends themselves, see 7.3/7.4 below).
+  - **Registration now provisions real credentials, per your call**:
+    LandLord's walk-in `tenant-register.component.ts` flow gained a password
+    field — the landlord sets a temp password at registration time (same
+    transaction as creating the `Tenant` row) and hands it to the tenant in
+    person, matching the real walk-in relationship instead of a separate
+    self-service signup step. BariVara's tenant/owner signup
+    (`POST /api/tenant-profiles` / `POST /api/owner-profiles`, Phase 14.3's
+    seed-only stubs) is now real self-service: creates the auth account and
+    the profile row together. Username is the phone number
+    (alphanumeric-sanitized — `Parts/auth`'s `USERNAME_PATTERN` rejects `+`).
+  - **Tenant-scoped reads hardened against id spoofing**: `permissions.json`
+    only checks "does this role have access to this URL," not row ownership
+    — without more, a `TENANT` token could read another tenant's invoices,
+    payments, maintenance tickets, notifications, conversations, or
+    favorites just by changing a query param. Landlord-backend's
+    `BillingController`, `MaintenanceController`, `NotificationController`,
+    `MessagingController` and BariVara's `FavoriteController` now derive
+    "which tenant" from the authenticated principal's linked record for
+    `TENANT` callers, ignoring the client-supplied id; a `LANDLORD` caller's
+    explicit id is still honored (landlord legitimately looks up any
+    tenant). **Not closed**: per-id operations (delete a favorite, mark one
+    notification read, fetch one maintenance ticket/booking-request by
+    number) still trust the id blindly — pre-existing pattern, not a new
+    hole from adding auth, just not fixed in this pass.
+  - **Verified live against real running instances** (not just code review):
+    login against the seeded account, 401 with no token, 403 with wrong
+    role, 200 with the right one; full walk-in registration → tenant login →
+    `/api/tenants/me` round trip; BariVara guest search working with zero
+    auth while writes 401; both backends boot clean end to end.
+  - **Frontend half done too (7.3/7.4), same session.** Neither Angular app's
+    JWT carries a role claim (`Parts/auth` only puts `sub` in the token), so
+    each backend gained a small `GET /api/auth/me` (host-app code, not
+    `Parts/auth` itself) returning `{username, roles}` right after login —
+    that's how the frontend learns "landlord or tenant" (or "owner"/
+    "landlord-linked" on BariVara) without a role picker.
+    - Both apps' `AuthService` rewritten: real `POST /api/v3/auth/login`,
+      then `GET /api/auth/me` to resolve the role, tokens in `localStorage`.
+      New `auth.interceptor.ts` in both attaches `Authorization`/
+      `x-refresh-token` headers and captures the rotated `x-access-token`
+      response header (`Parts/auth`'s silent-refresh mechanism).
+    - **Login pages no longer have a "sign in as" dropdown** — just
+      username/password, exactly as planned; role comes from the account.
+    - LandLord's signup page repurposed to informational-only: real accounts
+      here aren't self-service (one seeded `LANDLORD` login, tenants created
+      by the landlord at walk-in registration) — no backend capability was
+      ever designed for public LandLord-side signup, so the page now just
+      points a visitor back to their landlord instead of pretending to
+      create an account. `tenant-register.component.ts` gained the temp
+      password field.
+    - BariVara's signup wizard, by contrast, *is* real self-service now — its
+      OTP step's "verify" button calls the real
+      `POST /api/tenant-profiles` / `POST /api/owner-profiles`, then logs in
+      with the same credentials. **Real bug found and fixed here**: those two
+      endpoints were sitting behind the `TENANT`/`OWNER` permission
+      themselves — circular, since registering *is* how you get that role in
+      the first place. Fixed by adding both exact paths to `Parts/auth`'s
+      `PUBLIC_URLS` (their `GET /me` and `GET /{id}` siblings stay role-gated
+      as before; only the bare registration path opened up).
+    - All `CURRENT_TENANT_ID_REAL` (2 files, LandLord) and
+      `CURRENT_OWNER_ID_REAL`/`CURRENT_TENANT_ID_REAL` (8 files, BariVara)
+      consumers migrated to the real `/me` endpoints — both `current-tenant.ts`
+      stopgaps and BariVara's `current-owner.ts` deleted outright. Where the
+      backend already derives "which tenant" from the token (per Phase 7's
+      hardening pass), the frontend simply dropped the id argument entirely
+      rather than fetching one just to hand it back.
+    - Verified live end to end on both apps: guest browsing still works with
+      zero auth on BariVara, self-signup → login → `/me` → an owner-scoped
+      property create all round-tripped correctly, `ng build` clean on both,
+      `roleGuard` no longer touches localStorage directly.
+  - **7.5 (OTP email)**: 2FA/OTP code exists in `Parts/auth` but is
+    non-functional against real users until a real SMTP provider replaces
+    `LoggingMailService` — still an open decision (§6).
 - **Everything else still on `MockDataService`** (LandLord app) — Property,
   Units, Tenant, Billing/Move-out, tenant-detail/billing-views,
   Maintenance/Expenses, Ledger, landlord dashboard KPI tiles, Messaging/
@@ -427,9 +553,9 @@ slice only, as a proof-of-pipe before committing to the full schema):
   APIs wide open), no Flyway migrations yet, nothing deployed anywhere
   (localhost only).
 
-**Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
-(auth, BariVara's own messaging/notifications, etc. — Phase 7, 16-20), testing,
-deployment. See
+**Not done:** Phase 5.5 sign-off (yours to give), Phase 7.5 (OTP email — needs
+a mail provider), the rest of the real backend (BariVara's own
+messaging/notifications, etc. — Phase 16.4, 17-20), testing, deployment. See
 §3a for a tracked backlog of smaller gaps found during review but deliberately
 not fixed (property/unit edit-delete entry below is now resolved).
 
@@ -465,10 +591,13 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   `MockDataService.findOrCreateConversation(contextId, withName)` — same
   find-or-create shape as LandLord's real version, just against the mock
   signal instead of an API.
-- **Single hardcoded demo user per role.** `CURRENT_TENANT_ID` / `CURRENT_OWNER_ID`
-  mean login always lands on the same mock person regardless of email typed — can't
-  demo "two different tenants" without editing code. (Resolved naturally by Phase 7,
-  real auth.)
+- **Single hardcoded demo user per role, on pages still using `MockDataService`.**
+  `CURRENT_TENANT_ID` / `CURRENT_OWNER_ID` (the *mock* constants, distinct from the
+  real-backend `_REAL` ones Phase 7 already removed) still gate a handful of
+  not-yet-migrated tenant pages (LandLord's `payments/history.component.ts`,
+  `payments/pay.component.ts`, `profile.component.ts` — see §3's Phase 10.8 note).
+  Real login now works everywhere else; these three just haven't been moved off
+  the mock billing flow yet.
 - **No data persistence across page reload.** In-memory signals reset on F5. Known
   demo trap — mention before any live walkthrough. (Resolved by Phase 6/8+, real
   backend.)
@@ -498,10 +627,12 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   `VacancyAdSync` still has no photo field, so a LandLord-originated ad
   synced into BariVara doesn't carry a photo — same gap, deliberately not
   closed yet, see Phase 15's "Not covered" note below.
-- **Tenant-side real-backend pages now depend on a hardcoded `CURRENT_TENANT_ID_REAL`**
+- ~~**Tenant-side real-backend pages now depend on a hardcoded `CURRENT_TENANT_ID_REAL`**
   (`core/current-tenant.ts`, set to tenant id `3`) instead of a real login session —
   same shape as the older mock `CURRENT_TENANT_ID` gap, just now also true for the
-  real API. (Resolved by Phase 7, real auth — replace every usage then.)
+  real API.~~ **Resolved (2026-08-27)** — `core/current-tenant.ts` (both apps) and
+  BariVara's `core/current-owner.ts` deleted; every consumer now calls the real
+  `/api/tenants/me` / `/api/tenant-profiles/me` / `/api/owner-profiles/me` endpoints.
 - ~~**Tenant id 3's `unitId` (6) doesn't match any real `unit` row**~~ **Fixed
   (2026-08-19)** — direct DB correction: reassigned tenant 3 to real unit 3
   (`A2`, same property 6), flipped that unit's status to `occupied`. Was
@@ -672,19 +803,34 @@ now functionally deeper than a route scaffold.)*
      (`ALTER TABLE unit ADD COLUMN ad_paused boolean NOT NULL DEFAULT false;`
      via psql). Same manual fix will be needed for any future non-nullable
      column added to a populated table until Flyway lands.**
-6.4. Set up API auth (JWT issue/verify, password hashing, OTP delivery) — **on
-     hold: no online deployment planned right now, so a wide-open localhost-only
-     API is an acceptable risk for the time being. Revisit before any real
-     deployment (Phase 19). Same hold applies to Phase 7.**
+6.4. ✅ **Set up API auth (JWT issue/verify, password hashing, OTP delivery) —
+     Done (2026-08-27), see Phase 7.** No longer on hold: real auth (`Parts/auth`,
+     embedded per backend) now gates both backends. OTP delivery specifically
+     still stubbed (`LoggingMailService`) until a real SMTP provider is chosen
+     (§6 open decision).
 6.5. ✅ **Local dev environment: `docker-compose.yml` at repo root, official
      `postgres:16` image, `landlord_db`, port 5432, named volume**
 
-### Phase 7 — Real authentication (both apps) — **ON HOLD, see Phase 6.4 note**
-7.1. Backend: signup/login/OTP/forgot-password/reset-password endpoints
-7.2. Backend: account lockout after failed attempts (per login diagram)
-7.3. Frontend (both apps): replace `AuthService` stub with real HTTP calls + token
-7.4. Frontend (both apps): replace `roleGuard` localStorage check with real token/role
-7.5. Wire OTP email delivery (transactional email provider)
+### Phase 7 — Real authentication (both apps) ✅ DONE (2026-08-27) — 7.5 (OTP email) still open
+7.1. ✅ **Backend: signup/login/OTP/forgot-password/reset-password endpoints —
+     Done.** `Parts/auth` embedded into both backends (own `users`/`roles`
+     rows per backend, no SSO). Real login/logout/change-password/2FA-toggle;
+     OTP and forgot-password endpoints exist but stay non-functional against
+     real users until 7.5's mail provider lands (`LoggingMailService` stub).
+7.2. ✅ **Backend: account lockout after failed attempts — Done.** Per-account
+     lockout (`security.account-lockout.*`) and IP blocking (off by default,
+     `auth.ip.block.enabled=false`) both come from `Parts/auth` as-is.
+7.3. ✅ **Frontend (both apps): replace `AuthService` stub with real HTTP calls +
+     token — Done.** Real login + new `GET /api/auth/me` role resolution +
+     `auth.interceptor.ts` for Bearer/refresh headers, both apps.
+7.4. ✅ **Frontend (both apps): replace `roleGuard` localStorage check with real
+     token/role — Done.** `core/current-tenant.ts` (both apps) and BariVara's
+     `core/current-owner.ts` deleted; every consumer migrated to the real
+     `/api/tenants/me` / `/api/tenant-profiles/me` / `/api/owner-profiles/me`
+     endpoints. Login pages' role dropdown removed on both apps — role comes
+     from the account now.
+7.5. Wire OTP email delivery (transactional email provider) — still open,
+     same decision as §6's email/OTP provider row.
 
 ### Phase 8 — Properties & Units (real data)
 8.1. Backend: CRUD endpoints for properties and units — **Done. Property

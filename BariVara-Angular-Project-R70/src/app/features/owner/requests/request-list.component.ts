@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BookingApiService } from '../../../core/booking-api.service';
 import { ListingApiService } from '../../../core/listing-api.service';
-import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
+import { ProfileApiService } from '../../../core/profile-api.service';
 
 @Component({
   selector: 'app-owner-request-list',
@@ -34,10 +34,13 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 export class OwnerRequestListComponent {
   private readonly bookingApi = inject(BookingApiService);
   private readonly listingApi = inject(ListingApiService);
+  private readonly profileApi = inject(ProfileApiService);
 
   constructor() {
-    this.bookingApi.loadForOwner(CURRENT_OWNER_ID_REAL);
-    this.listingApi.search({ ownerId: CURRENT_OWNER_ID_REAL });
+    this.profileApi.myOwnerProfile().then((profile) => {
+      this.bookingApi.loadForOwner(profile.id);
+      this.listingApi.search({ ownerId: profile.id });
+    });
   }
 
   readonly myRequests = computed(() => this.bookingApi.requests());

@@ -1,5 +1,6 @@
 package com.idb.auth.config;
 
+import static com.idb.auth.common.constant.CommonConstants.PUBLIC_GET_URLS;
 import static com.idb.auth.common.constant.CommonConstants.PUBLIC_URLS;
 
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -100,6 +102,9 @@ public class SecurityConfig {
     private void configureRequestAuthorization(
             AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
         auth.requestMatchers(PUBLIC_URLS.toArray(new String[0])).permitAll();
+        if (!PUBLIC_GET_URLS.isEmpty()) {
+            auth.requestMatchers(HttpMethod.GET, PUBLIC_GET_URLS.toArray(new String[0])).permitAll();
+        }
 
         List<Permission> permissions = permissionService.loadPermissionsFromResource();
         if (!CollectionUtils.isEmpty(permissions)) {

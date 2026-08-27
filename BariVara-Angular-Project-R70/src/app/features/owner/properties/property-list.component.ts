@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
 import { OwnerUnitApiService } from '../../../core/owner-unit-api.service';
-import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
+import { ProfileApiService } from '../../../core/profile-api.service';
 
 @Component({
   selector: 'app-owner-property-list',
@@ -40,10 +40,13 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 export class OwnerPropertyListComponent {
   protected readonly propertyApi = inject(OwnerPropertyApiService);
   private readonly unitApi = inject(OwnerUnitApiService);
+  private readonly profileApi = inject(ProfileApiService);
 
   constructor() {
-    this.propertyApi.loadForOwner(CURRENT_OWNER_ID_REAL).then((properties) => {
-      this.unitApi.loadForProperties(properties.map((p) => p.id));
+    this.profileApi.myOwnerProfile().then((profile) => {
+      this.propertyApi.loadForOwner(profile.id).then((properties) => {
+        this.unitApi.loadForProperties(properties.map((p) => p.id));
+      });
     });
   }
 

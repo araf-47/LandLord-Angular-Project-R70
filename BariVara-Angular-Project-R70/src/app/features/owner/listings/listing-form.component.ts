@@ -5,7 +5,7 @@ import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES, PropertyType } from '../.
 import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
 import { ApiOwnerUnit, OwnerUnitApiService } from '../../../core/owner-unit-api.service';
 import { ListingApiService } from '../../../core/listing-api.service';
-import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
+import { ProfileApiService } from '../../../core/profile-api.service';
 
 @Component({
   selector: 'app-owner-listing-form',
@@ -106,7 +106,9 @@ export class OwnerListingFormComponent {
   private readonly propertyApi = inject(OwnerPropertyApiService);
   private readonly unitApi = inject(OwnerUnitApiService);
   private readonly listingApi = inject(ListingApiService);
+  private readonly profileApi = inject(ProfileApiService);
   private readonly router = inject(Router);
+  private ownerId: number | null = null;
 
   readonly step = signal(1);
   readonly districts = DISTRICTS;
@@ -124,8 +126,11 @@ export class OwnerListingFormComponent {
   photoUrl: string | null = null;
 
   constructor() {
-    this.propertyApi.loadForOwner(CURRENT_OWNER_ID_REAL).then((properties) => {
-      this.unitApi.loadForProperties(properties.map((p) => p.id));
+    this.profileApi.myOwnerProfile().then((profile) => {
+      this.ownerId = profile.id;
+      this.propertyApi.loadForOwner(profile.id).then((properties) => {
+        this.unitApi.loadForProperties(properties.map((p) => p.id));
+      });
     });
   }
 
@@ -156,9 +161,9 @@ export class OwnerListingFormComponent {
   }
 
   async publish(): Promise<void> {
-    if (!this.title || !this.address || !this.rent) return;
+    if (!this.title || !this.address || !this.rent || this.ownerId === null) return;
     await this.listingApi.create({
-      ownerId: CURRENT_OWNER_ID_REAL,
+      ownerId: this.ownerId,
       unitId: this.autoFill ? Number(this.selectedUnitId) : null,
       title: this.title,
       address: this.address,

@@ -6,7 +6,6 @@ import com.barivara.backend.sync.LandlordSyncService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/booking-requests")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201"})
 public class BookingController {
 
     private final BookingRequestRepository requests;

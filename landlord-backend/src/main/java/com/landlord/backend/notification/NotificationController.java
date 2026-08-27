@@ -1,9 +1,11 @@
 package com.landlord.backend.notification;
 
+import com.idb.auth.model.User;
+import com.landlord.backend.tenant.TenantRepository;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,21 +17,35 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201"})
 public class NotificationController {
 
     private final NotificationRepository notifications;
+    private final TenantRepository tenants;
 
-    public NotificationController(NotificationRepository notifications) {
+    public NotificationController(NotificationRepository notifications, TenantRepository tenants) {
         this.notifications = notifications;
+        this.tenants = tenants;
+    }
+
+    /** See BillingController.effectiveTenantId - same reasoning, same fix. */
+    private Long effectiveTenantId(User principal, Long requestedTenantId) {
+        boolean isLandlord = principal.getRoles().stream().anyMatch(r -> "LANDLORD".equals(r.getName()));
+        if (isLandlord) {
+            return requestedTenantId;
+        }
+        return tenants.findFirstByAuthUserId(principal.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No tenant record linked to this account"))
+            .getId();
     }
 
     /** `audience=landlord` (Phase 16.3) returns tenantId-less notifications — this
      *  app has no landlord-user table, so a null tenantId doubles as "for the
      *  landlord", same trick Notification already used for its optional field. */
     @GetMapping("/api/notifications")
-    public List<Notification> list(@RequestParam(required = false) Long tenantId, @RequestParam(required = false) String audience) {
-        if (tenantId != null) return notifications.findByTenantId(tenantId);
+    public List<Notification> list(@AuthenticationPrincipal User principal,
+            @RequestParam(required = false) Long tenantId, @RequestParam(required = false) String audience) {
+        Long effective = effectiveTenantId(principal, tenantId);
+        if (effective != null) return notifications.findByTenantId(effective);
         if ("landlord".equals(audience)) return notifications.findByTenantIdIsNull();
         return notifications.findAll();
     }

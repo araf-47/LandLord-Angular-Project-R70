@@ -56,6 +56,15 @@ public final class CommonConstants {
     public static final List<String> PUBLIC_URLS = new LinkedList<>(List.of(
             "/v3/api-docs/**", "/swagger-ui/**", "/actuator/health"));
 
+    /**
+     * Like {@link #PUBLIC_URLS}, but scoped to {@code GET} only - for endpoints
+     * that must stay anonymously readable (e.g. a public marketplace's guest
+     * browse/search) while other verbs on the same path stay role-gated via
+     * permissions.json. A plain {@code PUBLIC_URLS} entry would permit every verb
+     * on that path, including writes.
+     */
+    public static final List<String> PUBLIC_GET_URLS = new LinkedList<>();
+
     private CommonConstants() {
     }
 }

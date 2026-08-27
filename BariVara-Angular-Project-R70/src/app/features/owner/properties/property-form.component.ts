@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AREAS_BY_DISTRICT, DISTRICTS } from '../../../core/mock-data.service';
 import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
 import { OwnerUnitApiService } from '../../../core/owner-unit-api.service';
-import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
+import { ProfileApiService } from '../../../core/profile-api.service';
 
 @Component({
   selector: 'app-owner-property-form',
@@ -71,6 +71,7 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 export class OwnerPropertyFormComponent {
   private readonly propertyApi = inject(OwnerPropertyApiService);
   private readonly unitApi = inject(OwnerUnitApiService);
+  private readonly profileApi = inject(ProfileApiService);
   private readonly router = inject(Router);
 
   readonly districts = DISTRICTS;
@@ -92,8 +93,9 @@ export class OwnerPropertyFormComponent {
   async save(): Promise<void> {
     if (!this.name || !this.address || !this.unitNumber || this.rent == null) return;
 
+    const profile = await this.profileApi.myOwnerProfile();
     const property = await this.propertyApi.create({
-      ownerId: CURRENT_OWNER_ID_REAL,
+      ownerId: profile.id,
       name: this.name,
       address: this.address,
       district: this.district(),

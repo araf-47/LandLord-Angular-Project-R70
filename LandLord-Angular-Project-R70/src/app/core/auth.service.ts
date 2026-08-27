@@ -1,50 +1,94 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 export type UserRole = 'landlord' | 'tenant';
 
 export interface AuthUser {
-  name: string;
-  email: string;
+  username: string;
   role: UserRole;
 }
 
-const STORAGE_KEY = 'landlord_auth_user';
+const AUTH_BASE = 'http://localhost:8080/api/v3/auth';
+const ME_URL = 'http://localhost:8080/api/auth/me';
+
+const ACCESS_TOKEN_KEY = 'landlord_access_token';
+const REFRESH_TOKEN_KEY = 'landlord_refresh_token';
+const USER_KEY = 'landlord_auth_user';
+
+interface LoginResponseData {
+  accessToken: string;
+  refreshToken: string;
+  expiresInSeconds: number;
+}
+
+interface ApiEnvelope<T> {
+  data?: T;
+  message: string;
+  status: string;
+}
+
+interface MeResponse {
+  username: string;
+  roles: string[];
+}
 
 /**
- * Frontend-only stub: no real backend. Persists to localStorage so
- * refresh/route-guard checks behave like a logged-in session.
+ * Talks to the real backend (Parts/auth, embedded in landlord-backend).
+ * Tokens live in localStorage so a refresh keeps the session; the actual
+ * Authorization/refresh headers are attached by auth.interceptor.ts, not here.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly userSignal = signal<AuthUser | null>(this.restore());
+  private readonly http = inject(HttpClient);
+  private readonly userSignal = signal<AuthUser | null>(this.restoreUser());
 
   readonly user = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
   readonly role = computed(() => this.userSignal()?.role ?? null);
 
-  login(email: string, _password: string, role: UserRole): void {
-    const user: AuthUser = { name: email.split('@')[0], email, role };
-    this.persist(user);
+  getAccessToken(): string | null {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
 
-  signup(name: string, email: string, role: UserRole): void {
-    const user: AuthUser = { name, email, role };
-    this.persist(user);
+  getRefreshToken(): string | null {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  }
+
+  /** Called by the interceptor when the server silently rotates the token. */
+  setAccessToken(token: string): void {
+    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  }
+
+  async login(username: string, password: string): Promise<void> {
+    const res = await firstValueFrom(
+      this.http.post<ApiEnvelope<LoginResponseData>>(`${AUTH_BASE}/login`, { username, password })
+    );
+    if (res.status !== 'SUCCESS' || !res.data) {
+      throw new Error(res.message || 'Login failed');
+    }
+    localStorage.setItem(ACCESS_TOKEN_KEY, res.data.accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
+
+    const me = await firstValueFrom(this.http.get<MeResponse>(ME_URL));
+    const user: AuthUser = {
+      username: me.username,
+      role: me.roles.includes('LANDLORD') ? 'landlord' : 'tenant',
+    };
+    this.userSignal.set(user);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
   }
 
   logout(): void {
     this.userSignal.set(null);
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   }
 
-  private persist(user: AuthUser): void {
-    this.userSignal.set(user);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-  }
-
-  private restore(): AuthUser | null {
+  private restoreUser(): AuthUser | null {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(USER_KEY);
       return raw ? (JSON.parse(raw) as AuthUser) : null;
     } catch {
       return null;

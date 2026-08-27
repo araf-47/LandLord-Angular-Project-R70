@@ -27,6 +27,9 @@ public class Tenant {
 
     private String status = "active";
 
+    /** Links this business record to its login identity in the embedded auth module. */
+    private Long authUserId;
+
     public Long getId() {
         return id;
     }
@@ -77,5 +80,13 @@ public class Tenant {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getAuthUserId() {
+        return authUserId;
+    }
+
+    public void setAuthUserId(Long authUserId) {
+        this.authUserId = authUserId;
     }
 }

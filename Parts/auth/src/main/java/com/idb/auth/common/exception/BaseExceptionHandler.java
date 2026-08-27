@@ -29,10 +29,18 @@ import lombok.extern.slf4j.Slf4j;
  * Catch-all advice. Ordered LOWEST so {@code AuthExceptionHandler} wins for
  * authentication failures - otherwise the {@code Exception} handler here would
  * be an equally-specific candidate for some of them.
+ *
+ * <p>Scoped to {@code com.idb.auth} only: this module is embedded as a library
+ * into host applications (e.g. landlord-backend, barivara-backend), and an
+ * unscoped {@code @RestControllerAdvice} would otherwise intercept the host
+ * app's own controllers too - silently rewriting their {@code
+ * ResponseStatusException}-based 404s/409s/etc. into a 200 with a generic
+ * error body, since the {@code Exception.class} handler below matches
+ * everything.
  */
 @Slf4j
 @Order(Ordered.LOWEST_PRECEDENCE)
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.idb.auth")
 public class BaseExceptionHandler {
 
     @ExceptionHandler(TraceableException.class)

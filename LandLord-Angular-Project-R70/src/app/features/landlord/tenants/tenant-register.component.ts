@@ -35,6 +35,13 @@ import { UnitApiService } from '../../../core/unit-api.service';
             <input id="nationalId" name="nationalId" [(ngModel)]="nationalId" required />
           </div>
         </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="password">Temporary password</label>
+            <input id="password" name="password" [(ngModel)]="password" required />
+            <span class="hint-text">Hand this to the tenant in person — it's their login, along with their phone number.</span>
+          </div>
+        </div>
         @if (nidError()) {
           <p class="error-text">{{ nidError() }}</p>
         }
@@ -80,6 +87,7 @@ export class TenantRegisterComponent implements OnInit {
   unitId: number | null = null;
   terms = '';
   deposit: number | null = null;
+  password = '';
   readonly nidError = signal('');
 
   async ngOnInit(): Promise<void> {
@@ -108,6 +116,10 @@ export class TenantRegisterComponent implements OnInit {
       this.nidError.set('Choose a unit to assign.');
       return;
     }
+    if (!this.password) {
+      this.nidError.set('Set a temporary password for the tenant to log in with.');
+      return;
+    }
 
     this.nidError.set('');
     try {
@@ -119,6 +131,7 @@ export class TenantRegisterComponent implements OnInit {
         unitId: this.unitId,
         terms: this.terms,
         deposit: this.deposit ?? 0,
+        password: this.password,
       });
     } catch (err: any) {
       if (err?.status === 409) {

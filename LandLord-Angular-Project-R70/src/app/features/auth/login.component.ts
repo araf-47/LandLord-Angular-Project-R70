@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, UserRole } from '../../core/auth.service';
+import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -10,24 +10,16 @@ import { AuthService, UserRole } from '../../core/auth.service';
   template: `
     <div class="card">
       <h2>Log in</h2>
-      <p>Enter your account email and password.</p>
+      <p>Landlord: your seeded username. Tenant: the phone number your landlord registered you with.</p>
 
       <form (ngSubmit)="submit()">
         <div class="field">
-          <label for="email">Email</label>
-          <input id="email" type="email" name="email" [(ngModel)]="email" required />
+          <label for="username">Username</label>
+          <input id="username" name="username" [(ngModel)]="username" required />
         </div>
         <div class="field">
           <label for="password">Password</label>
           <input id="password" type="password" name="password" [(ngModel)]="password" required />
-        </div>
-        <div class="field">
-          <label for="role">Sign in as</label>
-          <select id="role" name="role" [(ngModel)]="role">
-            <option value="landlord">Landlord</option>
-            <option value="tenant">Tenant</option>
-          </select>
-          <span class="hint-text">Demo stub — role normally comes from the account record.</span>
         </div>
 
         @if (error()) {
@@ -35,7 +27,9 @@ import { AuthService, UserRole } from '../../core/auth.service';
         }
 
         <div class="actions-row">
-          <button type="submit" class="btn btn-primary">Log in</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading()">
+            {{ loading() ? 'Logging in…' : 'Log in' }}
+          </button>
         </div>
       </form>
 
@@ -52,18 +46,26 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  email = '';
+  username = '';
   password = '';
-  role: UserRole = 'landlord';
   readonly error = signal('');
+  readonly loading = signal(false);
 
-  submit(): void {
-    if (!this.email || !this.password) {
-      this.error.set('Enter both email and password.');
+  async submit(): Promise<void> {
+    if (!this.username || !this.password) {
+      this.error.set('Enter both username and password.');
       return;
     }
     this.error.set('');
-    this.auth.login(this.email, this.password, this.role);
-    this.router.navigateByUrl(this.role === 'landlord' ? '/landlord/dashboard' : '/tenant/dashboard');
+    this.loading.set(true);
+    try {
+      await this.auth.login(this.username, this.password);
+      const role = this.auth.role();
+      this.router.navigateByUrl(role === 'landlord' ? '/landlord/dashboard' : '/tenant/dashboard');
+    } catch (err: any) {
+      this.error.set(err?.error?.message || err?.message || 'Login failed. Check your username and password.');
+    } finally {
+      this.loading.set(false);
+    }
   }
 }

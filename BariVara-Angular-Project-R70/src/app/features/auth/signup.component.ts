@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService, UserRole } from '../../core/auth.service';
+import { ProfileApiService } from '../../core/profile-api.service';
 
 /**
  * Same shape as the LandLord app's signup wizard, reused per the diagram note
@@ -83,7 +84,9 @@ import { AuthService, UserRole } from '../../core/auth.service';
         }
         <div class="actions-row">
           <button class="btn" (click)="sendOtp()">Resend code</button>
-          <button class="btn btn-primary" (click)="verifyOtp()">Verify &amp; create account</button>
+          <button class="btn btn-primary" [disabled]="submitting()" (click)="verifyOtp()">
+            {{ submitting() ? 'Creating…' : 'Verify & create account' }}
+          </button>
         </div>
       }
 
@@ -93,6 +96,7 @@ import { AuthService, UserRole } from '../../core/auth.service';
 })
 export class SignupComponent {
   private readonly auth = inject(AuthService);
+  private readonly profileApi = inject(ProfileApiService);
   private readonly router = inject(Router);
 
   readonly step = signal(1);
@@ -104,6 +108,7 @@ export class SignupComponent {
   acceptedTerms = false;
   otp = '';
   readonly otpError = signal('');
+  readonly submitting = signal(false);
   private otpAttempts = 0;
   readonly attemptsLeft = () => 3 - this.otpAttempts;
 
@@ -120,13 +125,30 @@ export class SignupComponent {
     this.step.set(4);
   }
 
-  verifyOtp(): void {
+  async verifyOtp(): Promise<void> {
     if (this.otp !== '123456') {
       this.otpAttempts++;
       this.otpError.set('Invalid code.');
       return;
     }
-    this.auth.signup(this.name, this.email, this.accountType);
-    this.router.navigateByUrl(this.accountType === 'owner' ? '/owner/dashboard' : '/tenant/dashboard');
+
+    this.otpError.set('');
+    this.submitting.set(true);
+    try {
+      const request = { name: this.name, email: this.email, phone: this.phone, password: this.password };
+      if (this.accountType === 'owner') {
+        await this.profileApi.registerOwner(request);
+      } else {
+        await this.profileApi.registerTenant(request);
+      }
+      // Username is the phone number, sanitized the same way the backend does
+      // (Parts/auth's USERNAME_PATTERN rejects non-alphanumeric characters).
+      await this.auth.login(this.phone.replace(/[^a-zA-Z0-9]/g, ''), this.password);
+      this.router.navigateByUrl(this.accountType === 'owner' ? '/owner/dashboard' : '/tenant/dashboard');
+    } catch (err: any) {
+      this.otpError.set(err?.error?.message || err?.message || 'Could not create account.');
+    } finally {
+      this.submitting.set(false);
+    }
   }
 }

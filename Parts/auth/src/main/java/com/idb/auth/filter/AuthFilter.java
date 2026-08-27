@@ -2,6 +2,7 @@ package com.idb.auth.filter;
 
 import static com.idb.auth.common.constant.CommonConstants.ACCESS_TOKEN_HEADER;
 import static com.idb.auth.common.constant.CommonConstants.EMPTY_STRING;
+import static com.idb.auth.common.constant.CommonConstants.PUBLIC_GET_URLS;
 import static com.idb.auth.common.constant.CommonConstants.PUBLIC_URLS;
 
 import java.io.IOException;
@@ -61,6 +62,7 @@ public class AuthFilter extends OncePerRequestFilter {
     private final AuthManager authManager;
     private final AuthEntryPoint authEntryPoint;
     private volatile RequestMatcher publicUrls;
+    private volatile RequestMatcher publicGetUrls;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -73,7 +75,23 @@ public class AuthFilter extends OncePerRequestFilter {
             matcher = new OrRequestMatcher(matchers.toArray(new RequestMatcher[0]));
             publicUrls = matcher;
         }
-        return matcher.matches(request);
+        if (matcher.matches(request)) {
+            return true;
+        }
+
+        if (!"GET".equalsIgnoreCase(request.getMethod()) || PUBLIC_GET_URLS.isEmpty()) {
+            return false;
+        }
+        RequestMatcher getMatcher = publicGetUrls;
+        if (getMatcher == null) {
+            List<RequestMatcher> matchers = PUBLIC_GET_URLS.stream()
+                    .map(PathPatternRequestMatcher::pathPattern)
+                    .map(RequestMatcher.class::cast)
+                    .toList();
+            getMatcher = new OrRequestMatcher(matchers.toArray(new RequestMatcher[0]));
+            publicGetUrls = getMatcher;
+        }
+        return getMatcher.matches(request);
     }
 
     @Override

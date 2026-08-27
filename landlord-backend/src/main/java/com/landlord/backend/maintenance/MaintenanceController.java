@@ -1,5 +1,7 @@
 package com.landlord.backend.maintenance;
 
+import com.idb.auth.model.User;
+import com.landlord.backend.tenant.TenantRepository;
 import com.landlord.backend.unit.Unit;
 import com.landlord.backend.unit.UnitRepository;
 import java.io.IOException;
@@ -11,7 +13,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,25 +26,40 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4201"})
 public class MaintenanceController {
 
     private final MaintenanceTicketRepository tickets;
     private final ExpenseRepository expenses;
     private final UnitRepository units;
+    private final TenantRepository tenants;
 
     @Value("${app.uploads.dir}")
     private String uploadsDir;
 
-    public MaintenanceController(MaintenanceTicketRepository tickets, ExpenseRepository expenses, UnitRepository units) {
+    public MaintenanceController(MaintenanceTicketRepository tickets, ExpenseRepository expenses, UnitRepository units,
+            TenantRepository tenants) {
         this.tickets = tickets;
         this.expenses = expenses;
         this.units = units;
+        this.tenants = tenants;
+    }
+
+    /** See BillingController.effectiveTenantId - same reasoning, same fix. */
+    private Long effectiveTenantId(User principal, Long requestedTenantId) {
+        boolean isLandlord = principal.getRoles().stream().anyMatch(r -> "LANDLORD".equals(r.getName()));
+        if (isLandlord) {
+            return requestedTenantId;
+        }
+        return tenants.findFirstByAuthUserId(principal.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No tenant record linked to this account"))
+            .getId();
     }
 
     @GetMapping("/api/maintenance-tickets")
-    public List<MaintenanceTicket> list(@RequestParam(required = false) Long tenantId, @RequestParam(required = false) Long unitId) {
-        if (tenantId != null) return tickets.findByTenantId(tenantId);
+    public List<MaintenanceTicket> list(@AuthenticationPrincipal User principal,
+            @RequestParam(required = false) Long tenantId, @RequestParam(required = false) Long unitId) {
+        Long effective = effectiveTenantId(principal, tenantId);
+        if (effective != null) return tickets.findByTenantId(effective);
         if (unitId != null) return tickets.findByUnitId(unitId);
         return tickets.findAll();
     }
@@ -56,10 +73,11 @@ public class MaintenanceController {
     public record NewTicketRequest(Long unitId, Long tenantId, String description) {}
 
     @PostMapping("/api/maintenance-tickets")
-    public ResponseEntity<MaintenanceTicket> create(@RequestBody NewTicketRequest request) {
+    public ResponseEntity<MaintenanceTicket> create(@AuthenticationPrincipal User principal,
+            @RequestBody NewTicketRequest request) {
         MaintenanceTicket ticket = new MaintenanceTicket();
         ticket.setUnitId(request.unitId());
-        ticket.setTenantId(request.tenantId());
+        ticket.setTenantId(effectiveTenantId(principal, request.tenantId()));
         ticket.setDescription(request.description());
         ticket.setStatus("pending");
         return ResponseEntity.status(HttpStatus.CREATED).body(tickets.save(ticket));

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { API_ORIGIN, ListingApiService } from '../../../core/listing-api.service';
-import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
+import { ProfileApiService } from '../../../core/profile-api.service';
 
 @Component({
   selector: 'app-owner-listing-list',
@@ -47,10 +47,13 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 })
 export class OwnerListingListComponent {
   protected readonly api = inject(ListingApiService);
+  private readonly profileApi = inject(ProfileApiService);
   protected readonly photoOrigin = API_ORIGIN;
 
   constructor() {
-    this.api.search({ ownerId: CURRENT_OWNER_ID_REAL });
+    this.profileApi.myOwnerProfile().then((profile) => {
+      this.api.search({ ownerId: profile.id });
+    });
   }
 
   myListings() {

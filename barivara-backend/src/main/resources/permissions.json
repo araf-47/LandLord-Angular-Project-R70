@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0.2",
+  "clearExistingPermissions": true,
+  "permissions": {
+    "AUTH_ME": {
+      "route": "",
+      "url": "/api/auth/me",
+      "roles": ["LANDLORD", "TENANT", "OWNER"]
+    },
+    "MANAGE_PERMISSIONS": {
+      "route": "",
+      "url": "/api/v3/permission/role-permissions",
+      "roles": ["LANDLORD"]
+    },
+    "VIEW_PERMISSIONS": {
+      "route": "",
+      "url": "/api/v3/permission/get-user-permissions",
+      "roles": ["LANDLORD", "TENANT", "OWNER"]
+    },
+    "LIST_ROLES": {
+      "route": "",
+      "url": "/api/v3/role/list",
+      "roles": ["LANDLORD"]
+    },
+    "REGISTER_USER": {
+      "route": "",
+      "url": "/api/v3/user/register",
+      "roles": ["LANDLORD"]
+    },
+    "UPDATE_USER": {
+      "route": "",
+      "url": "/api/v3/user/update",
+      "roles": ["LANDLORD"]
+    },
+    "MANAGE_PASSWORD": {
+      "route": "",
+      "url": "/api/v3/user/change-password",
+      "roles": ["LANDLORD", "TENANT", "OWNER"]
+    },
+    "CLEAR_OTP_CACHE": {
+      "route": "",
+      "url": "/api/v3/user/clear-otp-cache",
+      "roles": ["LANDLORD"]
+    },
+    "TOGGLE_2FA": {
+      "route": "",
+      "url": "/api/v3/user/toggle-2fa",
+      "roles": ["LANDLORD", "TENANT", "OWNER"]
+    },
+    "LOGOUT_ALL": {
+      "route": "",
+      "url": "/api/v3/user/logout-all",
+      "roles": ["LANDLORD", "TENANT", "OWNER"]
+    },
+    "MANAGE_USER_BLOCKS": {
+      "route": "",
+      "url": "/api/v3/user-block/**",
+      "roles": ["LANDLORD"]
+    },
+    "MANAGE_IP_BLOCKS": {
+      "route": "",
+      "url": "/api/v3/ip-block/**",
+      "roles": ["LANDLORD"]
+    },
+
+    "BOOKING_STATUS": {
+      "route": "",
+      "url": "/api/booking-requests/*/status",
+      "roles": ["OWNER"]
+    },
+    "BOOKING_REQUESTS": {
+      "route": "",
+      "url": "/api/booking-requests/**",
+      "roles": ["TENANT", "OWNER"]
+    },
+
+    "FAVORITES": {
+      "route": "",
+      "url": "/api/favorites/**",
+      "roles": ["TENANT"]
+    },
+
+    "LISTING_MANAGEMENT": {
+      "route": "",
+      "url": "/api/listings/**",
+      "roles": ["OWNER"]
+    },
+
+    "OWNER_PROPERTY_MANAGEMENT": {
+      "route": "",
+      "url": "/api/owner-properties/**",
+      "roles": ["OWNER"]
+    },
+    "OWNER_UNIT_MANAGEMENT": {
+      "route": "",
+      "url": "/api/owner-units/**",
+      "roles": ["OWNER"]
+    },
+
+    "TENANT_PROFILE_SELF": {
+      "route": "",
+      "url": "/api/tenant-profiles/me",
+      "roles": ["TENANT"]
+    },
+    "TENANT_PROFILE": {
+      "route": "",
+      "url": "/api/tenant-profiles/**",
+      "roles": ["TENANT"]
+    },
+    "OWNER_PROFILE_SELF": {
+      "route": "",
+      "url": "/api/owner-profiles/me",
+      "roles": ["OWNER"]
+    },
+    "OWNER_PROFILE": {
+      "route": "",
+      "url": "/api/owner-profiles/**",
+      "roles": ["OWNER"]
+    }
+  }
+}

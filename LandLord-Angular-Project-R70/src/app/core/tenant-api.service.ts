@@ -29,6 +29,7 @@ export interface RegisterTenantRequest {
   unitId: number;
   terms: string;
   deposit: number;
+  password: string;
 }
 
 const API_BASE = 'http://localhost:8080/api/tenants';
@@ -46,6 +47,11 @@ export class TenantApiService {
 
   async get(id: number): Promise<ApiTenant> {
     return firstValueFrom(this.http.get<ApiTenant>(`${API_BASE}/${id}`));
+  }
+
+  /** The logged-in tenant's own record, resolved server-side from the auth token. */
+  async me(): Promise<ApiTenant> {
+    return firstValueFrom(this.http.get<ApiTenant>(`${API_BASE}/me`));
   }
 
   async agreementFor(tenantId: number): Promise<ApiRentalAgreement | null> {

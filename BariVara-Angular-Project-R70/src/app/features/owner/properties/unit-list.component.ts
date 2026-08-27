@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
 import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.service';
-import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
+import { ProfileApiService } from '../../../core/profile-api.service';
 
 @Component({
   selector: 'app-owner-unit-list',
@@ -49,12 +49,14 @@ import { CURRENT_OWNER_ID_REAL } from '../../../core/current-owner';
 export class OwnerUnitListComponent implements OnInit {
   protected readonly propertyApi = inject(OwnerPropertyApiService);
   protected readonly unitApi = inject(OwnerUnitApiService);
+  private readonly profileApi = inject(ProfileApiService);
   protected readonly propertyId = inject(ActivatedRoute).snapshot.paramMap.get('propertyId')!;
   protected readonly photoOrigin = API_ORIGIN;
 
   async ngOnInit(): Promise<void> {
     if (this.propertyApi.properties().length === 0) {
-      await this.propertyApi.loadForOwner(CURRENT_OWNER_ID_REAL);
+      const profile = await this.profileApi.myOwnerProfile();
+      await this.propertyApi.loadForOwner(profile.id);
     }
     await this.unitApi.loadForProperties([+this.propertyId]);
   }

@@ -1,0 +1,147 @@
+{
+  "version": "1.0.0.2",
+  "clearExistingPermissions": true,
+  "permissions": {
+    "AUTH_ME": {
+      "route": "",
+      "url": "/api/auth/me",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "MANAGE_PERMISSIONS": {
+      "route": "",
+      "url": "/api/v3/permission/role-permissions",
+      "roles": ["LANDLORD"]
+    },
+    "VIEW_PERMISSIONS": {
+      "route": "",
+      "url": "/api/v3/permission/get-user-permissions",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "LIST_ROLES": {
+      "route": "",
+      "url": "/api/v3/role/list",
+      "roles": ["LANDLORD"]
+    },
+    "REGISTER_USER": {
+      "route": "",
+      "url": "/api/v3/user/register",
+      "roles": ["LANDLORD"]
+    },
+    "UPDATE_USER": {
+      "route": "",
+      "url": "/api/v3/user/update",
+      "roles": ["LANDLORD"]
+    },
+    "MANAGE_PASSWORD": {
+      "route": "",
+      "url": "/api/v3/user/change-password",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "CLEAR_OTP_CACHE": {
+      "route": "",
+      "url": "/api/v3/user/clear-otp-cache",
+      "roles": ["LANDLORD"]
+    },
+    "TOGGLE_2FA": {
+      "route": "",
+      "url": "/api/v3/user/toggle-2fa",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "LOGOUT_ALL": {
+      "route": "",
+      "url": "/api/v3/user/logout-all",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "MANAGE_USER_BLOCKS": {
+      "route": "",
+      "url": "/api/v3/user-block/**",
+      "roles": ["LANDLORD"]
+    },
+    "MANAGE_IP_BLOCKS": {
+      "route": "",
+      "url": "/api/v3/ip-block/**",
+      "roles": ["LANDLORD"]
+    },
+
+    "TENANT_SELF": {
+      "route": "",
+      "url": "/api/tenants/me",
+      "roles": ["TENANT"]
+    },
+    "TENANT_SELF_AGREEMENT": {
+      "route": "",
+      "url": "/api/tenants/me/agreement",
+      "roles": ["TENANT"]
+    },
+    "TENANT_OUTSTANDING_BALANCE": {
+      "route": "",
+      "url": "/api/tenants/*/outstanding-balance",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "TENANT_MANAGEMENT": {
+      "route": "",
+      "url": "/api/tenants/**",
+      "roles": ["LANDLORD"]
+    },
+
+    "PROPERTY_MANAGEMENT": {
+      "route": "",
+      "url": "/api/properties/**",
+      "roles": ["LANDLORD"]
+    },
+    "UNIT_MANAGEMENT": {
+      "route": "",
+      "url": "/api/units/**",
+      "roles": ["LANDLORD"]
+    },
+
+    "INVOICE_GENERATE": {
+      "route": "",
+      "url": "/api/invoices/generate",
+      "roles": ["LANDLORD"]
+    },
+    "INVOICE_LIST": {
+      "route": "",
+      "url": "/api/invoices",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "PAYMENTS": {
+      "route": "",
+      "url": "/api/payments",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+
+    "MAINTENANCE_STATUS": {
+      "route": "",
+      "url": "/api/maintenance-tickets/*/status",
+      "roles": ["LANDLORD"]
+    },
+    "MAINTENANCE": {
+      "route": "",
+      "url": "/api/maintenance-tickets/**",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "EXPENSES": {
+      "route": "",
+      "url": "/api/expenses/**",
+      "roles": ["LANDLORD"]
+    },
+
+    "MARKETPLACE": {
+      "route": "",
+      "url": "/api/marketplace-requests/**",
+      "roles": ["LANDLORD"]
+    },
+
+    "MESSAGING": {
+      "route": "",
+      "url": "/api/conversations/**",
+      "roles": ["LANDLORD", "TENANT"]
+    },
+    "NOTIFICATIONS": {
+      "route": "",
+      "url": "/api/notifications/**",
+      "roles": ["LANDLORD", "TENANT"]
+    }
+  }
+}

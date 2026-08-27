@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 import { MessagingApiService } from '../../core/messaging-api.service';
 
 @Component({
@@ -27,7 +26,9 @@ export class TenantNotificationsComponent implements OnInit {
   readonly opened = signal(-1);
 
   async ngOnInit(): Promise<void> {
-    await this.api.loadNotificationsForTenant(CURRENT_TENANT_ID_REAL);
+    // No id needed: the backend derives "which tenant" from the auth token
+    // for a TENANT-role caller and ignores any client-supplied id anyway.
+    await this.api.loadNotifications();
   }
 
   async open(id: number): Promise<void> {

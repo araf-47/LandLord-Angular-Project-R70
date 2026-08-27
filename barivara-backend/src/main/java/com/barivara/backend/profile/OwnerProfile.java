@@ -22,6 +22,9 @@ public class OwnerProfile {
     @NotBlank
     private String phone;
 
+    /** Links this profile to its login identity in the embedded auth module. */
+    private Long authUserId;
+
     public Long getId() {
         return id;
     }
@@ -48,5 +51,13 @@ public class OwnerProfile {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Long getAuthUserId() {
+        return authUserId;
+    }
+
+    public void setAuthUserId(Long authUserId) {
+        this.authUserId = authUserId;
     }
 }

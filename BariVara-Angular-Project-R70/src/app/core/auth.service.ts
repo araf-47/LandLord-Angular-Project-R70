@@ -1,52 +1,97 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 export type UserRole = 'tenant' | 'owner' | 'landlord-linked';
 
 export interface AuthUser {
-  name: string;
-  email: string;
+  username: string;
   role: UserRole;
 }
 
-const STORAGE_KEY = 'barivara_auth_user';
+const AUTH_BASE = 'http://localhost:8081/api/v3/auth';
+const ME_URL = 'http://localhost:8081/api/auth/me';
+
+const ACCESS_TOKEN_KEY = 'barivara_access_token';
+const REFRESH_TOKEN_KEY = 'barivara_refresh_token';
+const USER_KEY = 'barivara_auth_user';
+
+const ROLE_MAP: Record<string, UserRole> = {
+  TENANT: 'tenant',
+  OWNER: 'owner',
+  LANDLORD: 'landlord-linked',
+};
+
+interface LoginResponseData {
+  accessToken: string;
+  refreshToken: string;
+  expiresInSeconds: number;
+}
+
+interface ApiEnvelope<T> {
+  data?: T;
+  message: string;
+  status: string;
+}
+
+interface MeResponse {
+  username: string;
+  roles: string[];
+}
 
 /**
- * Frontend-only stub, same shape as the LandLord app's AuthService: no real
- * backend, persists to localStorage so refresh/route-guard checks behave like a
- * logged-in session. Deliberately not shared code with the LandLord app — they're
- * two separate deployed sites with no shared runtime (see project-plan.md Phase 3).
+ * Talks to the real backend (Parts/auth, embedded in barivara-backend,
+ * separately from landlord-backend's own copy — deliberately no SSO between
+ * the two apps, see project-plan.md Phase 7).
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly userSignal = signal<AuthUser | null>(this.restore());
 
   readonly user = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.userSignal() !== null);
   readonly role = computed(() => this.userSignal()?.role ?? null);
 
-  login(email: string, _password: string, role: UserRole): void {
-    const user: AuthUser = { name: email.split('@')[0], email, role };
-    this.persist(user);
+  getAccessToken(): string | null {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
 
-  signup(name: string, email: string, role: UserRole): void {
-    const user: AuthUser = { name, email, role };
-    this.persist(user);
+  getRefreshToken(): string | null {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  }
+
+  setAccessToken(token: string): void {
+    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  }
+
+  async login(username: string, password: string): Promise<void> {
+    const res = await firstValueFrom(
+      this.http.post<ApiEnvelope<LoginResponseData>>(`${AUTH_BASE}/login`, { username, password })
+    );
+    if (res.status !== 'SUCCESS' || !res.data) {
+      throw new Error(res.message || 'Login failed');
+    }
+    localStorage.setItem(ACCESS_TOKEN_KEY, res.data.accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, res.data.refreshToken);
+
+    const me = await firstValueFrom(this.http.get<MeResponse>(ME_URL));
+    const role = me.roles.map((r) => ROLE_MAP[r]).find((r): r is UserRole => !!r) ?? 'tenant';
+    const user: AuthUser = { username: me.username, role };
+    this.userSignal.set(user);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
   }
 
   logout(): void {
     this.userSignal.set(null);
-    localStorage.removeItem(STORAGE_KEY);
-  }
-
-  private persist(user: AuthUser): void {
-    this.userSignal.set(user);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   }
 
   private restore(): AuthUser | null {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(USER_KEY);
       return raw ? (JSON.parse(raw) as AuthUser) : null;
     } catch {
       return null;

@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
 import { FavoriteApiService } from '../../core/favorite-api.service';
-import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
+import { ProfileApiService } from '../../core/profile-api.service';
 
 @Component({
   selector: 'app-tenant-favorites',
@@ -37,13 +37,18 @@ import { CURRENT_TENANT_ID_REAL } from '../../core/current-tenant';
 export class TenantFavoritesComponent {
   private readonly listingApi = inject(ListingApiService);
   private readonly favoriteApi = inject(FavoriteApiService);
+  private readonly profileApi = inject(ProfileApiService);
   protected readonly photoOrigin = API_ORIGIN;
+  private tenantId: number | null = null;
 
   constructor() {
-    this.favoriteApi.loadForTenant(CURRENT_TENANT_ID_REAL).then(() => {
-      const listingIds = new Set(this.favoriteApi.favorites().map((f) => f.listingId));
-      Promise.all([...listingIds].map((id) => this.listingApi.get(id))).then((listings) => {
-        this.listingApi.listings.set(listings);
+    this.profileApi.myTenantProfile().then((profile) => {
+      this.tenantId = profile.id;
+      this.favoriteApi.loadForTenant(profile.id).then(() => {
+        const listingIds = new Set(this.favoriteApi.favorites().map((f) => f.listingId));
+        Promise.all([...listingIds].map((id) => this.listingApi.get(id))).then((listings) => {
+          this.listingApi.listings.set(listings);
+        });
       });
     });
   }
@@ -54,7 +59,7 @@ export class TenantFavoritesComponent {
   });
 
   remove(listingId: number): void {
-    const favorite = this.favoriteApi.favorites().find((f) => f.tenantId === CURRENT_TENANT_ID_REAL && f.listingId === listingId);
+    const favorite = this.favoriteApi.favorites().find((f) => f.tenantId === this.tenantId && f.listingId === listingId);
     if (favorite) this.favoriteApi.remove(favorite.id);
   }
 }
