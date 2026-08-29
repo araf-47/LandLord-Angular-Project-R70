@@ -744,6 +744,16 @@ now functionally deeper than a route scaffold.)*
 > breakpoint. Full findings + suggested fixes:
 > **`moving-forward-plan/ui-ux_design_plan-v1.md`**. Not yet scheduled into a phase —
 > your call, same as backend order.
+>
+> **📌 Follow-up (2026-08-29), cosmetic:** separate from the functional gaps above, a
+> pure visual-polish pass ("eye-catching" pass, respecting Phase 4.1's anti-AI-
+> generated-look constraint) is written up in
+> **`moving-forward-plan/cosmetic-ui-design_plan-v1.md`** — hero moments, listing-card
+> hover/zoom + real "no photo" state, micro-interactions (stagger-in, stat-tile
+> count-up, route transitions), accent-as-highlight. Two runnable HTML/CSS/JS demos
+> exist: `moving-forward-plan/cosmetic-demo.html` (BariVara) and
+> `prototype-ground/cosmetic-demo-landlord.html` (LandLord) — you liked the direction
+> on first look. Not yet scheduled into a phase.
 4.6. Visual consistency check: both apps now share the exact same token structure,
      type scale, shadow system, and component shapes — same family, distinct skins
      (blue/professional vs. orange/marketplace) purely through the accent color and
