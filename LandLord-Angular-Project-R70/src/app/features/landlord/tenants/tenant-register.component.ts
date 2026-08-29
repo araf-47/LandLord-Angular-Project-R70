@@ -12,6 +12,17 @@ import { UnitApiService } from '../../../core/unit-api.service';
   template: `
     <h1>Register tenant (walk-in)</h1>
 
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ loadError() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
     <div class="card stack" style="max-width:640px;">
       <div>
         <h3>1. Tenant info</h3>
@@ -73,6 +84,8 @@ import { UnitApiService } from '../../../core/unit-api.service';
         <button class="btn btn-primary" (click)="save()">Confirm agreement &amp; assign unit</button>
       </div>
     </div>
+      }
+    }
   `,
 })
 export class TenantRegisterComponent implements OnInit {
@@ -91,8 +104,18 @@ export class TenantRegisterComponent implements OnInit {
   password = '';
   readonly nidError = signal('');
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly loadError = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    await Promise.all([this.propertyApi.load(), this.unitApi.load()]);
+    this.status.set('loading');
+    try {
+      await Promise.all([this.propertyApi.load(), this.unitApi.load()]);
+      this.status.set('ready');
+    } catch {
+      this.loadError.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   vacantUnits() {

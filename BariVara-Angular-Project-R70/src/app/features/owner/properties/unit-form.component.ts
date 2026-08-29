@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.service';
@@ -8,34 +8,47 @@ import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.se
   standalone: true,
   imports: [FormsModule],
   template: `
-    <h1>{{ editing ? 'Edit unit' : 'Add unit' }}</h1>
-    <div class="card" style="max-width:520px;">
-      <div class="field">
-        <label for="unitNumber">Unit number</label>
-        <input id="unitNumber" name="unitNumber" [(ngModel)]="unitNumber" required />
-      </div>
-      <div class="field">
-        <label for="rent">Rent</label>
-        <input id="rent" type="number" name="rent" [(ngModel)]="rent" required />
-      </div>
-      <div class="field">
-        <label for="photo">Photo (optional)</label>
-        @if (existingPhotoUrl) {
-          <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" style="max-width:200px;display:block;margin-bottom:0.5rem;" />
-        }
-        <input id="photo" type="file" name="photo" accept="image/*" (change)="onFileSelected($event)" />
-        @if (fileName) {
-          <span class="hint-text">{{ fileName }}</span>
-        }
-      </div>
-      @if (error) {
-        <p class="hint-text" style="color:var(--color-danger, #c0392b);">{{ error }}</p>
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading unit…</p></div>
       }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ loadError() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
+        <h1>{{ editing ? 'Edit unit' : 'Add unit' }}</h1>
+        <div class="card" style="max-width:520px;">
+          <div class="field">
+            <label for="unitNumber">Unit number</label>
+            <input id="unitNumber" name="unitNumber" [(ngModel)]="unitNumber" required />
+          </div>
+          <div class="field">
+            <label for="rent">Rent</label>
+            <input id="rent" type="number" name="rent" [(ngModel)]="rent" required />
+          </div>
+          <div class="field">
+            <label for="photo">Photo (optional)</label>
+            @if (existingPhotoUrl) {
+              <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" style="max-width:200px;display:block;margin-bottom:0.5rem;" />
+            }
+            <input id="photo" type="file" name="photo" accept="image/*" (change)="onFileSelected($event)" />
+            @if (fileName) {
+              <span class="hint-text">{{ fileName }}</span>
+            }
+          </div>
+          @if (error) {
+            <p class="hint-text" style="color:var(--color-danger, #c0392b);">{{ error }}</p>
+          }
 
-      <div class="actions-row">
-        <button class="btn btn-primary" (click)="save()">Save unit</button>
-      </div>
-    </div>
+          <div class="actions-row">
+            <button class="btn btn-primary" (click)="save()">Save unit</button>
+          </div>
+        </div>
+      }
+    }
   `,
 })
 export class OwnerUnitFormComponent implements OnInit {
@@ -55,12 +68,24 @@ export class OwnerUnitFormComponent implements OnInit {
   readonly photoOrigin = API_ORIGIN;
   error = '';
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly loadError = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    if (this.unitId) {
+    if (!this.unitId) {
+      this.status.set('ready');
+      return;
+    }
+    this.status.set('loading');
+    try {
       const unit = await this.api.get(+this.unitId);
       this.unitNumber = unit.unitNumber;
       this.rent = unit.rent;
       this.existingPhotoUrl = unit.photoUrl;
+      this.status.set('ready');
+    } catch {
+      this.loadError.set('Check your connection and try again.');
+      this.status.set('error');
     }
   }
 

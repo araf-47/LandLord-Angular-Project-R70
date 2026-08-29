@@ -13,6 +13,17 @@ import { UnitApiService } from '../../../core/unit-api.service';
   standalone: true,
   imports: [FormsModule],
   template: `
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading tenant…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
     @if (tenant()) {
       <h1>{{ tenant()!.name }}</h1>
       <div class="card">
@@ -135,6 +146,8 @@ import { UnitApiService } from '../../../core/unit-api.service';
         </div>
       </div>
     }
+      }
+    }
   `,
 })
 export class TenantDetailComponent implements OnInit {
@@ -163,23 +176,33 @@ export class TenantDetailComponent implements OnInit {
       .reduce((sum, e) => sum + e.amount, 0)
   );
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    const [tenant, agreement, invoices, payments, expenses] = await Promise.all([
-      this.api.get(this.tenantId),
-      this.api.agreementFor(this.tenantId),
-      this.billingApi.invoicesForTenant(this.tenantId),
-      this.billingApi.paymentsForTenant(this.tenantId),
-      this.maintenanceApi.expensesForTenant(this.tenantId),
-      this.unitApi.units().length ? Promise.resolve() : this.unitApi.load(),
-    ]);
-    this.tenant.set(tenant);
-    this.agreement.set(agreement);
-    this.termsDraft = agreement?.terms ?? '';
-    this.billingHistory.set(invoices);
-    this.paymentHistory.set(payments);
-    this.maintenanceHistory.set(
-      expenses.filter((e) => e.category === 'Maintenance').sort((a, b) => b.date.localeCompare(a.date))
-    );
+    this.status.set('loading');
+    try {
+      const [tenant, agreement, invoices, payments, expenses] = await Promise.all([
+        this.api.get(this.tenantId),
+        this.api.agreementFor(this.tenantId),
+        this.billingApi.invoicesForTenant(this.tenantId),
+        this.billingApi.paymentsForTenant(this.tenantId),
+        this.maintenanceApi.expensesForTenant(this.tenantId),
+        this.unitApi.units().length ? Promise.resolve() : this.unitApi.load(),
+      ]);
+      this.tenant.set(tenant);
+      this.agreement.set(agreement);
+      this.termsDraft = agreement?.terms ?? '';
+      this.billingHistory.set(invoices);
+      this.paymentHistory.set(payments);
+      this.maintenanceHistory.set(
+        expenses.filter((e) => e.category === 'Maintenance').sort((a, b) => b.date.localeCompare(a.date))
+      );
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   monthLabel(period: string): string {

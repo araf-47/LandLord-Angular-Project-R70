@@ -28,34 +28,47 @@ import { UnitApiService } from '../../../core/unit-api.service';
       </select>
     </div>
 
-    <div class="card">
-      <div class="table-scroll">
-      <table>
-        <thead>
-          <tr><th>Name</th><th>National ID</th><th>Phone</th><th>Unit</th><th>Status</th><th></th></tr>
-        </thead>
-        <tbody>
-          @for (t of filteredTenants(); track t.id) {
-            <tr>
-              <td>{{ t.name }}</td>
-              <td>{{ t.nationalId }}</td>
-              <td>{{ t.phone }}</td>
-              <td>{{ unitLabel(t.unitId) }}</td>
-              <td>{{ t.status }}</td>
-              <td class="actions-row" style="margin:0;">
-                <a class="btn btn-sm" [routerLink]="['/landlord/tenants', t.id]">View</a>
-                @if (t.status === 'active') {
-                  <a class="btn btn-sm btn-danger" [routerLink]="['/landlord/tenants', t.id, 'move-out']">Move out</a>
-                }
-              </td>
-            </tr>
-          } @empty {
-            <tr><td colspan="6" class="hint-text">No tenants match.</td></tr>
-          }
-        </tbody>
-      </table>
-      </div>
-    </div>
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading tenants…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
+        <div class="card">
+          <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>National ID</th><th>Phone</th><th>Unit</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (t of filteredTenants(); track t.id) {
+                <tr>
+                  <td>{{ t.name }}</td>
+                  <td>{{ t.nationalId }}</td>
+                  <td>{{ t.phone }}</td>
+                  <td>{{ unitLabel(t.unitId) }}</td>
+                  <td>{{ t.status }}</td>
+                  <td class="actions-row" style="margin:0;">
+                    <a class="btn btn-sm" [routerLink]="['/landlord/tenants', t.id]">View</a>
+                    @if (t.status === 'active') {
+                      <a class="btn btn-sm btn-danger" [routerLink]="['/landlord/tenants', t.id, 'move-out']">Move out</a>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="hint-text">No tenants match.</td></tr>
+              }
+            </tbody>
+          </table>
+          </div>
+        </div>
+      }
+    }
   `,
 })
 export class TenantListComponent implements OnInit {
@@ -65,8 +78,18 @@ export class TenantListComponent implements OnInit {
   readonly query = signal('');
   readonly statusFilter = signal<'active' | 'inactive' | 'all'>('active');
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    await Promise.all([this.api.load(), this.unitApi.load()]);
+    this.status.set('loading');
+    try {
+      await Promise.all([this.api.load(), this.unitApi.load()]);
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   readonly filteredTenants = computed(() => {

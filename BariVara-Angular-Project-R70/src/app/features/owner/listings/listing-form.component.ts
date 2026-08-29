@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES, PropertyType } from '../../../core/mock-data.service';
@@ -14,6 +14,17 @@ import { ProfileApiService } from '../../../core/profile-api.service';
   template: `
     <h1>Add Post Ad</h1>
 
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading your properties…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
     <div class="card stack" style="max-width:520px;">
       @if (step() === 1) {
         <p>Auto-fill from an existing property?</p>
@@ -100,9 +111,11 @@ import { ProfileApiService } from '../../../core/profile-api.service';
         </div>
       }
     </div>
+      }
+    }
   `,
 })
-export class OwnerListingFormComponent {
+export class OwnerListingFormComponent implements OnInit {
   private readonly propertyApi = inject(OwnerPropertyApiService);
   private readonly unitApi = inject(OwnerUnitApiService);
   private readonly listingApi = inject(ListingApiService);
@@ -125,13 +138,21 @@ export class OwnerListingFormComponent {
   rent: number | null = null;
   photoUrl: string | null = null;
 
-  constructor() {
-    this.profileApi.myOwnerProfile().then((profile) => {
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
+  async ngOnInit(): Promise<void> {
+    this.status.set('loading');
+    try {
+      const profile = await this.profileApi.myOwnerProfile();
       this.ownerId = profile.id;
-      this.propertyApi.loadForOwner(profile.id).then((properties) => {
-        this.unitApi.loadForProperties(properties.map((p) => p.id));
-      });
-    });
+      const properties = await this.propertyApi.loadForOwner(profile.id);
+      await this.unitApi.loadForProperties(properties.map((p) => p.id));
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   onDistrictChange(value: string): void {

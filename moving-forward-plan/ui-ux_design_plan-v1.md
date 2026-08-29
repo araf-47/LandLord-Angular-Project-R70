@@ -1,5 +1,23 @@
 # UI/UX Design Plan v1 — LandLord & BariVara
 
+> **📌 Progress (2026-08-29):** First slice implemented and verified (`ng build` clean,
+> both apps). Done: §1.1 toast system + confirm dialog (both apps, `shared/`, mounted
+> in `app.html`) — wired to LandLord's `ledger.component.ts` loading/error states,
+> `properties/unit-list`+`property-list` confirm dialogs, `tenant/payments/history`
+> toast; and BariVara's `owner/properties/unit-list` confirm dialog, `owner/listings/
+> listing-list` confirm dialog (was previously unguarded — a gap found during this
+> pass, not in the original audit), `public/listing-detail.book()` loading state +
+> toasts. §1.4's `aria-expanded` on all 5 hamburger buttons done.
+>
+> **Update, same day:** §0's headline gap ("only 1 of 56 LandLord components has
+> loading/error handling") is now closed — the same status/error pattern was rolled
+> out to all 34 remaining fetch-on-load components across both apps (24 LandLord, 10
+> BariVara). Both apps rebuild clean. Not yet touched: §1.3 inline-style cleanup
+> beyond `ledger.component.ts` (48+ instances remain), §1.5 mid-breakpoint, §1.6 dark
+> mode, and all of §2/§3's feature-specific items below (stat-tile, filter-chips,
+> permanent "no photo" placeholder, dashboard parity). Full summary:
+> `../phase-summary/ui-ux-plan-v1-slice1-summary.md`.
+
 Grounded in the actual codebase as of 2026-08-29 (post Phase 16.3, both backends live).
 Both apps use plain CSS (no Tailwind/Material/Bootstrap) — one `src/styles.css` design
 system per app, imported globally, plus component-scoped styles for one-offs. This plan

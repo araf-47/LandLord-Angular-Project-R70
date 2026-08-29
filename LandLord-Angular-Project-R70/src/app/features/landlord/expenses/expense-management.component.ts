@@ -11,77 +11,90 @@ import { TenantApiService } from '../../../core/tenant-api.service';
   template: `
     <h1>Expenses</h1>
 
-    <div class="card" style="max-width:520px;">
-      <h3>Log expense</h3>
-      <div class="field">
-        <label for="property">Property</label>
-        <select id="property" name="property" (change)="onPropertyChange($event)">
-          @for (p of propertyApi.properties(); track p.id) {
-            <option [value]="p.id" [selected]="p.id === propertyId">{{ p.name }}</option>
-          }
-        </select>
-      </div>
-      <div class="field">
-        <label for="bearer">Who bears this?</label>
-        <select id="bearer" name="bearer" [(ngModel)]="bearer">
-          <option value="landlord">Landlord</option>
-          <option value="tenant">Tenant</option>
-        </select>
-      </div>
-      @if (bearer === 'tenant') {
-        <div class="field">
-          <label for="tenant">Tenant</label>
-          <select id="tenant" name="tenant" (change)="onTenantChange($event)">
-            <option value="">— choose —</option>
-            @for (t of tenantApi.tenants(); track t.id) {
-              <option [value]="t.id" [selected]="t.id === tenantId">{{ t.name }}</option>
-            }
-          </select>
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading expenses…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ loadError() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
         </div>
       }
-      <div class="field">
-        <label for="amount">Amount</label>
-        <input id="amount" type="number" name="amount" [(ngModel)]="amount" />
-      </div>
-      <div class="field">
-        <label for="category">Category</label>
-        <select id="category" name="category" [(ngModel)]="category">
-          <option value="Maintenance">Maintenance</option>
-          <option value="Repairs">Repairs</option>
-          <option value="Utilities">Utilities</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="description">Description</label>
-        <input id="description" name="description" [(ngModel)]="description" />
-      </div>
-      @if (error()) {
-        <p class="error-text">{{ error() }}</p>
-      }
-      <div class="actions-row">
-        <button class="btn btn-primary" (click)="save()">Save expense</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="table-scroll">
-      <table>
-        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Bearer</th><th>Amount</th></tr></thead>
-        <tbody>
-          @for (e of sortedExpenses(); track e.id) {
-            <tr>
-              <td>{{ e.date }}</td>
-              <td>{{ e.category }}</td>
-              <td>{{ e.description }}</td>
-              <td>{{ e.bearer === 'tenant' ? tenantName(e.tenantId) : 'Landlord' }}</td>
-              <td>{{ e.amount }}</td>
-            </tr>
+      @case ('ready') {
+        <div class="card" style="max-width:520px;">
+          <h3>Log expense</h3>
+          <div class="field">
+            <label for="property">Property</label>
+            <select id="property" name="property" (change)="onPropertyChange($event)">
+              @for (p of propertyApi.properties(); track p.id) {
+                <option [value]="p.id" [selected]="p.id === propertyId">{{ p.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="bearer">Who bears this?</label>
+            <select id="bearer" name="bearer" [(ngModel)]="bearer">
+              <option value="landlord">Landlord</option>
+              <option value="tenant">Tenant</option>
+            </select>
+          </div>
+          @if (bearer === 'tenant') {
+            <div class="field">
+              <label for="tenant">Tenant</label>
+              <select id="tenant" name="tenant" (change)="onTenantChange($event)">
+                <option value="">— choose —</option>
+                @for (t of tenantApi.tenants(); track t.id) {
+                  <option [value]="t.id" [selected]="t.id === tenantId">{{ t.name }}</option>
+                }
+              </select>
+            </div>
           }
-        </tbody>
-      </table>
-      </div>
-    </div>
+          <div class="field">
+            <label for="amount">Amount</label>
+            <input id="amount" type="number" name="amount" [(ngModel)]="amount" />
+          </div>
+          <div class="field">
+            <label for="category">Category</label>
+            <select id="category" name="category" [(ngModel)]="category">
+              <option value="Maintenance">Maintenance</option>
+              <option value="Repairs">Repairs</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="description">Description</label>
+            <input id="description" name="description" [(ngModel)]="description" />
+          </div>
+          @if (error()) {
+            <p class="error-text">{{ error() }}</p>
+          }
+          <div class="actions-row">
+            <button class="btn btn-primary" (click)="save()">Save expense</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-scroll">
+          <table>
+            <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Bearer</th><th>Amount</th></tr></thead>
+            <tbody>
+              @for (e of sortedExpenses(); track e.id) {
+                <tr>
+                  <td>{{ e.date }}</td>
+                  <td>{{ e.category }}</td>
+                  <td>{{ e.description }}</td>
+                  <td>{{ e.bearer === 'tenant' ? tenantName(e.tenantId) : 'Landlord' }}</td>
+                  <td>{{ e.amount }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          </div>
+        </div>
+      }
+    }
   `,
 })
 export class ExpenseManagementComponent implements OnInit {
@@ -98,14 +111,24 @@ export class ExpenseManagementComponent implements OnInit {
   expenses: Awaited<ReturnType<MaintenanceApiService['allExpenses']>> = [];
   readonly error = signal('');
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly loadError = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    const [, , expenses] = await Promise.all([
-      this.propertyApi.load(),
-      this.tenantApi.load(),
-      this.maintenanceApi.allExpenses(),
-    ]);
-    this.expenses = expenses;
-    this.propertyId = this.propertyApi.properties()[0]?.id ?? null;
+    this.status.set('loading');
+    try {
+      const [, , expenses] = await Promise.all([
+        this.propertyApi.load(),
+        this.tenantApi.load(),
+        this.maintenanceApi.allExpenses(),
+      ]);
+      this.expenses = expenses;
+      this.propertyId = this.propertyApi.properties()[0]?.id ?? null;
+      this.status.set('ready');
+    } catch {
+      this.loadError.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   sortedExpenses() {

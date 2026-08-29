@@ -10,49 +10,63 @@ import { PropertyApiService } from '../../../core/property-api.service';
   imports: [FormsModule],
   template: `
     <h1>{{ editing ? 'Edit property' : 'Add property' }}</h1>
-    <div class="card" style="max-width:520px;">
-      <div class="field">
-        <label for="name">Property name</label>
-        <input id="name" name="name" [(ngModel)]="name" required />
-      </div>
-      <div class="field">
-        <label for="address">Address</label>
-        <input id="address" name="address" [(ngModel)]="address" required />
-      </div>
-      <div class="form-row">
-        <div class="field">
-          <label for="district">District</label>
-          <select id="district" name="district" [ngModel]="district()" (ngModelChange)="onDistrictChange($event)">
-            @for (d of districts; track d) {
-              <option [value]="d">{{ d }}</option>
-            }
-          </select>
+
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading property…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
         </div>
-        <div class="field">
-          <label for="area">Area</label>
-          <select id="area" name="area" [(ngModel)]="area">
-            @for (a of areas(); track a) {
-              <option [value]="a">{{ a }}</option>
-            }
-          </select>
+      }
+      @case ('ready') {
+        <div class="card" style="max-width:520px;">
+          <div class="field">
+            <label for="name">Property name</label>
+            <input id="name" name="name" [(ngModel)]="name" required />
+          </div>
+          <div class="field">
+            <label for="address">Address</label>
+            <input id="address" name="address" [(ngModel)]="address" required />
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="district">District</label>
+              <select id="district" name="district" [ngModel]="district()" (ngModelChange)="onDistrictChange($event)">
+                @for (d of districts; track d) {
+                  <option [value]="d">{{ d }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label for="area">Area</label>
+              <select id="area" name="area" [(ngModel)]="area">
+                @for (a of areas(); track a) {
+                  <option [value]="a">{{ a }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="propertyType">Property type</label>
+            <select id="propertyType" name="propertyType" [(ngModel)]="propertyType">
+              @for (t of propertyTypes; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+          <p class="hint-text">
+            District/area/property type are what let this property's vacant units
+            auto-post to BariVara.com — leave them set so that keeps working.
+          </p>
+          <div class="actions-row">
+            <button class="btn btn-primary" (click)="save()">Validate & save</button>
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label for="propertyType">Property type</label>
-        <select id="propertyType" name="propertyType" [(ngModel)]="propertyType">
-          @for (t of propertyTypes; track t.value) {
-            <option [value]="t.value">{{ t.label }}</option>
-          }
-        </select>
-      </div>
-      <p class="hint-text">
-        District/area/property type are what let this property's vacant units
-        auto-post to BariVara.com — leave them set so that keeps working.
-      </p>
-      <div class="actions-row">
-        <button class="btn btn-primary" (click)="save()">Validate & save</button>
-      </div>
-    </div>
+      }
+    }
   `,
 })
 export class PropertyFormComponent implements OnInit {
@@ -72,14 +86,24 @@ export class PropertyFormComponent implements OnInit {
   area = this.areas()[0] ?? '';
   propertyType: PropertyType = 'apartment';
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    if (this.propertyId) {
-      const property = await this.api.get(+this.propertyId);
-      this.name = property.name;
-      this.address = property.address;
-      if (property.district) this.district.set(property.district);
-      if (property.area) this.area = property.area;
-      if (property.propertyType) this.propertyType = property.propertyType;
+    this.status.set('loading');
+    try {
+      if (this.propertyId) {
+        const property = await this.api.get(+this.propertyId);
+        this.name = property.name;
+        this.address = property.address;
+        if (property.district) this.district.set(property.district);
+        if (property.area) this.area = property.area;
+        if (property.propertyType) this.propertyType = property.propertyType;
+      }
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
     }
   }
 

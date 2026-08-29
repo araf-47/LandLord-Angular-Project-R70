@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { API_ORIGIN } from '../../../core/maintenance-api.service';
@@ -10,37 +10,51 @@ import { ApiUnit, UnitApiService } from '../../../core/unit-api.service';
   imports: [FormsModule],
   template: `
     <h1>{{ editing ? 'Edit unit' : 'Add unit' }}</h1>
-    <div class="card" style="max-width:520px;">
-      <div class="field">
-        <label for="unitNumber">Unit number</label>
-        <input id="unitNumber" name="unitNumber" [(ngModel)]="unitNumber" required />
-      </div>
-      <div class="field">
-        <label for="rent">Rent</label>
-        <input id="rent" type="number" name="rent" [(ngModel)]="rent" required />
-      </div>
-      <div class="field">
-        <label for="status">Status</label>
-        <select id="status" name="status" [(ngModel)]="status">
-          <option value="vacant">Vacant</option>
-          <option value="occupied">Occupied</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="photo">Photo (optional)</label>
-        @if (existingPhotoUrl) {
-          <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" style="max-width:200px;display:block;margin-bottom:0.5rem;" />
-        }
-        <input id="photo" type="file" name="photo" accept="image/*" (change)="onFileSelected($event)" />
-        @if (fileName) {
-          <span class="hint-text">{{ fileName }}</span>
-        }
-      </div>
 
-      <div class="actions-row">
-        <button class="btn btn-primary" (click)="save()">Save unit</button>
-      </div>
-    </div>
+    @switch (pageStatus()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading unit…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ pageError() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
+        <div class="card" style="max-width:520px;">
+          <div class="field">
+            <label for="unitNumber">Unit number</label>
+            <input id="unitNumber" name="unitNumber" [(ngModel)]="unitNumber" required />
+          </div>
+          <div class="field">
+            <label for="rent">Rent</label>
+            <input id="rent" type="number" name="rent" [(ngModel)]="rent" required />
+          </div>
+          <div class="field">
+            <label for="status">Status</label>
+            <select id="status" name="status" [(ngModel)]="status">
+              <option value="vacant">Vacant</option>
+              <option value="occupied">Occupied</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="photo">Photo (optional)</label>
+            @if (existingPhotoUrl) {
+              <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" style="max-width:200px;display:block;margin-bottom:0.5rem;" />
+            }
+            <input id="photo" type="file" name="photo" accept="image/*" (change)="onFileSelected($event)" />
+            @if (fileName) {
+              <span class="hint-text">{{ fileName }}</span>
+            }
+          </div>
+
+          <div class="actions-row">
+            <button class="btn btn-primary" (click)="save()">Save unit</button>
+          </div>
+        </div>
+      }
+    }
   `,
 })
 export class UnitFormComponent implements OnInit {
@@ -60,13 +74,23 @@ export class UnitFormComponent implements OnInit {
   private selectedFile: File | null = null;
   readonly photoOrigin = API_ORIGIN;
 
+  readonly pageStatus = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly pageError = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    if (this.unitId) {
-      const unit = await this.api.get(+this.unitId);
-      this.unitNumber = unit.unitNumber;
-      this.rent = unit.rent;
-      this.status = unit.status;
-      this.existingPhotoUrl = unit.photoUrl;
+    this.pageStatus.set('loading');
+    try {
+      if (this.unitId) {
+        const unit = await this.api.get(+this.unitId);
+        this.unitNumber = unit.unitNumber;
+        this.rent = unit.rent;
+        this.status = unit.status;
+        this.existingPhotoUrl = unit.photoUrl;
+      }
+      this.pageStatus.set('ready');
+    } catch {
+      this.pageError.set('Check your connection and try again.');
+      this.pageStatus.set('error');
     }
   }
 

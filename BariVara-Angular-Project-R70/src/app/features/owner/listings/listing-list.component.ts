@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { API_ORIGIN, ListingApiService } from '../../../core/listing-api.service';
 import { ProfileApiService } from '../../../core/profile-api.service';
+import { ConfirmService } from '../../../shared/confirm.service';
 
 @Component({
   selector: 'app-owner-listing-list',
@@ -33,7 +34,7 @@ import { ProfileApiService } from '../../../core/profile-api.service';
               <td class="actions-row" style="margin:0;">
                 <a class="btn btn-sm" [routerLink]="['/owner/listings', l.id, 'edit']">Edit</a>
                 <button class="btn btn-sm" (click)="repost(l.id)">Repost</button>
-                <button class="btn btn-sm btn-danger" (click)="remove(l.id)">Delete</button>
+                <button class="btn btn-sm btn-danger" (click)="remove(l.id)" type="button">Delete</button>
               </td>
             </tr>
           } @empty {
@@ -49,6 +50,7 @@ export class OwnerListingListComponent {
   protected readonly api = inject(ListingApiService);
   private readonly profileApi = inject(ProfileApiService);
   protected readonly photoOrigin = API_ORIGIN;
+  private readonly confirmService = inject(ConfirmService);
 
   constructor() {
     this.profileApi.myOwnerProfile().then((profile) => {
@@ -64,7 +66,9 @@ export class OwnerListingListComponent {
     this.api.setStatus(id, 'active');
   }
 
-  remove(id: number): void {
+  async remove(id: number): Promise<void> {
+    const confirmed = await this.confirmService.confirm('Delete listing', 'Delete this listing? This cannot be undone.');
+    if (!confirmed) return;
     this.api.delete(id);
   }
 }

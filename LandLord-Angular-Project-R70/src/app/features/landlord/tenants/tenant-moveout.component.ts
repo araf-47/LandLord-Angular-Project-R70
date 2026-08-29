@@ -9,6 +9,17 @@ import { ApiRentalAgreement, ApiTenant, TenantApiService } from '../../../core/t
   standalone: true,
   imports: [FormsModule],
   template: `
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading tenant…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
     @if (tenant()) {
       <h1>Move out — {{ tenant()!.name }}</h1>
 
@@ -39,6 +50,8 @@ import { ApiRentalAgreement, ApiTenant, TenantApiService } from '../../../core/t
         }
       </div>
     }
+      }
+    }
   `,
 })
 export class TenantMoveoutComponent implements OnInit {
@@ -55,15 +68,25 @@ export class TenantMoveoutComponent implements OnInit {
   readonly agreement = signal<ApiRentalAgreement | null>(null);
   readonly outstandingBalance = signal(0);
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    const [tenant, agreement, balance] = await Promise.all([
-      this.api.get(this.tenantId),
-      this.api.agreementFor(this.tenantId),
-      this.billingApi.outstandingBalance(this.tenantId),
-    ]);
-    this.tenant.set(tenant);
-    this.agreement.set(agreement);
-    this.outstandingBalance.set(balance);
+    this.status.set('loading');
+    try {
+      const [tenant, agreement, balance] = await Promise.all([
+        this.api.get(this.tenantId),
+        this.api.agreementFor(this.tenantId),
+        this.billingApi.outstandingBalance(this.tenantId),
+      ]);
+      this.tenant.set(tenant);
+      this.agreement.set(agreement);
+      this.outstandingBalance.set(balance);
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   resultLabel(): string {

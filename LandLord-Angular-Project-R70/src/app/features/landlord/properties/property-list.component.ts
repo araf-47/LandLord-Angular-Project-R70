@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PropertyApiService } from '../../../core/property-api.service';
 import { UnitApiService } from '../../../core/unit-api.service';
+import { ConfirmService } from '../../../shared/confirm.service';
 
 @Component({
   selector: 'app-property-list',
@@ -43,6 +44,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
 export class PropertyListComponent implements OnInit {
   protected readonly api = inject(PropertyApiService);
   protected readonly unitApi = inject(UnitApiService);
+  private readonly confirmService = inject(ConfirmService);
 
   async ngOnInit(): Promise<void> {
     await Promise.all([this.api.load(), this.unitApi.load()]);
@@ -53,7 +55,8 @@ export class PropertyListComponent implements OnInit {
   }
 
   async remove(id: number): Promise<void> {
-    if (!confirm('Delete this property? This cannot be undone.')) return;
+    const confirmed = await this.confirmService.confirm('Delete property', 'Delete this property? This cannot be undone.');
+    if (!confirmed) return;
     await this.api.delete(id);
   }
 }

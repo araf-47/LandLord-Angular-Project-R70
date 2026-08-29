@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OwnerPropertyApiService } from '../../../core/owner-property-api.service';
 import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.service';
 import { ProfileApiService } from '../../../core/profile-api.service';
+import { ConfirmService } from '../../../shared/confirm.service';
 
 @Component({
   selector: 'app-owner-unit-list',
@@ -52,6 +53,7 @@ export class OwnerUnitListComponent implements OnInit {
   private readonly profileApi = inject(ProfileApiService);
   protected readonly propertyId = inject(ActivatedRoute).snapshot.paramMap.get('propertyId')!;
   protected readonly photoOrigin = API_ORIGIN;
+  private readonly confirmService = inject(ConfirmService);
 
   async ngOnInit(): Promise<void> {
     if (this.propertyApi.properties().length === 0) {
@@ -70,7 +72,8 @@ export class OwnerUnitListComponent implements OnInit {
   }
 
   async remove(unitId: number): Promise<void> {
-    if (!confirm('Delete this unit? This cannot be undone.')) return;
+    const confirmed = await this.confirmService.confirm('Delete unit', 'Delete this unit? This cannot be undone.');
+    if (!confirmed) return;
     await this.unitApi.delete(unitId);
   }
 }

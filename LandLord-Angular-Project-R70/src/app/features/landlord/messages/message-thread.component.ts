@@ -11,21 +11,34 @@ const POLL_MS = 10000;
   standalone: true,
   imports: [FormsModule, SlicePipe],
   template: `
-    @if (conversation()) {
-      <h1>{{ conversation()!.withName }}</h1>
-      <div class="card stack">
-        @for (m of messages(); track m.id) {
-          <div><strong>{{ m.senderRole === 'landlord' ? 'You' : conversation()!.withName }}:</strong> {{ m.text }} <span class="hint-text">({{ m.sentAt | slice: 0 : 10 }})</span></div>
-        } @empty {
-          <p class="hint-text">No messages yet.</p>
-        }
-      </div>
-      <div class="card">
-        <div class="field">
-          <textarea rows="2" name="reply" [(ngModel)]="reply" placeholder="Send / reply message"></textarea>
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading conversation…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
         </div>
-        <button class="btn btn-primary" (click)="send()">Send</button>
-      </div>
+      }
+      @case ('ready') {
+        @if (conversation()) {
+          <h1>{{ conversation()!.withName }}</h1>
+          <div class="card stack">
+            @for (m of messages(); track m.id) {
+              <div><strong>{{ m.senderRole === 'landlord' ? 'You' : conversation()!.withName }}:</strong> {{ m.text }} <span class="hint-text">({{ m.sentAt | slice: 0 : 10 }})</span></div>
+            } @empty {
+              <p class="hint-text">No messages yet.</p>
+            }
+          </div>
+          <div class="card">
+            <div class="field">
+              <textarea rows="2" name="reply" [(ngModel)]="reply" placeholder="Send / reply message"></textarea>
+            </div>
+            <button class="btn btn-primary" (click)="send()">Send</button>
+          </div>
+        }
+      }
     }
   `,
 })
@@ -38,11 +51,22 @@ export class LandlordMessageThreadComponent implements OnInit, OnDestroy {
   readonly conversation = computed(() => this.api.conversations().find((c) => c.id === this.conversationId));
   readonly messages = signal<ApiMessage[]>([]);
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    if (!this.api.conversations().length) {
-      await this.api.loadConversations();
+    this.status.set('loading');
+    try {
+      if (!this.api.conversations().length) {
+        await this.api.loadConversations();
+      }
+      await this.refresh();
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
+      return;
     }
-    await this.refresh();
     this.pollHandle = setInterval(() => this.refresh(), POLL_MS);
   }
 

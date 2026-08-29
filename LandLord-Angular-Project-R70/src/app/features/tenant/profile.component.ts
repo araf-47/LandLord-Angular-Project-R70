@@ -9,6 +9,17 @@ import { ApiTenant, TenantApiService } from '../../core/tenant-api.service';
   template: `
     <h1>My Profile</h1>
 
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading profile…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ loadError() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
     @if (tenant(); as t) {
       <div class="card" style="max-width:480px;">
         @if (!editing()) {
@@ -39,6 +50,8 @@ import { ApiTenant, TenantApiService } from '../../core/tenant-api.service';
         }
       </div>
     }
+      }
+    }
   `,
 })
 export class TenantProfileComponent implements OnInit {
@@ -51,8 +64,18 @@ export class TenantProfileComponent implements OnInit {
   phone = '';
   email = '';
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly loadError = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    this.tenant.set(await this.tenantApi.me());
+    this.status.set('loading');
+    try {
+      this.tenant.set(await this.tenantApi.me());
+      this.status.set('ready');
+    } catch {
+      this.loadError.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   edit(): void {

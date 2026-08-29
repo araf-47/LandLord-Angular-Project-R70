@@ -8,46 +8,59 @@ import { API_ORIGIN, MaintenanceApiService } from '../../../core/maintenance-api
   standalone: true,
   imports: [FormsModule],
   template: `
-    @if (ticket()) {
-      <h1>Ticket — {{ ticket()!.description }}</h1>
-      <div class="card stack" style="max-width:520px;">
-        <p><strong>Status:</strong> {{ ticket()!.status }}</p>
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading ticket…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
+        @if (ticket()) {
+          <h1>Ticket — {{ ticket()!.description }}</h1>
+          <div class="card stack" style="max-width:520px;">
+            <p><strong>Status:</strong> {{ ticket()!.status }}</p>
 
-        @if (ticket()!.photoUrl) {
-          <img [src]="photoUrl()" alt="Ticket photo" style="max-width:100%;border-radius:8px;" />
+            @if (ticket()!.photoUrl) {
+              <img [src]="photoUrl()" alt="Ticket photo" style="max-width:100%;border-radius:8px;" />
+            }
+
+            @if (ticket()!.status === 'pending') {
+              <button class="btn btn-primary" (click)="askCost()">Update status: Resolved</button>
+
+              @if (asking() && !costingForm()) {
+                <div class="field">
+                  <label>Did repair cost money?</label>
+                  <div class="form-row">
+                    <button class="btn btn-sm" (click)="costingForm.set(true)">Yes</button>
+                    <button class="btn btn-sm" (click)="resolve()">No</button>
+                  </div>
+                </div>
+              }
+
+              @if (costingForm()) {
+                <div class="field">
+                  <label for="amount">Amount</label>
+                  <input id="amount" type="number" name="amount" [(ngModel)]="amount" />
+                </div>
+                <div class="field">
+                  <label for="bearer">Who bears this?</label>
+                  <select id="bearer" name="bearer" [(ngModel)]="bearer">
+                    <option value="landlord">Landlord</option>
+                    <option value="tenant">Tenant</option>
+                  </select>
+                </div>
+                <div class="actions-row">
+                  <button class="btn btn-primary" (click)="resolve()">Save &amp; resolve</button>
+                </div>
+              }
+            }
+          </div>
         }
-
-        @if (ticket()!.status === 'pending') {
-          <button class="btn btn-primary" (click)="askCost()">Update status: Resolved</button>
-
-          @if (asking() && !costingForm()) {
-            <div class="field">
-              <label>Did repair cost money?</label>
-              <div class="form-row">
-                <button class="btn btn-sm" (click)="costingForm.set(true)">Yes</button>
-                <button class="btn btn-sm" (click)="resolve()">No</button>
-              </div>
-            </div>
-          }
-
-          @if (costingForm()) {
-            <div class="field">
-              <label for="amount">Amount</label>
-              <input id="amount" type="number" name="amount" [(ngModel)]="amount" />
-            </div>
-            <div class="field">
-              <label for="bearer">Who bears this?</label>
-              <select id="bearer" name="bearer" [(ngModel)]="bearer">
-                <option value="landlord">Landlord</option>
-                <option value="tenant">Tenant</option>
-              </select>
-            </div>
-            <div class="actions-row">
-              <button class="btn btn-primary" (click)="resolve()">Save &amp; resolve</button>
-            </div>
-          }
-        }
-      </div>
+      }
     }
   `,
 })
@@ -64,9 +77,19 @@ export class LandlordTicketDetailComponent implements OnInit {
   amount = 0;
   bearer: 'landlord' | 'tenant' = 'landlord';
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    if (this.api.tickets().length === 0) {
-      await this.api.load();
+    this.status.set('loading');
+    try {
+      if (this.api.tickets().length === 0) {
+        await this.api.load();
+      }
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
     }
   }
 

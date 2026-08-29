@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { API_ORIGIN } from '../../../core/maintenance-api.service';
 import { PropertyApiService } from '../../../core/property-api.service';
 import { UnitApiService } from '../../../core/unit-api.service';
+import { ConfirmService } from '../../../shared/confirm.service';
 
 @Component({
   selector: 'app-unit-list',
@@ -50,6 +51,7 @@ export class UnitListComponent implements OnInit {
   protected readonly unitApi = inject(UnitApiService);
   protected readonly propertyId = inject(ActivatedRoute).snapshot.paramMap.get('propertyId')!;
   protected readonly photoOrigin = API_ORIGIN;
+  private readonly confirmService = inject(ConfirmService);
 
   async ngOnInit(): Promise<void> {
     if (this.propertyApi.properties().length === 0) {
@@ -63,7 +65,8 @@ export class UnitListComponent implements OnInit {
   }
 
   async remove(unitId: number): Promise<void> {
-    if (!confirm('Delete this unit? This cannot be undone.')) return;
+    const confirmed = await this.confirmService.confirm('Delete unit', 'Delete this unit? This cannot be undone.');
+    if (!confirmed) return;
     await this.unitApi.delete(unitId);
   }
 }

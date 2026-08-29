@@ -1,6 +1,9 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-27 (Phase 7 — real auth — now fully done, backend and
+Last updated: 2026-08-29 (First slice of `ui-ux_design_plan-v1.md` built and verified
+— toast/confirm-dialog shared infra in both apps, ledger loading/error states, and
+delete-confirm/booking-feedback fixes; see §5 Phase 4 follow-up and
+`phase-summary/ui-ux-plan-v1-slice1-summary.md`. Phase 7 — real auth — fully done, backend and
 frontend, both apps. `Parts/auth` embedded separately into each backend, no
 SSO; both Angular apps' `AuthService`/`roleGuard` replaced with real
 login/token/role handling; the `CURRENT_TENANT_ID_REAL`/`CURRENT_OWNER_ID_REAL`
@@ -744,6 +747,27 @@ now functionally deeper than a route scaffold.)*
 > breakpoint. Full findings + suggested fixes:
 > **`moving-forward-plan/ui-ux_design_plan-v1.md`**. Not yet scheduled into a phase —
 > your call, same as backend order.
+>
+> **📌 Progress (2026-08-29):** First slice of that plan built and verified (both apps
+> build clean). Shared `ToastService`/`<app-toast-host>` and `ConfirmService`/
+> `<app-confirm-dialog>` now exist in both apps (`shared/`, mounted once in `app.html`),
+> plus `--space-*` tokens and `.text-success`/`.text-danger`/`.mb-*`/`.gap-*` utilities
+> in both `styles.css`. Wired up as proof: LandLord's `ledger.component.ts` (real
+> loading/error/ready states, replacing the silent `Promise.all`), `properties/
+> unit-list` + `property-list` (confirm dialog replaces `confirm()`), `tenant/payments/
+> history` (toast replaces `alert()`); BariVara's `owner/properties/unit-list` (confirm
+> dialog) and `owner/listings/listing-list` (confirm dialog added — this delete had
+> **no confirmation at all** before, found during this pass), `public/listing-detail`'s
+> `book()` (loading/disabled button state + success/error toasts, previously silent).
+> `aria-expanded` added to all 5 hamburger menu-toggle buttons across both apps.
+> **Update, same day:** the loading/error pattern then rolled out to all 34 remaining
+> fetch-on-load components (24 LandLord, 10 BariVara) — closes the plan's §0 headline
+> gap ("only 1 of 56 LandLord components handled loading/error") across essentially
+> the whole app now. Both apps re-verified clean with `ng build`. Full summary:
+> `phase-summary/ui-ux-plan-v1-slice1-summary.md`. Still open: browser verification
+> against the live backends, inline-style cleanup (48+ instances), mid-breakpoint,
+> dark mode, stat-tile component, and the BariVara-specific items (filter-chips,
+> permanent "no photo" placeholder, dashboard parity).
 >
 > **📌 Follow-up (2026-08-29), cosmetic:** separate from the functional gaps above, a
 > pure visual-polish pass ("eye-catching" pass, respecting Phase 4.1's anti-AI-

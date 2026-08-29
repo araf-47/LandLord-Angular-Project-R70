@@ -5,6 +5,7 @@ import { API_ORIGIN, ApiListing, ListingApiService } from '../../core/listing-ap
 import { FavoriteApiService } from '../../core/favorite-api.service';
 import { BookingApiService } from '../../core/booking-api.service';
 import { ProfileApiService } from '../../core/profile-api.service';
+import { ToastService } from '../../shared/toast.service';
 
 @Component({
   selector: 'app-listing-detail',
@@ -35,7 +36,7 @@ import { ProfileApiService } from '../../core/profile-api.service';
             <div class="actions-row">
               <button class="btn" (click)="toggleFavorite()">{{ isFavorite() ? 'Saved ✓' : 'Save' }}</button>
               @if (!alreadyRequested()) {
-                <button class="btn btn-primary" (click)="book()">Book now</button>
+                <button class="btn btn-primary" [disabled]="booking()" (click)="book()">{{ booking() ? 'Booking…' : 'Book now' }}</button>
               }
             </div>
             @if (alreadyRequested()) {
@@ -60,9 +61,11 @@ export class ListingDetailComponent {
   private readonly bookingApi = inject(BookingApiService);
   private readonly profileApi = inject(ProfileApiService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   private readonly listingId = Number(inject(ActivatedRoute).snapshot.paramMap.get('id'));
 
   readonly listing = signal<ApiListing | undefined>(undefined);
+  readonly booking = signal(false);
   private readonly tenantId = signal<number | null>(null);
 
   readonly alreadyRequested = computed(() => {
@@ -99,13 +102,21 @@ export class ListingDetailComponent {
 
   async book(): Promise<void> {
     const id = this.tenantId();
-    if (id === null) return;
-    const tenant = await this.profileApi.myTenantProfile();
-    await this.bookingApi.create({
-      listingId: this.listingId,
-      tenantId: id,
-      applicantName: tenant.name,
-    });
+    if (id === null || this.booking()) return;
+    this.booking.set(true);
+    try {
+      const tenant = await this.profileApi.myTenantProfile();
+      await this.bookingApi.create({
+        listingId: this.listingId,
+        tenantId: id,
+        applicantName: tenant.name,
+      });
+      this.toast.success('Request sent.');
+    } catch {
+      this.toast.error("Couldn't send your request. Please try again.");
+    } finally {
+      this.booking.set(false);
+    }
   }
 
   promptSignup(): void {

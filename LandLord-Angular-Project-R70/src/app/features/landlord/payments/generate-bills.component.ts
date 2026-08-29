@@ -10,40 +10,54 @@ import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
   imports: [FormsModule],
   template: `
     <h1>Monthly Bills</h1>
-    <div class="card">
-      <p class="hint-text">{{ label(currentPeriod) }} — bills generate against the current month only.</p>
-      <button class="btn btn-primary" (click)="generate()">Generate bills for tenants missing one this month</button>
-    </div>
 
-    <div class="card">
-      <div class="table-scroll">
-      <table>
-        <thead>
-          <tr><th>Tenant</th><th>Rent</th><th>Utilities</th><th>Rolled over</th><th>Total due</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          @for (i of rows(); track i.id) {
-            <tr>
-              <td>{{ tenantName(i.tenantId) }}</td>
-              <td>{{ i.rent }}</td>
-              <td>{{ i.utilitiesTotal }}</td>
-              <td>{{ i.prevUnpaidRolled }}</td>
-              <td>
-                @if (i.status === 'partial') {
-                  {{ i.balance }}/{{ i.amount }}
-                } @else {
-                  {{ i.balance }}
-                }
-              </td>
-              <td><span class="badge" [class.badge-unpaid]="i.status === 'unpaid'" [class.badge-partial]="i.status === 'partial'" [class.badge-paid]="i.status === 'paid'">{{ i.status }}</span></td>
-            </tr>
-          } @empty {
-            <tr><td colspan="6" class="hint-text">No bills for this month yet.</td></tr>
-          }
-        </tbody>
-      </table>
-      </div>
-    </div>
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading bills…</p></div>
+      }
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
+        <div class="card">
+          <p class="hint-text">{{ label(currentPeriod) }} — bills generate against the current month only.</p>
+          <button class="btn btn-primary" (click)="generate()">Generate bills for tenants missing one this month</button>
+        </div>
+
+        <div class="card">
+          <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Tenant</th><th>Rent</th><th>Utilities</th><th>Rolled over</th><th>Total due</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (i of rows(); track i.id) {
+                <tr>
+                  <td>{{ tenantName(i.tenantId) }}</td>
+                  <td>{{ i.rent }}</td>
+                  <td>{{ i.utilitiesTotal }}</td>
+                  <td>{{ i.prevUnpaidRolled }}</td>
+                  <td>
+                    @if (i.status === 'partial') {
+                      {{ i.balance }}/{{ i.amount }}
+                    } @else {
+                      {{ i.balance }}
+                    }
+                  </td>
+                  <td><span class="badge" [class.badge-unpaid]="i.status === 'unpaid'" [class.badge-partial]="i.status === 'partial'" [class.badge-paid]="i.status === 'paid'">{{ i.status }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="hint-text">No bills for this month yet.</td></tr>
+              }
+            </tbody>
+          </table>
+          </div>
+        </div>
+      }
+    }
   `,
 })
 export class GenerateBillsComponent implements OnInit {
@@ -60,10 +74,20 @@ export class GenerateBillsComponent implements OnInit {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id - a.id)
   );
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    await this.tenantApi.load();
-    this.tenants.set(this.tenantApi.tenants());
-    await this.refresh();
+    this.status.set('loading');
+    try {
+      await this.tenantApi.load();
+      this.tenants.set(this.tenantApi.tenants());
+      await this.refresh();
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   private async refresh(): Promise<void> {

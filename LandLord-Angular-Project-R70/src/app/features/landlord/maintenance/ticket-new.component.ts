@@ -11,27 +11,41 @@ import { UnitApiService } from '../../../core/unit-api.service';
   imports: [FormsModule],
   template: `
     <h1>Log new issue</h1>
-    <div class="card stack" style="max-width:520px;">
-      <div class="field">
-        <label for="tenant">Tenant &amp; unit</label>
-        <select id="tenant" name="tenant" (change)="onTenantChange($event)">
-          <option value="">— choose —</option>
-          @for (t of tenantApi.tenants(); track t.id) {
-            <option [value]="t.id" [selected]="t.id === tenantId">{{ t.name }} — {{ unitLabel(t.unitId) }}</option>
-          }
-        </select>
-      </div>
-      <div class="field">
-        <label for="description">Issue description</label>
-        <textarea id="description" rows="3" name="description" [(ngModel)]="description"></textarea>
-      </div>
-      @if (error()) {
-        <p class="error-text">{{ error() }}</p>
+
+    @switch (status()) {
+      @case ('loading') {
+        <div class="card"><p class="hint-text">Loading…</p></div>
       }
-      <div class="actions-row">
-        <button class="btn btn-primary" (click)="save()">Save ticket (status: Pending)</button>
-      </div>
-    </div>
+      @case ('error') {
+        <div class="card">
+          <p class="text-danger mb-sm">Couldn't load this page. {{ loadError() }}</p>
+          <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+        </div>
+      }
+      @case ('ready') {
+        <div class="card stack" style="max-width:520px;">
+          <div class="field">
+            <label for="tenant">Tenant &amp; unit</label>
+            <select id="tenant" name="tenant" (change)="onTenantChange($event)">
+              <option value="">— choose —</option>
+              @for (t of tenantApi.tenants(); track t.id) {
+                <option [value]="t.id" [selected]="t.id === tenantId">{{ t.name }} — {{ unitLabel(t.unitId) }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="description">Issue description</label>
+            <textarea id="description" rows="3" name="description" [(ngModel)]="description"></textarea>
+          </div>
+          @if (error()) {
+            <p class="error-text">{{ error() }}</p>
+          }
+          <div class="actions-row">
+            <button class="btn btn-primary" (click)="save()">Save ticket (status: Pending)</button>
+          </div>
+        </div>
+      }
+    }
   `,
 })
 export class LandlordTicketNewComponent implements OnInit {
@@ -44,8 +58,18 @@ export class LandlordTicketNewComponent implements OnInit {
   description = '';
   readonly error = signal('');
 
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly loadError = signal<string | undefined>(undefined);
+
   async ngOnInit(): Promise<void> {
-    await Promise.all([this.tenantApi.load(), this.unitApi.load()]);
+    this.status.set('loading');
+    try {
+      await Promise.all([this.tenantApi.load(), this.unitApi.load()]);
+      this.status.set('ready');
+    } catch {
+      this.loadError.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   unitLabel(unitId: number | null): string {

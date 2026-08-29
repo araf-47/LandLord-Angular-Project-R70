@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ApiPayment, BillingApiService } from '../../../core/billing-api.service';
 import { TenantApiService } from '../../../core/tenant-api.service';
+import { ToastService } from '../../../shared/toast.service';
 
 @Component({
   selector: 'app-tenant-payment-history',
@@ -36,6 +37,7 @@ import { TenantApiService } from '../../../core/tenant-api.service';
 export class TenantPaymentHistoryComponent implements OnInit {
   private readonly tenantApi = inject(TenantApiService);
   private readonly billingApi = inject(BillingApiService);
+  private readonly toast = inject(ToastService);
 
   readonly history = signal<ApiPayment[]>([]);
 
@@ -47,6 +49,6 @@ export class TenantPaymentHistoryComponent implements OnInit {
 
   download(paymentId: number): void {
     // PDF generation is a backend concern; frontend stub only.
-    alert(`Receipt PDF generated for payment ${paymentId}`);
+    this.toast.success(`Receipt PDF generated for payment ${paymentId}`);
   }
 }

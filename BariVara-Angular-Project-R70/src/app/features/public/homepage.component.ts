@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AREAS_BY_DISTRICT, DISTRICTS, PROPERTY_TYPES } from '../../core/mock-data.service';
@@ -38,31 +38,44 @@ import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
       </div>
 
       <h2>Recent listings</h2>
-      <div class="listing-grid">
-        @for (l of recentListings(); track l.id) {
-          <a class="listing-card" [routerLink]="['/listings', l.id]">
-            @if (l.photoUrl) {
-              <img class="listing-card-image" [src]="photoOrigin + l.photoUrl" alt="" style="width:100%;object-fit:cover;" />
-            } @else {
-              <div class="listing-card-image">No photo</div>
-            }
-            <div class="listing-card-body">
-              <div class="listing-card-title">{{ l.title }}</div>
-              <p>{{ l.area }}, {{ l.district }}</p>
-              <span class="badge" [class.badge-owner]="l.source === 'owner'" [class.badge-landlord-linked]="l.source === 'landlord-linked'">
-                {{ l.source === 'owner' ? 'Owner-posted' : 'LandLord-linked' }}
-              </span>
-              <div class="listing-card-rent">৳{{ l.rent }}/mo</div>
-            </div>
-          </a>
-        } @empty {
-          <p class="hint-text">No listings yet.</p>
+      @switch (status()) {
+        @case ('loading') {
+          <div class="card"><p class="hint-text">Loading recent listings…</p></div>
         }
-      </div>
+        @case ('error') {
+          <div class="card">
+            <p class="text-danger mb-sm">Couldn't load this page. {{ error() }}</p>
+            <button type="button" class="btn btn-sm" (click)="ngOnInit()">Retry</button>
+          </div>
+        }
+        @case ('ready') {
+          <div class="listing-grid">
+            @for (l of recentListings(); track l.id) {
+              <a class="listing-card" [routerLink]="['/listings', l.id]">
+                @if (l.photoUrl) {
+                  <img class="listing-card-image" [src]="photoOrigin + l.photoUrl" alt="" style="width:100%;object-fit:cover;" />
+                } @else {
+                  <div class="listing-card-image">No photo</div>
+                }
+                <div class="listing-card-body">
+                  <div class="listing-card-title">{{ l.title }}</div>
+                  <p>{{ l.area }}, {{ l.district }}</p>
+                  <span class="badge" [class.badge-owner]="l.source === 'owner'" [class.badge-landlord-linked]="l.source === 'landlord-linked'">
+                    {{ l.source === 'owner' ? 'Owner-posted' : 'LandLord-linked' }}
+                  </span>
+                  <div class="listing-card-rent">৳{{ l.rent }}/mo</div>
+                </div>
+              </a>
+            } @empty {
+              <p class="hint-text">No listings yet.</p>
+            }
+          </div>
+        }
+      }
     </div>
   `,
 })
-export class HomepageComponent {
+export class HomepageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly api = inject(ListingApiService);
   protected readonly photoOrigin = API_ORIGIN;
@@ -75,8 +88,18 @@ export class HomepageComponent {
 
   readonly areas = computed(() => (this.district() ? AREAS_BY_DISTRICT[this.district()] ?? [] : []));
 
-  constructor() {
-    this.api.search();
+  readonly status = signal<'loading' | 'error' | 'ready'>('loading');
+  readonly error = signal<string | undefined>(undefined);
+
+  async ngOnInit(): Promise<void> {
+    this.status.set('loading');
+    try {
+      await this.api.search();
+      this.status.set('ready');
+    } catch {
+      this.error.set('Check your connection and try again.');
+      this.status.set('error');
+    }
   }
 
   readonly recentListings = computed(() => this.api.listings().filter((l) => l.status === 'active').slice(0, 8));
