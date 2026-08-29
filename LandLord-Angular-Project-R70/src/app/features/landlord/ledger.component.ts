@@ -157,8 +157,9 @@ export class LedgerComponent implements OnInit {
     this.entries.set([...income, ...outflow].sort((a, b) => a.date.localeCompare(b.date)));
   }
 
-  /** Cumulative balance computed over entries within the selected date range,
-   *  oldest first, so the last row's balance always matches the Net card above. */
+  /** Cumulative balance computed oldest-first (so each row's balance is correct
+   *  running-total-to-date), then reversed so the table displays newest first —
+   *  top row's balance always matches the Net card above. */
   readonly visibleRows = computed(() => {
     let balance = 0;
     const propertyFilter = this.propertyFilter();
@@ -168,7 +169,8 @@ export class LedgerComponent implements OnInit {
       .map((entry) => {
         balance += entry.type === 'income' ? entry.amount : -entry.amount;
         return { ...entry, balance };
-      });
+      })
+      .reverse();
   });
 
   readonly totalIn = computed(() =>

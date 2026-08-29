@@ -41,7 +41,8 @@ export class TenantPaymentHistoryComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const tenant = await this.tenantApi.me();
-    this.history.set(await this.billingApi.paymentsForTenant(tenant.id));
+    const payments = await this.billingApi.paymentsForTenant(tenant.id);
+    this.history.set([...payments].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id));
   }
 
   download(paymentId: number): void {

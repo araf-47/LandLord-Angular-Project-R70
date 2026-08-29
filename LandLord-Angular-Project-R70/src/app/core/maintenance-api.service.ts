@@ -34,19 +34,23 @@ export class MaintenanceApiService {
 
   readonly tickets = signal<ApiMaintenanceTicket[]>([]);
 
+  private sortTickets(list: ApiMaintenanceTicket[]): ApiMaintenanceTicket[] {
+    return [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id - a.id);
+  }
+
   async load(): Promise<void> {
     const result = await firstValueFrom(this.http.get<ApiMaintenanceTicket[]>(`${BASE}/maintenance-tickets`));
-    this.tickets.set(result);
+    this.tickets.set(this.sortTickets(result));
   }
 
   async loadForTenant(tenantId: number): Promise<void> {
     const result = await firstValueFrom(this.http.get<ApiMaintenanceTicket[]>(`${BASE}/maintenance-tickets`, { params: { tenantId } }));
-    this.tickets.set(result);
+    this.tickets.set(this.sortTickets(result));
   }
 
   async loadForUnit(unitId: number): Promise<void> {
     const result = await firstValueFrom(this.http.get<ApiMaintenanceTicket[]>(`${BASE}/maintenance-tickets`, { params: { unitId } }));
-    this.tickets.set(result);
+    this.tickets.set(this.sortTickets(result));
   }
 
   async ticket(id: number): Promise<ApiMaintenanceTicket> {
@@ -55,7 +59,7 @@ export class MaintenanceApiService {
 
   async createTicket(unitId: number, tenantId: number, description: string): Promise<ApiMaintenanceTicket> {
     const created = await firstValueFrom(this.http.post<ApiMaintenanceTicket>(`${BASE}/maintenance-tickets`, { unitId, tenantId, description }));
-    this.tickets.update((list) => [...list, created]);
+    this.tickets.update((list) => [created, ...list]);
     return created;
   }
 

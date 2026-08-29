@@ -69,7 +69,7 @@ import { TenantApiService } from '../../../core/tenant-api.service';
       <table>
         <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Bearer</th><th>Amount</th></tr></thead>
         <tbody>
-          @for (e of expenses; track e.id) {
+          @for (e of sortedExpenses(); track e.id) {
             <tr>
               <td>{{ e.date }}</td>
               <td>{{ e.category }}</td>
@@ -106,6 +106,10 @@ export class ExpenseManagementComponent implements OnInit {
     ]);
     this.expenses = expenses;
     this.propertyId = this.propertyApi.properties()[0]?.id ?? null;
+  }
+
+  sortedExpenses() {
+    return [...this.expenses].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
   }
 
   tenantName(tenantId: number | null): string {

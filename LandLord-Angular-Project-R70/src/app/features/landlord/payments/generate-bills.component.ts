@@ -54,7 +54,11 @@ export class GenerateBillsComponent implements OnInit {
   readonly invoices = signal<ApiInvoice[]>([]);
   readonly tenants = signal<ApiTenant[]>([]);
 
-  readonly rows = computed(() => this.invoices().filter((i) => i.period === this.currentPeriod));
+  readonly rows = computed(() =>
+    this.invoices()
+      .filter((i) => i.period === this.currentPeriod)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id - a.id)
+  );
 
   async ngOnInit(): Promise<void> {
     await this.tenantApi.load();
