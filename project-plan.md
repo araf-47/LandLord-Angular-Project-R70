@@ -783,6 +783,23 @@ now functionally deeper than a route scaffold.)*
 > active-filter-chips added to browse/search. Full detail:
 > `phase-summary/ui-ux-plan-v1-slice1-summary.md`.
 >
+> **📌 Verified (2026-08-30):** the "still open: browser verification" item above is
+> now closed. Full click-through against the live backends on both apps: dark-mode
+> toggle, ledger loading/error states (error state forced via a fetch-injection test,
+> Retry recovers cleanly), delete-confirm dialogs (LandLord unit/property, BariVara
+> unit/listing — the previously-unguarded listing delete confirmed fixed), BariVara
+> active-filter-chips (set + "Clear all", live-filters), tenant booking-request flow
+> end-to-end including sync to LandLord's Marketplace & Leads → Requests, tenant
+> "Download receipt" toast, and a keyboard-only pass (`aria-expanded` toggles
+> correctly, Escape-to-cancel works). No regressions found in any of this pass's
+> work. Three pre-existing bugs turned up incidentally (not regressions from this
+> plan) and are filed in `bug-for-later/`: local-format phone numbers (no `+880`)
+> rejected at registration in both apps despite LandLord's own form claiming
+> otherwise; `ConfirmDialogComponent`'s focus trap doesn't actually trap focus
+> (Tab escapes the modal) in both apps; and `receive-payment.component.ts` shows a
+> false "Payment saved" success message when the tenant has no unpaid invoice to
+> apply the payment to. Full session detail: `phase-summary/ui-ux-plan-v1-session-summary.md`.
+>
 > **📌 Follow-up (2026-08-29), cosmetic:** separate from the functional gaps above, a
 > pure visual-polish pass ("eye-catching" pass, respecting Phase 4.1's anti-AI-
 > generated-look constraint) is written up in
