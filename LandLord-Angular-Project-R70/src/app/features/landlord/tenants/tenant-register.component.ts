@@ -39,7 +39,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
           <div class="field">
             <label for="password">Temporary password</label>
             <input id="password" name="password" [(ngModel)]="password" required />
-            <span class="hint-text">Hand this to the tenant in person — it's their login, along with their phone number.</span>
+            <span class="hint-text">8-16 chars, needs upper, lower, digit, and a special character. Hand this to the tenant in person — it's their login, along with their phone number.</span>
           </div>
         </div>
         @if (nidError()) {
@@ -135,7 +135,7 @@ export class TenantRegisterComponent implements OnInit {
       });
     } catch (err: any) {
       if (err?.status === 409) {
-        this.nidError.set('This National ID is already registered to an active tenant.');
+        this.nidError.set(err?.error?.message || 'This National ID is already registered to an active tenant.');
         return;
       }
       throw err;
