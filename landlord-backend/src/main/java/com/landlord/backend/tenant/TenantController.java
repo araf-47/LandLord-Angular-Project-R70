@@ -52,6 +52,15 @@ public class TenantController {
         this.userService = userService;
     }
 
+    /** Strips everything but digits, then collapses a leading "880" country code to a local "0". */
+    private static String normalizeBdPhone(String phone) {
+        String digits = phone.replaceAll("[^0-9]", "");
+        if (digits.startsWith("880") && digits.length() == 13) {
+            digits = "0" + digits.substring(3);
+        }
+        return digits;
+    }
+
     @GetMapping
     public List<Tenant> all() {
         return tenants.findAll();
@@ -109,10 +118,12 @@ public class TenantController {
 
         // Real login credentials for the tenant, handed to them in person by the
         // landlord at registration time (per your call: no separate self-service
-        // signup step for LandLord-side tenants). Username is the phone number.
+        // signup step for LandLord-side tenants). Username is the phone number,
+        // normalized to local 0-prefixed form so "+8801..." and "01..." both land
+        // on the same username regardless of which format was typed at registration.
         if (request.password() != null && !request.password().isBlank()) {
             UserRegistrationRequest userRequest = new UserRegistrationRequest();
-            userRequest.setUsername(request.phone().replaceAll("[^a-zA-Z0-9]", ""));
+            userRequest.setUsername(normalizeBdPhone(request.phone()));
             userRequest.setPassword(request.password());
             userRequest.setRoles(List.of("TENANT"));
             userRequest.setEmail(request.email());

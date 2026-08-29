@@ -23,6 +23,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
           <div class="field">
             <label for="phone">Phone</label>
             <input id="phone" name="phone" [(ngModel)]="phone" required />
+            <span class="hint-text">This becomes their login username — with or without +880, both work.</span>
           </div>
         </div>
         <div class="form-row">
