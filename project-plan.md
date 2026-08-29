@@ -591,13 +591,19 @@ listed here so they're not lost, with a note on which phase naturally absorbs ea
   `MockDataService.findOrCreateConversation(contextId, withName)` — same
   find-or-create shape as LandLord's real version, just against the mock
   signal instead of an API.
-- **Single hardcoded demo user per role, on pages still using `MockDataService`.**
-  `CURRENT_TENANT_ID` / `CURRENT_OWNER_ID` (the *mock* constants, distinct from the
-  real-backend `_REAL` ones Phase 7 already removed) still gate a handful of
-  not-yet-migrated tenant pages (LandLord's `payments/history.component.ts`,
-  `payments/pay.component.ts`, `profile.component.ts` — see §3's Phase 10.8 note).
-  Real login now works everywhere else; these three just haven't been moved off
-  the mock billing flow yet.
+- ~~**Single hardcoded demo user per role, on pages still using `MockDataService`.**~~
+  **Resolved (2026-08-29)** for the 3 named pages — LandLord's
+  `payments/history.component.ts`, `payments/pay.component.ts`, `profile.component.ts`
+  now use `TenantApiService.me()` + `BillingApiService` against the real backend
+  instead of `CURRENT_TENANT_ID`/`MockDataService`. `TenantApiService` gained an
+  `update()` method (`PUT /api/tenants/{id}`, already existed server-side, frontend
+  just hadn't wired it). Online-pay stays a stub (records straight to confirmed via
+  the same real `POST /api/payments`, no actual gateway — Phase 10.8 still on hold).
+  Pay page's invoice breakdown simplified to match the real `Invoice` entity's single
+  `utilitiesTotal` (no more mock per-item `utilityItems`).
+  **Not touched, separate mock islands, not part of this gap's scope**:
+  `payments/pending.component.ts`, `documents/document-dashboard.component.ts`,
+  `browse-transfer.component.ts` — still on `CURRENT_TENANT_ID`/`MockDataService`.
 - **No data persistence across page reload.** In-memory signals reset on F5. Known
   demo trap — mention before any live walkthrough. (Resolved by Phase 6/8+, real
   backend.)

@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../../core/mock-data.service';
+import { ApiInvoice, BillingApiService } from '../../../core/billing-api.service';
+import { TenantApiService } from '../../../core/tenant-api.service';
 
 @Component({
   selector: 'app-tenant-pay',
@@ -16,11 +17,9 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../../core/mock-d
           <div class="hint-text" style="display:flex; justify-content:space-between;">
             <span>Rent</span><span>{{ inv.rent }}</span>
           </div>
-          @for (u of inv.utilityItems; track u.label) {
-            <div class="hint-text" style="display:flex; justify-content:space-between;">
-              <span>{{ u.label }}</span><span>{{ u.amount }}</span>
-            </div>
-          }
+          <div class="hint-text" style="display:flex; justify-content:space-between;">
+            <span>Utilities</span><span>{{ inv.utilitiesTotal }}</span>
+          </div>
           @if (inv.prevUnpaidRolled) {
             <div class="hint-text" style="display:flex; justify-content:space-between;">
               <span>Previous unpaid balance</span><span>{{ inv.prevUnpaidRolled }}</span>
@@ -60,8 +59,12 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../../core/mock-d
     </div>
   `,
 })
-export class TenantPayComponent {
-  private readonly data = inject(MockDataService);
+export class TenantPayComponent implements OnInit {
+  private readonly tenantApi = inject(TenantApiService);
+  private readonly billingApi = inject(BillingApiService);
+
+  private tenantId: number | null = null;
+  readonly invoices = signal<ApiInvoice[]>([]);
 
   amount = 0;
   method: 'online' | 'cash' = 'online';
@@ -69,47 +72,39 @@ export class TenantPayComponent {
   readonly result = signal('');
 
   readonly nextInvoice = computed(() =>
-    this.data
-      .invoicesForTenant(CURRENT_TENANT_ID)
+    this.invoices()
       .filter((i) => i.status !== 'paid')
       .sort((a, b) => a.period.localeCompare(b.period))[0]
   );
 
+  async ngOnInit(): Promise<void> {
+    const tenant = await this.tenantApi.me();
+    this.tenantId = tenant.id;
+    this.invoices.set(await this.billingApi.invoicesForTenant(tenant.id));
+  }
+
   totalDue(): number {
-    return this.data
-      .invoices()
-      .filter((i) => i.tenantId === CURRENT_TENANT_ID && i.status !== 'paid')
+    return this.invoices()
+      .filter((i) => i.status !== 'paid')
       .reduce((sum, i) => sum + i.balance, 0);
   }
 
-  payOnline(): void {
-    if (!this.amount) return;
-    // Simulated gateway — always succeeds in this frontend-only build.
-    this.data.applyPaymentToTenant(CURRENT_TENANT_ID, this.amount);
-    this.recordPayment('confirmed');
+  async payOnline(): Promise<void> {
+    // Real payment gateway integration is on hold (Phase 10.8) — records
+    // straight to confirmed, same as cash, just tagged 'online'.
+    await this.pay('online');
     this.result.set('Payment successful. Balance updated.');
   }
 
-  payCash(): void {
-    if (!this.amount) return;
-    // Matches the real backend: payments record straight to confirmed, no pending/confirm step.
-    this.data.applyPaymentToTenant(CURRENT_TENANT_ID, this.amount);
-    this.recordPayment('confirmed');
+  async payCash(): Promise<void> {
+    await this.pay('cash');
     this.result.set('Payment recorded. Balance updated.');
   }
 
-  private recordPayment(status: 'confirmed'): void {
-    this.data.payments.update((list) => [
-      ...list,
-      {
-        id: nextId('pay'),
-        tenantId: CURRENT_TENANT_ID,
-        invoiceId: '',
-        amount: this.amount,
-        method: this.method,
-        status,
-        date: this.date,
-      },
-    ]);
+  private async pay(method: 'online' | 'cash'): Promise<void> {
+    const invoice = this.nextInvoice();
+    if (!this.amount || !invoice || this.tenantId === null) return;
+    await this.billingApi.recordPayment(this.tenantId, invoice.id, this.amount, method);
+    this.invoices.set(await this.billingApi.invoicesForTenant(this.tenantId));
   }
 }

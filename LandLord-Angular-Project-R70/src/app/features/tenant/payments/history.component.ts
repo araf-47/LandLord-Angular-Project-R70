@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
-import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.service';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { ApiPayment, BillingApiService } from '../../../core/billing-api.service';
+import { TenantApiService } from '../../../core/tenant-api.service';
 
 @Component({
   selector: 'app-tenant-payment-history',
@@ -32,14 +33,18 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.serv
     </div>
   `,
 })
-export class TenantPaymentHistoryComponent {
-  private readonly data = inject(MockDataService);
+export class TenantPaymentHistoryComponent implements OnInit {
+  private readonly tenantApi = inject(TenantApiService);
+  private readonly billingApi = inject(BillingApiService);
 
-  history() {
-    return this.data.payments().filter((p) => p.tenantId === CURRENT_TENANT_ID);
+  readonly history = signal<ApiPayment[]>([]);
+
+  async ngOnInit(): Promise<void> {
+    const tenant = await this.tenantApi.me();
+    this.history.set(await this.billingApi.paymentsForTenant(tenant.id));
   }
 
-  download(paymentId: string): void {
+  download(paymentId: number): void {
     // PDF generation is a backend concern; frontend stub only.
     alert(`Receipt PDF generated for payment ${paymentId}`);
   }

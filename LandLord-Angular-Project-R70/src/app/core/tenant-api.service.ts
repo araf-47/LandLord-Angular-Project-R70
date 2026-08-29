@@ -72,6 +72,12 @@ export class TenantApiService {
     }
   }
 
+  async update(id: number, update: Omit<ApiTenant, 'id'>): Promise<ApiTenant> {
+    const saved = await firstValueFrom(this.http.put<ApiTenant>(`${API_BASE}/${id}`, update));
+    this.tenants.update((list) => list.map((t) => (t.id === id ? saved : t)));
+    return saved;
+  }
+
   async register(request: RegisterTenantRequest): Promise<ApiTenant> {
     const created = await firstValueFrom(this.http.post<ApiTenant>(`${API_BASE}/register`, request));
     this.tenants.update((list) => [...list, created]);

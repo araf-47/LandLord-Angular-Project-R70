@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CURRENT_TENANT_ID, MockDataService } from '../../core/mock-data.service';
+import { ApiTenant, TenantApiService } from '../../core/tenant-api.service';
 
 @Component({
   selector: 'app-tenant-profile',
@@ -9,12 +9,12 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../core/mock-data.service
   template: `
     <h1>My Profile</h1>
 
-    @if (tenant()) {
+    @if (tenant(); as t) {
       <div class="card" style="max-width:480px;">
         @if (!editing()) {
-          <p><strong>Name:</strong> {{ tenant()!.name }}</p>
-          <p><strong>Phone:</strong> {{ tenant()!.phone }}</p>
-          <p><strong>Email:</strong> {{ tenant()!.email }}</p>
+          <p><strong>Name:</strong> {{ t.name }}</p>
+          <p><strong>Phone:</strong> {{ t.phone }}</p>
+          <p><strong>Email:</strong> {{ t.email }}</p>
           <button class="btn btn-primary" (click)="edit()">Edit info</button>
         } @else {
           <div class="field">
@@ -41,17 +41,18 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../core/mock-data.service
     }
   `,
 })
-export class TenantProfileComponent {
-  private readonly data = inject(MockDataService);
+export class TenantProfileComponent implements OnInit {
+  private readonly tenantApi = inject(TenantApiService);
 
+  readonly tenant = signal<ApiTenant | null>(null);
   readonly editing = signal(false);
   readonly error = signal('');
   name = '';
   phone = '';
   email = '';
 
-  tenant() {
-    return this.data.tenants().find((t) => t.id === CURRENT_TENANT_ID);
+  async ngOnInit(): Promise<void> {
+    this.tenant.set(await this.tenantApi.me());
   }
 
   edit(): void {
@@ -63,15 +64,21 @@ export class TenantProfileComponent {
     this.editing.set(true);
   }
 
-  save(): void {
+  async save(): Promise<void> {
+    const t = this.tenant();
+    if (!t) return;
     if (!this.name || !this.email) {
       this.error.set('Name and email are required.');
       return;
     }
     this.error.set('');
-    this.data.tenants.update((list) =>
-      list.map((t) => (t.id === CURRENT_TENANT_ID ? { ...t, name: this.name, phone: this.phone, email: this.email } : t))
-    );
+    const updated = await this.tenantApi.update(t.id, {
+      ...t,
+      name: this.name,
+      phone: this.phone,
+      email: this.email,
+    });
+    this.tenant.set(updated);
     this.editing.set(false);
   }
 }
