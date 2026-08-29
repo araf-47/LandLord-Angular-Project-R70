@@ -25,7 +25,7 @@ import { ProfileApiService } from '../../../core/profile-api.service';
         </div>
       }
       @case ('ready') {
-    <div class="card stack" style="max-width:520px;">
+    <div class="card stack max-w-md">
       @if (step() === 1) {
         <p>Auto-fill from an existing property?</p>
         <div class="form-row">

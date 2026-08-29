@@ -9,7 +9,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div class="topbar" style="background:transparent;border:none;padding:0;margin-bottom:1rem;">
+    <div class="topbar topbar-plain">
       <h1>Maintenance</h1>
       <a class="btn btn-primary" routerLink="/landlord/maintenance/new">Log new issue</a>
     </div>

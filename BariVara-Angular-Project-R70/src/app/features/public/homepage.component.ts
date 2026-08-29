@@ -14,7 +14,7 @@ import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
         <h1>Now search the property very easily</h1>
         <p>Save your valuable time — browse verified rentals across the city.</p>
 
-        <div class="search-bar" style="flex-wrap:wrap;">
+        <div class="search-bar flex-wrap">
           <select [ngModel]="district()" (ngModelChange)="onDistrictChange($event)" name="district">
             <option value="">Select District</option>
             @for (d of districts; track d) {
@@ -53,9 +53,12 @@ import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
             @for (l of recentListings(); track l.id) {
               <a class="listing-card" [routerLink]="['/listings', l.id]">
                 @if (l.photoUrl) {
-                  <img class="listing-card-image" [src]="photoOrigin + l.photoUrl" alt="" style="width:100%;object-fit:cover;" />
+                  <img class="listing-card-image img-cover" [src]="photoOrigin + l.photoUrl" alt="" />
                 } @else {
-                  <div class="listing-card-image">No photo</div>
+                  <div class="listing-card-image no-photo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" /></svg>
+                    <span>No photo yet</span>
+                  </div>
                 }
                 <div class="listing-card-body">
                   <div class="listing-card-title">{{ l.title }}</div>

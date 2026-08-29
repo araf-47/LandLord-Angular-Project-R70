@@ -23,7 +23,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
         </div>
       }
       @case ('ready') {
-        <div class="card stack" style="max-width:520px;">
+        <div class="card stack max-w-md">
           <div class="field">
             <label for="tenant">Tenant &amp; unit</label>
             <select id="tenant" name="tenant" (change)="onTenantChange($event)">

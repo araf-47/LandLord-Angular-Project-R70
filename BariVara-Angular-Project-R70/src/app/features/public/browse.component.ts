@@ -23,7 +23,7 @@ import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
           </div>
         }
         @case ('ready') {
-          <div class="search-bar" style="flex-wrap:wrap; margin-bottom:1.5rem;">
+          <div class="search-bar flex-wrap mb-lg">
             <input [ngModel]="query()" (ngModelChange)="query.set($event)" name="query" placeholder="Search by title" />
             <select [ngModel]="district()" (ngModelChange)="onDistrictChange($event)" name="district">
               <option value="">All districts</option>
@@ -50,13 +50,25 @@ import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
             </select>
           </div>
 
+          @if (activeFilters().length > 0) {
+            <div class="filter-chips mb-md">
+              @for (f of activeFilters(); track f.key) {
+                <button type="button" class="filter-chip" (click)="f.clear()">{{ f.label }} &times;</button>
+              }
+              <button type="button" class="filter-chip filter-chip-clear-all" (click)="clearAllFilters()">Clear all</button>
+            </div>
+          }
+
           <div class="listing-grid">
             @for (l of filtered(); track l.id) {
               <a class="listing-card" [routerLink]="['/listings', l.id]">
                 @if (l.photoUrl) {
-                  <img class="listing-card-image" [src]="photoOrigin + l.photoUrl" alt="" style="width:100%;object-fit:cover;" />
+                  <img class="listing-card-image img-cover" [src]="photoOrigin + l.photoUrl" alt="" />
                 } @else {
-                  <div class="listing-card-image">No photo</div>
+                  <div class="listing-card-image no-photo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" /></svg>
+                    <span>No photo yet</span>
+                  </div>
                 }
                 <div class="listing-card-body">
                   <div class="listing-card-title">{{ l.title }}</div>
@@ -109,6 +121,30 @@ export class BrowseComponent implements OnInit {
   onDistrictChange(value: string): void {
     this.district.set(value);
     this.area.set('');
+  }
+
+  readonly activeFilters = computed(() => {
+    const filters: { key: string; label: string; clear: () => void }[] = [];
+    if (this.query()) filters.push({ key: 'query', label: `"${this.query()}"`, clear: () => this.query.set('') });
+    if (this.district()) filters.push({ key: 'district', label: this.district(), clear: () => this.onDistrictChange('') });
+    if (this.area()) filters.push({ key: 'area', label: this.area(), clear: () => this.area.set('') });
+    if (this.propertyType()) {
+      const label = this.propertyTypes.find((t) => t.value === this.propertyType())?.label ?? this.propertyType();
+      filters.push({ key: 'propertyType', label, clear: () => this.propertyType.set('') });
+    }
+    if (this.sourceFilter()) {
+      const label = this.sourceFilter() === 'owner' ? 'Owner-posted' : 'LandLord-linked';
+      filters.push({ key: 'source', label, clear: () => this.sourceFilter.set('') });
+    }
+    return filters;
+  });
+
+  clearAllFilters(): void {
+    this.query.set('');
+    this.district.set('');
+    this.area.set('');
+    this.propertyType.set('');
+    this.sourceFilter.set('');
   }
 
   readonly filtered = computed(() => {

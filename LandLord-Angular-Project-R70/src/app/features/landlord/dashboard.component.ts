@@ -4,11 +4,12 @@ import { MaintenanceApiService } from '../../core/maintenance-api.service';
 import { BillingApiService } from '../../core/billing-api.service';
 import { UnitApiService } from '../../core/unit-api.service';
 import { periodKey, periodLabel } from '../../core/mock-data.service';
+import { StatTileComponent } from '../../shared/stat-tile.component';
 
 @Component({
   selector: 'app-landlord-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, StatTileComponent],
   template: `
     @switch (status()) {
       @case ('loading') {
@@ -22,27 +23,12 @@ import { periodKey, periodLabel } from '../../core/mock-data.service';
       }
       @case ('ready') {
         <h1>{{ currentPeriodLabel() }} overview</h1>
-        <div class="module-grid" style="margin-bottom:2rem;">
-          <div class="card">
-            <p class="hint-text">Occupancy</p>
-            <h2>{{ occupancy().occupied }}/{{ occupancy().total }}</h2>
-          </div>
-          <div class="card">
-            <p class="hint-text">Collected this month</p>
-            <h2 style="color:var(--success);">{{ collected() }}</h2>
-          </div>
-          <div class="card">
-            <p class="hint-text">Outstanding this month</p>
-            <h2 style="color:var(--danger);">{{ outstanding() }}</h2>
-          </div>
-          <div class="card">
-            <p class="hint-text">Net this month</p>
-            <h2>{{ net() }}</h2>
-          </div>
-          <div class="card">
-            <p class="hint-text">Pending maintenance</p>
-            <h2>{{ pendingMaintenance() }}</h2>
-          </div>
+        <div class="module-grid mb-lg">
+          <app-stat-tile label="Occupancy" [value]="occupancy().occupied + '/' + occupancy().total" />
+          <app-stat-tile label="Collected this month" [value]="collected()" color="success" />
+          <app-stat-tile label="Outstanding this month" [value]="outstanding()" color="danger" />
+          <app-stat-tile label="Net this month" [value]="net()" />
+          <app-stat-tile label="Pending maintenance" [value]="pendingMaintenance()" />
         </div>
 
         <h1>Manage your property</h1>

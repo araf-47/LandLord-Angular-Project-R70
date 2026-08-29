@@ -10,7 +10,7 @@ import { MockDataService } from '../../../core/mock-data.service';
   template: `
     @if (agreement()) {
       <h1>Rental agreement</h1>
-      <div class="card" style="max-width:560px;">
+      <div class="card max-w-lg">
         @if (!editing()) {
           <p><strong>Terms:</strong> {{ agreement()!.terms }}</p>
           <p><strong>Deposit:</strong> {{ agreement()!.deposit }}</p>

@@ -62,7 +62,7 @@ import { ProfileApiService } from '../../core/profile-api.service';
 
       @if (step() === 3) {
         <p>Accept Terms &amp; Privacy Policy</p>
-        <label class="field" style="flex-direction:row; align-items:center; gap:0.5rem;">
+        <label class="field field-row">
           <input type="checkbox" name="terms" [(ngModel)]="acceptedTerms" />
           I agree to the Terms of Service and Privacy Policy
         </label>
@@ -90,7 +90,7 @@ import { ProfileApiService } from '../../core/profile-api.service';
         </div>
       }
 
-      <p style="margin-top:1rem;">Already have an account? <a routerLink="/auth/login">Log in</a></p>
+      <p class="mt-md">Already have an account? <a routerLink="/auth/login">Log in</a></p>
     </div>
   `,
 })

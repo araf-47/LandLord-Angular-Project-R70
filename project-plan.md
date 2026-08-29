@@ -1,8 +1,9 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-29 (First slice of `ui-ux_design_plan-v1.md` built and verified
-— toast/confirm-dialog shared infra in both apps, ledger loading/error states, and
-delete-confirm/booking-feedback fixes; see §5 Phase 4 follow-up and
+Last updated: 2026-08-29 (`ui-ux_design_plan-v1.md` fully implemented — toast/confirm-
+dialog infra, loading/error states across all fetch-on-load components, inline-style
+cleanup, dark mode, stat-tile component, mid-breakpoint, and BariVara's filter-chips/
+no-photo-state, both apps rebuild clean; see §5 Phase 4 follow-up and
 `phase-summary/ui-ux-plan-v1-slice1-summary.md`. Phase 7 — real auth — fully done, backend and
 frontend, both apps. `Parts/auth` embedded separately into each backend, no
 SSO; both Angular apps' `AuthService`/`roleGuard` replaced with real
@@ -768,6 +769,19 @@ now functionally deeper than a route scaffold.)*
 > against the live backends, inline-style cleanup (48+ instances), mid-breakpoint,
 > dark mode, stat-tile component, and the BariVara-specific items (filter-chips,
 > permanent "no photo" placeholder, dashboard parity).
+>
+> **Plan complete (2026-08-29):** the remaining items are now all built too — both
+> apps rebuild clean. All 79 inline `style="..."` attributes replaced with utility
+> classes (also fixed a dead `--color-danger` token that never existed, silently
+> falling back to a hardcoded hex in 3 places). Badge contrast audited (all pass
+> WCAG AA). Focus-visible ring added app-wide. Mid-breakpoint (1100px) added. Dark
+> mode built — token remap + signal-backed `ThemeService` + toggle button, both
+> apps. `<app-stat-tile>` component built (LandLord), wired into dashboard/ledger;
+> ledger rows get income/expense left-border tint. Both apps' `message-thread`
+> components get a "Sending…" disabled state + error toast on the compose box.
+> BariVara: "no photo" placeholder now an icon + label instead of a flat gradient;
+> active-filter-chips added to browse/search. Full detail:
+> `phase-summary/ui-ux-plan-v1-slice1-summary.md`.
 >
 > **📌 Follow-up (2026-08-29), cosmetic:** separate from the functional gaps above, a
 > pure visual-polish pass ("eye-catching" pass, respecting Phase 4.1's anti-AI-

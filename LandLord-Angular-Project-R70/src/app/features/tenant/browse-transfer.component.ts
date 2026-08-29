@@ -27,7 +27,7 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data
       </table>
       </div>
       @if (requested()) {
-        <p class="hint-text" style="margin-top:0.75rem;">Landlord notified via Marketplace &amp; Leads inbox.</p>
+        <p class="hint-text mt-sm">Landlord notified via Marketplace &amp; Leads inbox.</p>
       }
     </div>
 
@@ -35,7 +35,7 @@ import { CURRENT_TENANT_ID, MockDataService, nextId } from '../../core/mock-data
       <h3>Looking outside this property?</h3>
       <p>Global search redirects to the BariVara.com marketplace.</p>
       <a class="btn" [href]="bariVaraUrl + '/browse'" target="_blank" rel="noopener">Search all listings on BariVara.com</a>
-      <p class="hint-text" style="margin-top:0.5rem;">Opens the BariVara dev site in a new tab — separate mock data until Phase 15's real sync.</p>
+      <p class="hint-text mt-sm">Opens the BariVara dev site in a new tab — separate mock data until Phase 15's real sync.</p>
     </div>
   `,
 })

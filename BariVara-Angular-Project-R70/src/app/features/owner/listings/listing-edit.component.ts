@@ -21,7 +21,7 @@ import { ListingApiService } from '../../../core/listing-api.service';
       }
       @case ('ready') {
         <h1>Edit listing</h1>
-        <div class="card stack" style="max-width:520px;">
+        <div class="card stack max-w-md">
           <div class="field">
             <label for="title">Title</label>
             <input id="title" name="title" [(ngModel)]="title" />

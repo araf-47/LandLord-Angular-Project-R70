@@ -21,7 +21,7 @@ import { ApiTenant, TenantApiService } from '../../core/tenant-api.service';
       }
       @case ('ready') {
     @if (tenant(); as t) {
-      <div class="card" style="max-width:480px;">
+      <div class="card max-w-sm">
         @if (!editing()) {
           <p><strong>Name:</strong> {{ t.name }}</p>
           <p><strong>Phone:</strong> {{ t.phone }}</p>

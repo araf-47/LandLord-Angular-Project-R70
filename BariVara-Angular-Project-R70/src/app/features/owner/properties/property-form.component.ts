@@ -12,7 +12,7 @@ import { ProfileApiService } from '../../../core/profile-api.service';
   imports: [FormsModule],
   template: `
     <h1>Add property</h1>
-    <div class="card stack" style="max-width:520px;">
+    <div class="card stack max-w-md">
       <div>
         <h3>Property info</h3>
         <div class="field">

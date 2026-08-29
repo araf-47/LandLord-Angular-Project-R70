@@ -20,7 +20,7 @@ import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.se
       }
       @case ('ready') {
         <h1>{{ editing ? 'Edit unit' : 'Add unit' }}</h1>
-        <div class="card" style="max-width:520px;">
+        <div class="card max-w-md">
           <div class="field">
             <label for="unitNumber">Unit number</label>
             <input id="unitNumber" name="unitNumber" [(ngModel)]="unitNumber" required />
@@ -32,7 +32,7 @@ import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.se
           <div class="field">
             <label for="photo">Photo (optional)</label>
             @if (existingPhotoUrl) {
-              <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" style="max-width:200px;display:block;margin-bottom:0.5rem;" />
+              <img [src]="photoOrigin + existingPhotoUrl" alt="Unit photo" class="max-w-xs mb-sm" />
             }
             <input id="photo" type="file" name="photo" accept="image/*" (change)="onFileSelected($event)" />
             @if (fileName) {
@@ -40,7 +40,7 @@ import { API_ORIGIN, OwnerUnitApiService } from '../../../core/owner-unit-api.se
             }
           </div>
           @if (error) {
-            <p class="hint-text" style="color:var(--color-danger, #c0392b);">{{ error }}</p>
+            <p class="hint-text text-danger">{{ error }}</p>
           }
 
           <div class="actions-row">

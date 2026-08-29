@@ -33,7 +33,7 @@ import { AuthService } from '../../core/auth.service';
         </div>
       </form>
 
-      <p style="margin-top:1rem;">
+      <p class="mt-md">
         <a routerLink="/auth/forgot-password">Forgot password?</a>
       </p>
       <p>

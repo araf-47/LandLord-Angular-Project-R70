@@ -24,7 +24,7 @@ import { CURRENT_TENANT_ID, MockDataService } from '../../../core/mock-data.serv
           <p class="hint-text">No documents uploaded yet.</p>
         }
       </div>
-      <div class="field" style="margin-top:1rem;">
+      <div class="field mt-md">
         <label for="upload">Upload document</label>
         <input id="upload" type="file" (change)="upload($event)" />
       </div>

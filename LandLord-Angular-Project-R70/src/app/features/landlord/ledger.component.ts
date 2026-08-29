@@ -6,6 +6,7 @@ import { MaintenanceApiService } from '../../core/maintenance-api.service';
 import { TenantApiService } from '../../core/tenant-api.service';
 import { UnitApiService } from '../../core/unit-api.service';
 import { PropertyApiService, ApiProperty } from '../../core/property-api.service';
+import { StatTileComponent } from '../../shared/stat-tile.component';
 
 interface LedgerEntry {
   id: string;
@@ -28,7 +29,7 @@ function today(): string {
 @Component({
   selector: 'app-ledger',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, StatTileComponent],
   template: `
     <h1>Ledger</h1>
 
@@ -66,18 +67,9 @@ function today(): string {
         </div>
 
         <div class="module-grid mb-md">
-          <div class="card">
-            <p class="hint-text">Total in</p>
-            <h2 class="text-success">{{ totalIn() }}</h2>
-          </div>
-          <div class="card">
-            <p class="hint-text">Total out</p>
-            <h2 class="text-danger">{{ totalOut() }}</h2>
-          </div>
-          <div class="card">
-            <p class="hint-text">Net</p>
-            <h2>{{ net() }}</h2>
-          </div>
+          <app-stat-tile label="Total in" [value]="totalIn()" color="success" />
+          <app-stat-tile label="Total out" [value]="totalOut()" color="danger" />
+          <app-stat-tile label="Net" [value]="net()" />
         </div>
 
         <div class="card">
@@ -86,7 +78,7 @@ function today(): string {
             <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead>
             <tbody>
               @for (row of visibleRows(); track row.id) {
-                <tr>
+                <tr [class.row-income]="row.type === 'income'" [class.row-expense]="row.type === 'expense'">
                   <td>{{ row.date }}</td>
                   <td><span class="badge" [class.badge-paid]="row.type === 'income'" [class.badge-unpaid]="row.type === 'expense'">{{ row.type }}</span></td>
                   <td>{{ row.description }}</td>

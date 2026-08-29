@@ -22,7 +22,7 @@ import { LogoComponent } from '../shared/logo.component';
           <a routerLink="/owner/messages" routerLinkActive="active">Messages</a>
         </nav>
         <div class="sidebar-footer">
-          <button class="btn btn-ghost" style="color:#cbd5e1; width:100%; justify-content:flex-start;" (click)="logout()">
+          <button class="btn btn-ghost sidebar-logout-btn" (click)="logout()">
             Logout
           </button>
         </div>

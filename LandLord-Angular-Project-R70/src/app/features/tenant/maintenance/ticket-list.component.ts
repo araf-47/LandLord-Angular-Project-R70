@@ -7,7 +7,7 @@ import { MaintenanceApiService } from '../../../core/maintenance-api.service';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div class="topbar" style="background:transparent;border:none;padding:0;margin-bottom:1rem;">
+    <div class="topbar topbar-plain">
       <h1>Maintenance</h1>
       <a class="btn btn-primary" routerLink="/tenant/maintenance/new">Create new ticket</a>
     </div>

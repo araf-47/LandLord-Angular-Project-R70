@@ -9,7 +9,7 @@ import { ConfirmService } from '../../../shared/confirm.service';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div class="topbar" style="background:transparent;border:none;padding:0;margin-bottom:1rem;">
+    <div class="topbar topbar-plain">
       <h1>My Listings</h1>
       <a class="btn btn-primary" routerLink="/owner/listings/new">Add Post Ad</a>
     </div>
@@ -23,7 +23,7 @@ import { ConfirmService } from '../../../shared/confirm.service';
             <tr>
               <td>
                 @if (l.photoUrl) {
-                  <img [src]="photoOrigin + l.photoUrl" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+                  <img [src]="photoOrigin + l.photoUrl" alt="" class="img-thumb" />
                 } @else {
                   <span class="hint-text">No photo</span>
                 }
@@ -31,7 +31,7 @@ import { ConfirmService } from '../../../shared/confirm.service';
               <td>{{ l.title }}</td>
               <td>৳{{ l.rent }}</td>
               <td><span class="badge" [class.badge-vacant]="l.status === 'active'" [class.badge-occupied]="l.status === 'taken'" [class.badge-pending]="l.status === 'paused'">{{ l.status }}</span></td>
-              <td class="actions-row" style="margin:0;">
+              <td class="actions-row mb-0">
                 <a class="btn btn-sm" [routerLink]="['/owner/listings', l.id, 'edit']">Edit</a>
                 <button class="btn btn-sm" (click)="repost(l.id)">Repost</button>
                 <button class="btn btn-sm btn-danger" (click)="remove(l.id)" type="button">Delete</button>

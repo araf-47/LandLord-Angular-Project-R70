@@ -21,7 +21,7 @@ import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
         </div>
       }
       @case ('ready') {
-        <div class="card stack" style="max-width:520px;">
+        <div class="card stack max-w-md">
           <div class="field">
             <label for="tenant">Select tenant</label>
             <select id="tenant" name="tenant" (change)="onTenantChange($event)">

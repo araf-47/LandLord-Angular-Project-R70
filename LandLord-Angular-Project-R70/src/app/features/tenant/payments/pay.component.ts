@@ -21,19 +21,19 @@ import { TenantApiService } from '../../../core/tenant-api.service';
         </div>
       }
       @case ('ready') {
-        <div class="card" style="max-width:480px;">
+        <div class="card max-w-sm">
           <p><strong>Current due (invoice):</strong> {{ totalDue() }}</p>
 
           @if (nextInvoice(); as inv) {
-            <div class="stack" style="margin-bottom:1rem;">
-              <div class="hint-text" style="display:flex; justify-content:space-between;">
+            <div class="stack mb-md">
+              <div class="hint-text flex-between">
                 <span>Rent</span><span>{{ inv.rent }}</span>
               </div>
-              <div class="hint-text" style="display:flex; justify-content:space-between;">
+              <div class="hint-text flex-between">
                 <span>Utilities</span><span>{{ inv.utilitiesTotal }}</span>
               </div>
               @if (inv.prevUnpaidRolled) {
-                <div class="hint-text" style="display:flex; justify-content:space-between;">
+                <div class="hint-text flex-between">
                   <span>Previous unpaid balance</span><span>{{ inv.prevUnpaidRolled }}</span>
                 </div>
               }
@@ -64,7 +64,7 @@ import { TenantApiService } from '../../../core/tenant-api.service';
           }
 
           @if (result()) {
-            <p [class.error-text]="result()!.startsWith('Error')" [class.hint-text]="!result()!.startsWith('Error')" style="margin-top:0.75rem;">
+            <p [class.error-text]="result()!.startsWith('Error')" [class.hint-text]="!result()!.startsWith('Error')" class="mt-sm">
               {{ result() }}
             </p>
           }

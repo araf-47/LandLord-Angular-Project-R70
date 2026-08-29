@@ -20,7 +20,7 @@ import { ProfileApiService } from '../../../core/profile-api.service';
         </div>
       }
       @case ('ready') {
-        <div class="topbar" style="background:transparent;border:none;padding:0;margin-bottom:1rem;">
+        <div class="topbar topbar-plain">
           <h1>Properties</h1>
           <a class="btn btn-primary" routerLink="/owner/properties/new">Add property</a>
         </div>

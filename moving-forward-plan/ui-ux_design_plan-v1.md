@@ -17,6 +17,30 @@
 > mode, and all of §2/§3's feature-specific items below (stat-tile, filter-chips,
 > permanent "no photo" placeholder, dashboard parity). Full summary:
 > `../phase-summary/ui-ux-plan-v1-slice1-summary.md`.
+>
+> **Plan complete (2026-08-29):** every remaining item in §1-§3 is now built, both
+> apps rebuild clean. §1.3: all 79 inline `style="..."` attributes removed (45
+> LandLord, 34 BariVara), replaced with utility classes; also fixed a dead
+> `--color-danger` token (never existed, was silently always using its hardcoded
+> fallback) in 3 places, now correctly reads `--danger`. §1.4: badge contrast
+> audited (all pairs pass WCAG AA, 6.37:1 to 8.06:1, no changes needed), focus-visible
+> ring added to `.btn`/`.module-tile`/`.listing-card`/links/buttons, icon-only
+> controls checked (none found beyond the already-labeled hamburger). §1.5: mid
+> breakpoint (1100px, 2-column grid) added to both apps. §1.6: dark mode built —
+> `[data-theme="dark"]` token remap in both `styles.css`, a signal-backed
+> `ThemeService` (localStorage-persisted) + floating toggle button in both apps.
+> §2: `<app-stat-tile>` component built (LandLord `shared/`), wired into
+> `dashboard.component.ts` and `ledger.component.ts`; ledger rows now get a
+> left-border income/expense tint beyond the badge; both `message-thread.component.ts`
+> files (landlord + tenant) got a disabled "Sending…" state and an error toast,
+> without touching the 10s poll loop. §3: BariVara's 4 "No photo" spots replaced
+> with a house-icon + "No photo yet" label on a brand-tint background (was a flat
+> gray gradient — VacancyAdSync's missing-photo-field gap noted as a separate,
+> not-yet-scheduled backend item); `browse.component.ts` got active-filter-chips
+> (query/district/area/type/source, each clearable, plus "Clear all"); dashboard
+> parity was already true structurally (same token system, same module-grid pattern)
+> — no code change needed there, just confirmed. Full summary:
+> `../phase-summary/ui-ux-plan-v1-slice1-summary.md`.
 
 Grounded in the actual codebase as of 2026-08-29 (post Phase 16.3, both backends live).
 Both apps use plain CSS (no Tailwind/Material/Bootstrap) — one `src/styles.css` design

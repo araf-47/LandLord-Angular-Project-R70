@@ -10,7 +10,7 @@ import { TenantApiService } from '../../../core/tenant-api.service';
   imports: [FormsModule],
   template: `
     <h1>Create new ticket</h1>
-    <div class="card stack" style="max-width:520px;">
+    <div class="card stack max-w-md">
       <div class="field">
         <label for="category">Category</label>
         <select id="category" name="category" [(ngModel)]="category">

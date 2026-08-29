@@ -26,7 +26,7 @@ import { RouterLink } from '@angular/router';
         </div>
       }
 
-      <p style="margin-top:1rem;"><a routerLink="/auth/login">Back to login</a></p>
+      <p class="mt-md"><a routerLink="/auth/login">Back to login</a></p>
     </div>
   `,
 })

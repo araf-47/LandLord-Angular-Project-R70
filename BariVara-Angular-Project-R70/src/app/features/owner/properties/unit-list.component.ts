@@ -10,7 +10,7 @@ import { ConfirmService } from '../../../shared/confirm.service';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div class="topbar" style="background:transparent;border:none;padding:0;margin-bottom:1rem;">
+    <div class="topbar topbar-plain">
       <h1>{{ propertyName() }} — units</h1>
       <a class="btn btn-primary" [routerLink]="['/owner/properties', propertyId, 'units', 'new']">Add unit</a>
     </div>
@@ -26,7 +26,7 @@ import { ConfirmService } from '../../../shared/confirm.service';
             <tr>
               <td>
                 @if (u.photoUrl) {
-                  <img [src]="photoOrigin + u.photoUrl" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" />
+                  <img [src]="photoOrigin + u.photoUrl" alt="" class="img-thumb" />
                 } @else {
                   <span class="hint-text">No photo</span>
                 }

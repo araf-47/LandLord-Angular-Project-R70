@@ -43,7 +43,7 @@ import { ListingApiService } from '../../core/listing-api.service';
           <a class="btn btn-primary" [href]="landlordCoreUrl + '/landlord/marketplace/requests'" target="_blank" rel="noopener">
             Redirect to LandLord core → Marketplace &amp; Leads
           </a>
-          <p class="hint-text" style="margin-top:0.5rem;">
+          <p class="hint-text mt-sm">
             Opens the LandLord dev site in a new tab — a separate app, so this just jumps
             over there rather than embedding it here.
           </p>

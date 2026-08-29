@@ -8,7 +8,7 @@ import { MockDataService } from '../../core/mock-data.service';
     <h1>Notifications</h1>
     <div class="card stack">
       @for (n of data.notifications(); track n.id) {
-        <div class="card" (click)="open(n.id)" style="cursor:pointer;">
+        <div class="card cursor-pointer" (click)="open(n.id)">
           <strong>{{ n.title }}</strong>
           @if (opened() === n.id) {
             <p>{{ n.body }}</p>

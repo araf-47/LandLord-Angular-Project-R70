@@ -21,11 +21,11 @@ import { API_ORIGIN, MaintenanceApiService } from '../../../core/maintenance-api
       @case ('ready') {
         @if (ticket()) {
           <h1>Ticket — {{ ticket()!.description }}</h1>
-          <div class="card stack" style="max-width:520px;">
+          <div class="card stack max-w-md">
             <p><strong>Status:</strong> {{ ticket()!.status }}</p>
 
             @if (ticket()!.photoUrl) {
-              <img [src]="photoUrl()" alt="Ticket photo" style="max-width:100%;border-radius:8px;" />
+              <img [src]="photoUrl()" alt="Ticket photo" class="img-rounded" />
             }
 
             @if (ticket()!.status === 'pending') {

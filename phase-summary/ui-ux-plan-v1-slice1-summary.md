@@ -14,8 +14,22 @@ Both apps verified with `ng build --configuration development` — clean, no com
 
 This closes out the plan's §0 headline gap ("only 1 of 56 LandLord components has loading/error handling") — now essentially all of them do, across both apps.
 
-Deliberately deferred (per the plan's own sequencing, to keep this reviewable): §1.3 inline-style cleanup beyond `ledger.component.ts` (48+ instances remain), §1.5 mid-breakpoint (1024px), §1.6 dark mode, §2/§3's feature-specific items (stat-tile component, active-filter-chips, BariVara's permanent "no photo" placeholder, dashboard visual parity). Also not yet done: manual browser verification against the live backends (delete-confirm flow, ledger/list error states, booking flow) — plan file has the full checklist.
+**Update (same day, third pass): plan complete.** Every remaining item in the doc's §1-§3 is now built, both apps rebuild clean.
+
+§1.3 (kill inline styles) — all 79 literal `style="..."` attributes removed (45 LandLord, 34 BariVara), replaced with utility classes (`.mt-*`, `.max-w-*`, `.flex-between`, `.img-thumb`, `.topbar-plain`, `.sidebar-logout-btn`, a few narrowly-scoped one-offs). Found and fixed a real bug along the way: `style="color:var(--color-danger, #c0392b)"` in 3 places referenced a token, `--color-danger`, that was never defined anywhere — it had always silently fallen back to the hardcoded hex, never actually reading the design system. Now uses the real `.text-danger`/`--danger` token.
+
+§1.4 (accessibility) — badge color-contrast audited by hand (all pairs pass WCAG AA, 6.37:1 to 8.06:1, several pass AAA too — no changes needed). `:focus-visible` ring added to `.btn`/`.module-tile`/`.listing-card`/links/buttons (previously only form inputs had one). Icon-only controls checked — none found beyond the hamburger, which already had `aria-label` (and got `aria-expanded` in the earlier pass).
+
+§1.5 (mid-breakpoint) — 1100px breakpoint added to both apps, `.module-grid`/`.listing-grid` collapse to 2 columns before the 860px mobile-drawer swap kicks in.
+
+§1.6 (dark mode) — built, after confirming with you it should be committed to rather than skipped. `[data-theme="dark"]` token remap in both `styles.css` (same variable names, no component changes needed, badges deliberately kept light in both themes since they're small self-contained chips). Signal-backed `ThemeService` per app (localStorage-persisted) + a floating toggle button mounted in `app.html`.
+
+§2 (LandLord-specific) — `<app-stat-tile>` component built in `shared/`, wired into `dashboard.component.ts`'s 5 stat cards and `ledger.component.ts`'s 3 totals (previously hand-rolled `<h2>` markup per page). Ledger rows now get a left-border income/expense tint in addition to the badge, for at-a-glance scanning. Both `message-thread.component.ts` files (landlord + tenant) got a disabled "Sending…" button state and an error toast on the compose box, without touching the existing 10-second poll loop.
+
+§3 (BariVara-specific) — the 4 "No photo" spots (browse, homepage, favorites, listing-detail) replaced with a house-icon + "No photo yet" label on a brand-tint background, instead of a flat gray gradient. (The underlying cause — `VacancyAdSync` carrying no photo field, so landlord-linked listings show this permanently, not just transiently — is a backend gap, noted but not in this pass's scope.) `browse.component.ts` got active-filter-chips: one chip per set filter (search text/district/area/property type/source), each individually clearable, plus a "Clear all". Dashboard visual parity between BariVara's owner side and LandLord's landlord side was already true structurally (same token system, same `.module-grid`/`.module-tile` pattern) — confirmed, no code change needed.
+
+Still not done: manual browser verification against the live backends (delete-confirm flow, ledger/list error states, booking flow, dark-mode toggle, filter-chips) — plan file has the full checklist and nobody's clicked through it yet.
 
 Plan file: `/home/araf/.claude/plans/shimmering-sprouting-stonebraker.md`. Source doc: `moving-forward-plan/ui-ux_design_plan-v1.md`.
 
-Next candidates: browser-verify all this against real backends, then move to the remaining hygiene/polish items above, or the cosmetic UI plan (`moving-forward-plan/cosmetic-ui-design_plan-v1.md`) — your call.
+Next candidates: browser-verify all of this against real backends, or move to the cosmetic UI plan (`moving-forward-plan/cosmetic-ui-design_plan-v1.md`) now that stat-tile/loading-state/dark-mode infra exists for it to build on — your call.

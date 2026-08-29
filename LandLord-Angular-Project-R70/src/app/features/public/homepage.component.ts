@@ -16,7 +16,7 @@ import { RouterLink } from '@angular/router';
           </p>
           <div class="hero-actions">
             <a class="btn btn-primary btn-lg" routerLink="/auth/signup">Get Started Free</a>
-            <a class="btn btn-lg" routerLink="/auth/login" style="background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.4); color:#fff;">Log in</a>
+            <a class="btn btn-lg btn-hero-ghost" routerLink="/auth/login">Log in</a>
           </div>
         </div>
 
@@ -24,11 +24,11 @@ import { RouterLink } from '@angular/router';
           <div class="hero-preview-title">Ledger — This Month</div>
           <div class="hero-preview-stats">
             <div>
-              <span class="stat-value" style="color:var(--success);">৳48,000</span>
+              <span class="stat-value text-success">৳48,000</span>
               <span class="stat-label">In</span>
             </div>
             <div>
-              <span class="stat-value" style="color:var(--danger);">৳6,200</span>
+              <span class="stat-value text-danger">৳6,200</span>
               <span class="stat-label">Out</span>
             </div>
             <div>

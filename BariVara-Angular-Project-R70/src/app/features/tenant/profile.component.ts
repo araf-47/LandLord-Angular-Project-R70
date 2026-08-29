@@ -8,7 +8,7 @@ import { MockDataService } from '../../core/mock-data.service';
   imports: [FormsModule],
   template: `
     <h1>My Profile</h1>
-    <div class="card" style="max-width:480px;">
+    <div class="card max-w-sm">
       @if (!editing()) {
         <p><strong>Name:</strong> {{ data.tenantProfile().name }}</p>
         <p><strong>Phone:</strong> {{ data.tenantProfile().phone }}</p>

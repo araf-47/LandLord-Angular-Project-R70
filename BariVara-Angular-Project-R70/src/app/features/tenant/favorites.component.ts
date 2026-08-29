@@ -25,9 +25,12 @@ import { ProfileApiService } from '../../core/profile-api.service';
           @for (l of favoriteListings(); track l.id) {
             <div class="listing-card">
               @if (l.photoUrl) {
-                <img class="listing-card-image" [src]="photoOrigin + l.photoUrl" alt="" style="width:100%;object-fit:cover;" />
+                <img class="listing-card-image img-cover" [src]="photoOrigin + l.photoUrl" alt="" />
               } @else {
-                <div class="listing-card-image">No photo</div>
+                <div class="listing-card-image no-photo">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" /></svg>
+                  <span>No photo yet</span>
+                </div>
               }
               <div class="listing-card-body">
                 <div class="listing-card-title">{{ l.title }}</div>

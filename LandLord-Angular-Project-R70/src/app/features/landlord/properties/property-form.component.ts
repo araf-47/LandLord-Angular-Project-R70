@@ -22,7 +22,7 @@ import { PropertyApiService } from '../../../core/property-api.service';
         </div>
       }
       @case ('ready') {
-        <div class="card" style="max-width:520px;">
+        <div class="card max-w-md">
           <div class="field">
             <label for="name">Property name</label>
             <input id="name" name="name" [(ngModel)]="name" required />

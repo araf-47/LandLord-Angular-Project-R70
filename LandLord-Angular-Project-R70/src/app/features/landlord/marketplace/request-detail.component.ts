@@ -43,7 +43,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
               <textarea rows="3" name="chat" [(ngModel)]="chatMessage" placeholder="Write a message..."></textarea>
             </div>
             @if (chatError) {
-              <p class="hint-text" style="color:var(--color-danger, #c0392b);">{{ chatError }}</p>
+              <p class="hint-text text-danger">{{ chatError }}</p>
             }
             <button class="btn btn-sm" (click)="sendChat()">Send</button>
           </div>

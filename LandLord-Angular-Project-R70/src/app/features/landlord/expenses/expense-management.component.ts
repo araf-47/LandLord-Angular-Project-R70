@@ -22,7 +22,7 @@ import { TenantApiService } from '../../../core/tenant-api.service';
         </div>
       }
       @case ('ready') {
-        <div class="card" style="max-width:520px;">
+        <div class="card max-w-md">
           <h3>Log expense</h3>
           <div class="field">
             <label for="property">Property</label>

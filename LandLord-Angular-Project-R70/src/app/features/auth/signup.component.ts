@@ -23,7 +23,7 @@ import { RouterLink } from '@angular/router';
       <p>
         If you're the landlord, use the account you already have.
       </p>
-      <p style="margin-top:1rem;">Already have an account? <a routerLink="/auth/login">Log in</a></p>
+      <p class="mt-md">Already have an account? <a routerLink="/auth/login">Log in</a></p>
     </div>
   `,
 })

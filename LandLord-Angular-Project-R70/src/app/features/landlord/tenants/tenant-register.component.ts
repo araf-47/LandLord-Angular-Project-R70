@@ -23,7 +23,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
         </div>
       }
       @case ('ready') {
-    <div class="card stack" style="max-width:640px;">
+    <div class="card stack max-w-xl">
       <div>
         <h3>1. Tenant info</h3>
         <div class="form-row">

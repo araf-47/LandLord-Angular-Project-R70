@@ -31,8 +31,53 @@
 .mb-sm { margin-bottom: var(--space-sm); }
 .mb-md { margin-bottom: var(--space-md); }
 .mb-lg { margin-bottom: var(--space-lg); }
+.mb-0 { margin-bottom: 0; }
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
 .gap-sm { gap: var(--space-sm); }
 .gap-md { gap: var(--space-md); }
+.max-w-xs { max-width: 200px; }
+.max-w-sm { max-width: 480px; }
+.max-w-md { max-width: 520px; }
+.max-w-lg { max-width: 560px; }
+.max-w-xl { max-width: 640px; }
+.flex-between { display: flex; justify-content: space-between; }
+.flex-center { display: flex; justify-content: center; }
+.cursor-pointer { cursor: pointer; }
+.img-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; }
+.img-cover { width: 100%; object-fit: cover; }
+.topbar-plain { background: transparent; border: none; padding: 0; margin-bottom: var(--space-md); }
+.sidebar-logout-btn { color: #cbd5e1; width: 100%; justify-content: flex-start; }
+.img-rounded { max-width: 100%; border-radius: 8px; }
+.img-preview { max-width: 200px; display: block; margin-bottom: var(--space-sm); }
+.btn-hero-ghost { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.4); color: #fff; }
+
+/* Dark mode — same token names, remapped values. Applied via [data-theme] on
+   <html>, set by ThemeService. Badges keep their light chip backgrounds in both
+   themes on purpose (small, self-contained, stay legible either way). */
+:root[data-theme="dark"] {
+  --primary-light: #17233d;
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --border: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Focus-visible — keyboard navigation needs a visible ring everywhere, not just
+   on form inputs (which already had one). */
+.btn:focus-visible,
+.module-tile:focus-visible,
+.listing-card:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 
 * {
   box-sizing: border-box;
@@ -632,6 +677,21 @@ th {
 
 .table-scroll {
   overflow-x: auto;
+}
+
+.row-income {
+  border-left: 3px solid var(--success);
+}
+.row-expense {
+  border-left: 3px solid var(--danger);
+}
+
+/* Tablet — one mid-breakpoint above the mobile drawer swap, so dense grids get an
+   intermediate 2-column layout instead of jumping straight from 4+ columns to 860px. */
+@media (max-width: 1100px) and (min-width: 861px) {
+  .module-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Responsive — Phase 4.4 (CSS reflow scope; see project-plan.md for what this

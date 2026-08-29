@@ -56,14 +56,14 @@ import { UnitApiService } from '../../../core/unit-api.service';
         </div>
       }
 
-      <div class="module-grid" style="margin-bottom:1rem;">
+      <div class="module-grid mb-md">
         <div class="card">
           <p class="hint-text">Total due</p>
-          <h2 style="color:var(--danger);">{{ totalDue() }}</h2>
+          <h2 class="text-danger">{{ totalDue() }}</h2>
         </div>
         <div class="card">
           <p class="hint-text">Total paid (lifetime)</p>
-          <h2 style="color:var(--success);">{{ totalPaid() }}</h2>
+          <h2 class="text-success">{{ totalPaid() }}</h2>
         </div>
         <div class="card">
           <p class="hint-text">Total maintenance cost (tenant-borne)</p>

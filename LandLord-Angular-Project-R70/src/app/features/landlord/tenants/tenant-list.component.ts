@@ -9,19 +9,19 @@ import { UnitApiService } from '../../../core/unit-api.service';
   standalone: true,
   imports: [RouterLink, FormsModule],
   template: `
-    <div class="topbar" style="background:transparent;border:none;padding:0;margin-bottom:1rem;">
+    <div class="topbar topbar-plain">
       <h1>Tenant Management</h1>
       <a class="btn btn-primary" routerLink="/landlord/tenants/register">Register tenant (walk-in)</a>
     </div>
 
-    <div class="search-bar" style="margin-bottom:1rem;">
+    <div class="search-bar mb-md">
       <input
         [ngModel]="query()"
         (ngModelChange)="query.set($event)"
         name="query"
         placeholder="Search by name, National ID, or phone"
       />
-      <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" name="statusFilter" style="max-width:160px;">
+      <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" name="statusFilter" class="max-w-xs">
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
         <option value="all">All</option>
@@ -53,7 +53,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
                   <td>{{ t.phone }}</td>
                   <td>{{ unitLabel(t.unitId) }}</td>
                   <td>{{ t.status }}</td>
-                  <td class="actions-row" style="margin:0;">
+                  <td class="actions-row mb-0">
                     <a class="btn btn-sm" [routerLink]="['/landlord/tenants', t.id]">View</a>
                     @if (t.status === 'active') {
                       <a class="btn btn-sm btn-danger" [routerLink]="['/landlord/tenants', t.id, 'move-out']">Move out</a>

@@ -15,23 +15,26 @@ import { ToastService } from '../../shared/toast.service';
       <div class="public-content">
         <div class="card">
           @if (listing()!.photoUrl) {
-            <img class="listing-card-image" [src]="photoOrigin + listing()!.photoUrl" alt="" style="height:220px; width:100%; border-radius:var(--radius); margin-bottom:1rem; object-fit:cover;" />
+            <img class="listing-card-image listing-hero-image" [src]="photoOrigin + listing()!.photoUrl" alt="" />
           } @else {
-            <div class="listing-card-image" style="height:220px; border-radius:var(--radius); margin-bottom:1rem;">No photo</div>
+            <div class="listing-card-image no-photo listing-hero-image">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" /></svg>
+              <span>No photo yet</span>
+            </div>
           }
           <h1>{{ listing()!.title }}</h1>
           <p>{{ listing()!.address }}</p>
           <span class="badge" [class.badge-owner]="listing()!.source === 'owner'" [class.badge-landlord-linked]="listing()!.source === 'landlord-linked'">
             {{ listing()!.source === 'owner' ? 'Owner-posted' : 'LandLord-linked' }}
           </span>
-          <div class="listing-card-rent" style="font-size:1.4rem; margin-top:0.75rem;">৳{{ listing()!.rent }}/mo</div>
+          <div class="listing-card-rent listing-detail-rent">৳{{ listing()!.rent }}/mo</div>
 
           @if (!auth.isAuthenticated()) {
             <div class="actions-row">
               <button class="btn" (click)="promptSignup()">Save</button>
               <button class="btn btn-primary" (click)="promptSignup()">Book now</button>
             </div>
-            <p class="hint-text" style="margin-top:0.5rem;">Sign up or log in to save or book this listing.</p>
+            <p class="hint-text mt-sm">Sign up or log in to save or book this listing.</p>
           } @else if (auth.role() === 'tenant') {
             <div class="actions-row">
               <button class="btn" (click)="toggleFavorite()">{{ isFavorite() ? 'Saved ✓' : 'Save' }}</button>
@@ -40,7 +43,7 @@ import { ToastService } from '../../shared/toast.service';
               }
             </div>
             @if (alreadyRequested()) {
-              <p class="hint-text" style="margin-top:0.75rem;">
+              <p class="hint-text mt-sm">
                 Request submitted —
                 {{ listing()!.source === 'owner' ? "sent to the owner's request inbox." : 'synced to LandLord core Marketplace & Leads.' }}
               </p>

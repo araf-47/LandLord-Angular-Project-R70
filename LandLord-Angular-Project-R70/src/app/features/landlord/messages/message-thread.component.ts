@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ApiMessage, MessagingApiService } from '../../../core/messaging-api.service';
+import { ToastService } from '../../../shared/toast.service';
 
 const POLL_MS = 10000;
 
@@ -35,7 +36,7 @@ const POLL_MS = 10000;
             <div class="field">
               <textarea rows="2" name="reply" [(ngModel)]="reply" placeholder="Send / reply message"></textarea>
             </div>
-            <button class="btn btn-primary" (click)="send()">Send</button>
+            <button class="btn btn-primary" [disabled]="sending()" (click)="send()">{{ sending() ? 'Sending…' : 'Send' }}</button>
           </div>
         }
       }
@@ -44,12 +45,14 @@ const POLL_MS = 10000;
 })
 export class LandlordMessageThreadComponent implements OnInit, OnDestroy {
   private readonly api = inject(MessagingApiService);
+  private readonly toast = inject(ToastService);
   private readonly conversationId = Number(inject(ActivatedRoute).snapshot.paramMap.get('conversationId'));
   private pollHandle?: ReturnType<typeof setInterval>;
 
   reply = '';
   readonly conversation = computed(() => this.api.conversations().find((c) => c.id === this.conversationId));
   readonly messages = signal<ApiMessage[]>([]);
+  readonly sending = signal(false);
 
   readonly status = signal<'loading' | 'error' | 'ready'>('loading');
   readonly error = signal<string | undefined>(undefined);
@@ -79,9 +82,16 @@ export class LandlordMessageThreadComponent implements OnInit, OnDestroy {
   }
 
   async send(): Promise<void> {
-    if (!this.reply) return;
-    await this.api.sendMessage(this.conversationId, 'landlord', this.reply);
-    this.reply = '';
-    await this.refresh();
+    if (!this.reply || this.sending()) return;
+    this.sending.set(true);
+    try {
+      await this.api.sendMessage(this.conversationId, 'landlord', this.reply);
+      this.reply = '';
+      await this.refresh();
+    } catch {
+      this.toast.error("Couldn't send your message. Please try again.");
+    } finally {
+      this.sending.set(false);
+    }
   }
 }

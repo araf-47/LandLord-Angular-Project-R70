@@ -23,7 +23,7 @@ import { ApiRentalAgreement, ApiTenant, TenantApiService } from '../../../core/t
     @if (tenant()) {
       <h1>Move out — {{ tenant()!.name }}</h1>
 
-      <div class="card stack" style="max-width:560px;">
+      <div class="card stack max-w-lg">
         <p><strong>Outstanding balance:</strong> {{ outstandingBalance() }}</p>
 
         <div class="field">

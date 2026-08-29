@@ -20,7 +20,7 @@ import { MessagingApiService } from '../../core/messaging-api.service';
       @case ('ready') {
         <div class="card stack">
           @for (n of api.notifications(); track n.id) {
-            <div class="card" (click)="open(n.id)" style="cursor:pointer;">
+            <div class="card cursor-pointer" (click)="open(n.id)">
               <strong>{{ n.title }}</strong>
               @if (opened() === n.id) {
                 <p>{{ n.body }}</p>
