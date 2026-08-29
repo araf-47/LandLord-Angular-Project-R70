@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cosmetic UI Demo</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --accent: #d97706;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --success: #16a34a;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06), 0 1px 1px rgba(15,23,42,.04);
+  --shadow-md: 0 10px 24px rgba(15,23,42,.10), 0 2px 6px rgba(15,23,42,.06);
+  font-family: 'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--text); }
+header.tag { text-align:center; padding:6px; font-size:12px; color:var(--text-muted); background:var(--surface); border-bottom:1px solid var(--border); }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 80px; }
+section { margin-bottom: 56px; }
+section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 14px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+
+/* 1. hero moment */
+.hero {
+  border-radius: var(--radius);
+  padding: 56px 40px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 60%, #0f172a 130%);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+.hero h1 { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 10px; }
+.hero p { color: rgba(255,255,255,.85); font-size: 1.05rem; max-width: 460px; margin:0; }
+.hero .badge { display:inline-block; font-size:12px; background:rgba(255,255,255,.15); padding:4px 10px; border-radius:999px; margin-bottom:14px; }
+
+/* 2. listing cards w/ hover zoom + no-photo state */
+.grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:18px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); transition: box-shadow .2s ease, transform .2s ease; opacity:0; transform:translateY(10px); animation: fadeUp .4s ease forwards; }
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.card-photo { height:140px; overflow:hidden; position:relative; background:#e2e8f0; }
+.card-photo img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .35s ease; }
+.card:hover .card-photo img { transform: scale(1.06); }
+.card-photo.nophoto { display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, var(--primary-light,#eff6ff), #fff); flex-direction:column; gap:6px; color:var(--text-muted); }
+.card-photo.nophoto svg { opacity:.55; }
+.card-photo.nophoto span { font-size:12px; }
+.card-body { padding:14px; }
+.card-body h3 { margin:0 0 4px; font-size:.95rem; }
+.card-body .price { color:var(--primary); font-weight:700; font-size:1rem; }
+.card.featured { border-color: var(--accent); background: linear-gradient(180deg, #fffbeb, var(--surface) 40%); }
+.card.featured .tag { display:inline-block; font-size:10px; font-weight:700; color:#fff; background:var(--accent); padding:2px 8px; border-radius:999px; margin-bottom:6px; letter-spacing:.03em; }
+
+@keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+/* 3. stat tiles w/ count-up */
+.stats { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:16px; }
+.stat { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-sm); }
+.stat .label { font-size:12px; color:var(--text-muted); margin-bottom:6px; }
+.stat .value { font-size:1.7rem; font-weight:800; letter-spacing:-0.02em; }
+.stat.income .value { color: var(--success); }
+.stat .spark { margin-top:8px; }
+
+/* 4. route/tab transition demo */
+.tabs { display:flex; gap:8px; margin-bottom:16px; }
+.tab-btn { border:1px solid var(--border); background:var(--surface); padding:8px 14px; border-radius:var(--radius-sm); cursor:pointer; font-size:.85rem; color:var(--text); transition: background .15s ease, transform .1s ease; }
+.tab-btn:active { transform: scale(.97); }
+.tab-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; min-height:120px; box-shadow:var(--shadow-sm); }
+.panel-content { display:none; animation: fadeIn .25s ease; }
+.panel-content.show { display:block; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+.note { font-size:12px; color:var(--text-muted); margin-top:8px; }
+</style>
+</head>
+<body>
+<header class="tag">Cosmetic demo — visual reference only, not wired to real data. See cosmetic-ui-design_plan-v1.md.</header>
+<main>
+
+<section>
+  <h2>1. Hero moment (one per public page, not everywhere)</h2>
+  <div class="hero">
+    <span class="badge">BariVara.com</span>
+    <h1>Find your next home, faster.</h1>
+    <p>Verified listings, direct from landlords. One gradient, used once, on purpose.</p>
+  </div>
+</section>
+
+<section>
+  <h2>2. Listing cards — hover zoom, no-photo state, featured highlight</h2>
+  <div class="grid">
+    <div class="card" style="animation-delay:.02s">
+      <div class="card-photo"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop" alt=""></div>
+      <div class="card-body"><h3>2 Bed Apartment, Dhanmondi</h3><div class="price">৳18,000/mo</div></div>
+    </div>
+    <div class="card featured" style="animation-delay:.08s">
+      <div class="card-photo"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop" alt=""></div>
+      <div class="card-body"><span class="tag">Featured</span><h3>3 Bed Flat, Gulshan</h3><div class="price">৳42,000/mo</div></div>
+    </div>
+    <div class="card" style="animation-delay:.14s">
+      <div class="card-photo nophoto">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        <span>Photo coming soon</span>
+      </div>
+      <div class="card-body"><h3>Studio, Landlord-linked</h3><div class="price">৳12,500/mo</div></div>
+    </div>
+    <div class="card" style="animation-delay:.2s">
+      <div class="card-photo"><img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop" alt=""></div>
+      <div class="card-body"><h3>1 Bed, Mirpur</h3><div class="price">৳9,000/mo</div></div>
+    </div>
+  </div>
+  <p class="note">Hover any card: zoom + lift. Amber card = accent-as-highlight, not a uniform tint.</p>
+</section>
+
+<section>
+  <h2>3. Stat tiles — count-up on load</h2>
+  <div class="stats">
+    <div class="stat income"><div class="label">Total Income (Aug)</div><div class="value" data-target="184500">৳0</div></div>
+    <div class="stat"><div class="label">Total Expense (Aug)</div><div class="value" data-target="52300">৳0</div></div>
+    <div class="stat"><div class="label">Occupied Units</div><div class="value" data-target="27">0</div></div>
+  </div>
+  <p class="note">Reload page to replay the count-up.</p>
+</section>
+
+<section>
+  <h2>4. Route/tab transition (fade instead of hard cut)</h2>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="1">Dashboard</button>
+    <button class="tab-btn" data-tab="2">Ledger</button>
+    <button class="tab-btn" data-tab="3">Messages</button>
+  </div>
+  <div class="panel">
+    <div class="panel-content show" id="tab-1">Dashboard content — fades in on switch, no hard cut.</div>
+    <div class="panel-content" id="tab-2">Ledger content — same transition, reused everywhere via one CSS rule.</div>
+    <div class="panel-content" id="tab-3">Messages content — cheap, applies globally via router config in the real app.</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+document.querySelectorAll('.stat .value').forEach(el => {
+  const target = +el.dataset.target;
+  const prefix = el.textContent.startsWith('৳') ? '৳' : '';
+  let start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    const progress = Math.min((ts - start) / 600, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = prefix + Math.round(target * eased).toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('show'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('show');
+  });
+});
+</script>
+</body>
+</html>
