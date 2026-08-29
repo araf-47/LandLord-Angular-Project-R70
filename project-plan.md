@@ -736,6 +736,14 @@ now functionally deeper than a route scaffold.)*
      states are **not applicable yet** — all data is synchronous mock data, there is
      no async operation that could show a loading spinner or a network error. Real
      candidates once Phase 6+ wires up an actual API ✅ (empty states) / N/A (loading/error)
+
+> **📌 Follow-up (2026-08-29):** Phases 6-16 wired both apps to live backends, so the
+> "N/A" above no longer holds — a full UI/UX audit against the real (now-async) app
+> found loading/error states missing on 55/56 LandLord feature components, plus
+> `alert()`/`confirm()` usage, no toast/modal system, thin ARIA coverage, single
+> breakpoint. Full findings + suggested fixes:
+> **`moving-forward-plan/ui-ux_design_plan-v1.md`**. Not yet scheduled into a phase —
+> your call, same as backend order.
 4.6. Visual consistency check: both apps now share the exact same token structure,
      type scale, shadow system, and component shapes — same family, distinct skins
      (blue/professional vs. orange/marketplace) purely through the accent color and
