@@ -754,3 +754,12 @@ th {
     font-size: 1.5rem;
   }
 }
+
+/* Route-change view transition (native browser API, provideRouter's withViewTransitions()) */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
