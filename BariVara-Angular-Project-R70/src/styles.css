@@ -350,6 +350,35 @@ a {
 }
 .hero h1 {
   color: #fff;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.hero.hero-split {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  text-align: left;
+}
+.hero.hero-split .hero-copy {
+  flex: 1;
+  min-width: 260px;
+}
+.hero-photo-frame {
+  flex-shrink: 0;
+  display: block;
+  width: 280px;
+  height: 200px;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hero-photo-frame img {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.25s ease;
+}
+.hero-photo-frame:hover img {
+  transform: scale(1.04);
 }
 .hero p {
   color: rgba(255, 255, 255, 0.85);
@@ -752,6 +781,13 @@ th {
   }
   .hero h1 {
     font-size: 1.5rem;
+  }
+  .hero.hero-split {
+    flex-direction: column;
+  }
+  .hero-photo-frame {
+    width: 100%;
+    height: 160px;
   }
 }
 

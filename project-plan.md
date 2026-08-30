@@ -810,7 +810,7 @@ now functionally deeper than a route scaffold.)*
 > `prototype-ground/cosmetic-demo-landlord.html` (LandLord) — you liked the direction
 > on first look. Not yet scheduled into a phase.
 >
-> **📌 Follow-up (2026-08-30), cosmetic batch 1+2 done:** split into safe (pure-CSS,
+> **📌 Follow-up (2026-08-30), cosmetic batches 1-3 done:** split into safe (pure-CSS,
 > no shared-component touch) vs. needs-care work, both apps verified with a clean
 > `ng build` after each batch. **Batch 1** (`c5ef6d3`): BariVara listing-photo
 > hover-zoom, stagger-in fade on `.listing-grid`/`.module-grid` (both apps,
@@ -819,12 +819,19 @@ now functionally deeper than a route scaffold.)*
 > yet — wiring it would mean inventing fake data). **Batch 2** (`a23d967`): route
 > transitions via `provideRouter`'s native `withViewTransitions()` (zero new
 > dependency — `@angular/animations` isn't installed and wasn't needed), stat-tile
-> count-up (LandLord only; skips the one string-valued tile, Occupancy). Left
-> untouched: `ConfirmDialogComponent` and `receive-payment.component.ts` (both
-> carry open bugs from the UX-plan session above — didn't want cosmetic work
-> compounding on known-broken files). Still open from the cosmetic plan: hero
-> display-typography moment, stat-tile sparkline, skeleton shimmer, BariVara hero
-> imagery on the landing page.
+> count-up (LandLord only; skips the one string-valued tile, Occupancy). **Batch 3**:
+> hero `h1` bumped to `font-weight: 800` + larger size, both apps (mobile breakpoints
+> re-checked so the bump doesn't leak onto small screens); BariVara homepage hero now
+> shows a real listing photo (`heroListing` computed off already-fetched data, no
+> fake data) beside the hero copy when one exists, falls back to text-only hero
+> otherwise. Left untouched: `ConfirmDialogComponent` and `receive-payment.component.ts`
+> (both carry open bugs from the UX-plan session above — didn't want cosmetic work
+> compounding on known-broken files). **Left open on purpose, judged more costly than
+> a cosmetic tweak** — user's call, 2026-08-30: stat-tile sparkline (no
+> historical/multi-period billing data exists to drive one — needs backend/data
+> plumbing) and skeleton shimmer (loading markup repeated inline in 35 places across
+> both apps, not componentized — doing it right means touching all 35). Also still
+> open: featured-card wiring (CSS exists, blocked on a real "featured" data signal).
 4.6. Visual consistency check: both apps now share the exact same token structure,
      type scale, shadow system, and component shapes — same family, distinct skins
      (blue/professional vs. orange/marketplace) purely through the accent color and

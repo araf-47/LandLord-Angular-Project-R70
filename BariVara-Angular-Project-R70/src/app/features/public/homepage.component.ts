@@ -10,31 +10,39 @@ import { API_ORIGIN, ListingApiService } from '../../core/listing-api.service';
   imports: [FormsModule, RouterLink],
   template: `
     <div class="public-content">
-      <div class="hero">
-        <h1>Now search the property very easily</h1>
-        <p>Save your valuable time — browse verified rentals across the city.</p>
+      <div class="hero" [class.hero-split]="heroListing()">
+        <div class="hero-copy">
+          <h1>Now search the property very easily</h1>
+          <p>Save your valuable time — browse verified rentals across the city.</p>
 
-        <div class="search-bar flex-wrap">
-          <select [ngModel]="district()" (ngModelChange)="onDistrictChange($event)" name="district">
-            <option value="">Select District</option>
-            @for (d of districts; track d) {
-              <option [value]="d">{{ d }}</option>
-            }
-          </select>
-          <select [ngModel]="area()" (ngModelChange)="area.set($event)" name="area">
-            <option value="">Select Area Name</option>
-            @for (a of areas(); track a) {
-              <option [value]="a">{{ a }}</option>
-            }
-          </select>
-          <select [ngModel]="propertyType()" (ngModelChange)="propertyType.set($event)" name="propertyType">
-            <option value="">Select property type</option>
-            @for (t of propertyTypes; track t.value) {
-              <option [value]="t.value">{{ t.label }}</option>
-            }
-          </select>
-          <button class="btn btn-primary" (click)="search()">Find</button>
+          <div class="search-bar flex-wrap">
+            <select [ngModel]="district()" (ngModelChange)="onDistrictChange($event)" name="district">
+              <option value="">Select District</option>
+              @for (d of districts; track d) {
+                <option [value]="d">{{ d }}</option>
+              }
+            </select>
+            <select [ngModel]="area()" (ngModelChange)="area.set($event)" name="area">
+              <option value="">Select Area Name</option>
+              @for (a of areas(); track a) {
+                <option [value]="a">{{ a }}</option>
+              }
+            </select>
+            <select [ngModel]="propertyType()" (ngModelChange)="propertyType.set($event)" name="propertyType">
+              <option value="">Select property type</option>
+              @for (t of propertyTypes; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+            <button class="btn btn-primary" (click)="search()">Find</button>
+          </div>
         </div>
+
+        @if (heroListing(); as hl) {
+          <a class="hero-photo-frame" [routerLink]="['/listings', hl.id]" aria-label="View featured listing: {{ hl.title }}">
+            <img [src]="photoOrigin + hl.photoUrl" alt="" class="img-cover" />
+          </a>
+        }
       </div>
 
       <h2>Recent listings</h2>
@@ -106,6 +114,8 @@ export class HomepageComponent implements OnInit {
   }
 
   readonly recentListings = computed(() => this.api.listings().filter((l) => l.status === 'active').slice(0, 8));
+
+  readonly heroListing = computed(() => this.recentListings().find((l) => !!l.photoUrl));
 
   onDistrictChange(value: string): void {
     this.district.set(value);

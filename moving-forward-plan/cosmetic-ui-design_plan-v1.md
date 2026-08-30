@@ -6,9 +6,14 @@ accessibility). That plan is about things being *broken*; this one is about thin
 being *plain*. Referenced from `project-plan.md` §4.5 follow-up notes (2026-08-29
 scoping, 2026-08-30 batch 1+2 progress).
 
-**Status (2026-08-30):** batch 1 (`c5ef6d3`) and batch 2 (`a23d967`) done — see
-inline ✅ markers below. Remaining items not started: hero display-typography
-moment, stat-tile sparkline, skeleton shimmer, BariVara landing-page hero imagery.
+**Status (2026-08-30):** batch 1 (`c5ef6d3`), batch 2 (`a23d967`), and batch 3
+(hero typography + BariVara hero imagery) done — see inline ✅ markers below.
+Left open on purpose, both judged more costly than a cosmetic tweak: **sparkline**
+(no historical/multi-period data exists anywhere in the billing model to drive one —
+needs new backend/data plumbing, not just CSS) and **skeleton shimmer** (the loading
+markup is inline-repeated in 35 places across both apps, not componentized — doing
+it right means touching all 35, not a quick add). Revisit either if/when the
+underlying blocker is worth solving on its own.
 
 ## 0. The constraint this has to work inside
 
@@ -42,10 +47,11 @@ treatment than a plain `<img>` in a card:
   a gap: `browse.component.ts` already renders a house-outline SVG + "No photo yet"
   label on `--primary-light`, not a plain gradient. (This plan's original text was
   stale on this point — corrected 2026-08-30.)
-- **Hero imagery on the public landing/search page** — not started. If there's real
-  inventory, a large-format featured-listing hero (one big photo, not a slideshow of
-  gradients) gives the homepage an actual "look at what's on here" moment instead of
-  a generic hero card.
+- ✅ **Hero imagery on the public landing page — done (batch 3), BariVara.**
+  `homepage.component.ts` picks the first real listing that has a photo
+  (`heroListing` computed off already-fetched data — no invented data), shows it in
+  a photo panel beside the hero copy; falls back to the original text-only hero when
+  no listing has a photo yet. Responsive: stacks on mobile.
 
 ## 2. Micro-interactions & motion
 
@@ -68,23 +74,27 @@ Cheap additions that compound:
   change" this bullet originally implied). Degrades to an instant cut on browsers
   without View Transition support. `prefers-reduced-motion` guard added in both
   stylesheets.
-- **Skeleton shimmer** — not started. Once the loading-state work from the UX plan
-  lands (it has — see `ui-ux_design_plan-v1.md`), pairing a shimmer with it is still
-  open.
+- 🔴 **Skeleton shimmer — left open, judged too costly for a cosmetic pass.** The
+  loading-state work from the UX plan is real (see `ui-ux_design_plan-v1.md`), but
+  it's the same `<p class="hint-text">Loading…</p>` idiom repeated inline 35 times
+  across both apps, not one shared component. Adding shimmer properly means either
+  touching all 35 sites or componentizing them first — bigger than this plan's scope.
 
 ## 3. Typography & "hero moments"
 
 Current type scale (`styles.css` h1-h4) is disciplined but conservative — good for
 tables, a little flat for the handful of places that should actually grab attention:
 
-- **One outsized display moment per public page** — the LandLord homepage hero
-  headline and BariVara's search-page headline are the two places a bigger, bolder
-  weight (not a bigger palette) earns its keep. Everywhere else, keep the current
-  restrained scale — this is deliberately not "make all headings bigger."
-- **LandLord's stat tiles** could go beyond a bare number — a small sparkline or
-  trend indicator next to the figure would let typography/data work together
-  instead of the number sitting alone. (Count-up animation done, batch 2 — this
-  sparkline/trend-line addition is separate and not started.)
+- ✅ **One outsized display moment per public page — done (batch 3), both apps.**
+  Hero `h1` bumped to `font-weight: 800` with tighter letter-spacing, and sized up
+  (LandLord 2.5rem, BariVara 2.2rem, up from base 1.75-2.1rem) — mobile breakpoints
+  re-checked and given a matching override so the desktop size doesn't leak onto
+  small screens. Everywhere else keeps the original restrained scale.
+- 🔴 **LandLord's stat-tile sparkline — left open, judged too costly for a cosmetic
+  pass.** Count-up animation is done (batch 2), but a sparkline needs a real
+  historical/multi-period series and none exists: `collected`/`outstanding`/`net`
+  are single current-month numbers everywhere in the billing model. Building this
+  for real means new backend/data plumbing, not a CSS addition — out of scope here.
 
 ## 4. Color — use the accent more intentionally
 
@@ -120,12 +130,14 @@ Bootstrap Icons mixed in. Nothing to change here.
 2. ✅ **Stagger-in lists + stat-tile count-up** — done (batch 1 + batch 2).
 3. ✅ **Route transitions** — done (batch 2), via native View Transitions API, not
    `@angular/animations`.
-4. **One hero display-type moment per app's public landing page** — not started.
-   Moderate effort, highest visibility (first thing any new visitor sees).
+4. ✅ **One hero display-type moment per app's public landing page** — done (batch 3),
+   both the typography bump and BariVara's hero imagery.
 5. 🟡 **Accent-as-highlight pattern (featured card treatment)** — CSS shipped
    (batch 1), not wired in — blocked on a real "featured" data signal, not effort.
 
-Remaining open items (sparkline, skeleton shimmer, hero imagery, hero typography,
-featured-card wiring) still require no framework change or new dependency —
-achievable in plain CSS/Angular, consistent with the existing "no Tailwind/Material"
-setup.
+Remaining open items: sparkline and skeleton shimmer (both explicitly left open,
+2026-08-30 — judged more costly than a cosmetic tweak, see §2/§3 above) and
+featured-card wiring (blocked on data, not effort — see §4). All three still
+require no framework change or new dependency when their blocker is eventually
+resolved — achievable in plain CSS/Angular, consistent with the existing
+"no Tailwind/Material" setup.
