@@ -3,8 +3,12 @@
 Scope: visual polish only — make both apps more "eye-catching." This is separate from
 `ui-ux_design_plan-v1.md`, which covers functional UX gaps (loading states, toasts,
 accessibility). That plan is about things being *broken*; this one is about things
-being *plain*. Not yet mentioned in `project-plan.md` — sits here until you decide
-whether/when to schedule it.
+being *plain*. Referenced from `project-plan.md` §4.5 follow-up notes (2026-08-29
+scoping, 2026-08-30 batch 1+2 progress).
+
+**Status (2026-08-30):** batch 1 (`c5ef6d3`) and batch 2 (`a23d967`) done — see
+inline ✅ markers below. Remaining items not started: hero display-typography
+moment, stat-tile sparkline, skeleton shimmer, BariVara landing-page hero imagery.
 
 ## 0. The constraint this has to work inside
 
@@ -28,19 +32,20 @@ BariVara is the consumer-facing marketplace side; it's the one app where imagery
 gradient placeholder — fine as a fallback, but real listing photos deserve better
 treatment than a plain `<img>` in a card:
 
-- **Photo cards**: subtle zoom-on-hover (`transform: scale(1.04)` inside an
-  `overflow:hidden` frame, ~250ms ease) — makes the grid feel alive without adding
-  any new UI chrome.
-- **Consistent aspect ratio + object-fit: cover** across all listing photos so the
-  grid reads as a considered layout, not user-uploaded chaos.
-- **A real "no photo yet" state** instead of an infinite plain gradient (this echoes
-  a finding in the UX plan too, but it's a cosmetic opportunity as much as a
-  functional gap) — a subtle line-icon illustration (house outline) on a soft brand
-  tint, not just muted text on a gradient.
-- **Hero imagery on the public landing/search page** — if there's real inventory,
-  a large-format featured-listing hero (one big photo, not a slideshow of gradients)
-  gives the homepage an actual "look at what's on here" moment instead of a
-  generic hero card.
+- ✅ **Photo cards zoom-on-hover — done (batch 1).** `transform: scale(1.04)` on
+  `.listing-card:hover .listing-card-image.img-cover`, clipped by the card's
+  existing `overflow: hidden` — only fires on real photos, not the no-photo state.
+- ✅ **Consistent aspect ratio + object-fit: cover — already in place before this
+  plan was written**, not a gap: `.listing-card-image` is a fixed 150px height with
+  `.img-cover` (`object-fit: cover`) on every listing photo.
+- ✅ **"No photo yet" state — already in place before this plan was written**, not
+  a gap: `browse.component.ts` already renders a house-outline SVG + "No photo yet"
+  label on `--primary-light`, not a plain gradient. (This plan's original text was
+  stale on this point — corrected 2026-08-30.)
+- **Hero imagery on the public landing/search page** — not started. If there's real
+  inventory, a large-format featured-listing hero (one big photo, not a slideshow of
+  gradients) gives the homepage an actual "look at what's on here" moment instead of
+  a generic hero card.
 
 ## 2. Micro-interactions & motion
 
@@ -48,19 +53,24 @@ Phase 4.3 already added hover-lift + shadow-md on cards and a tactile button pre
 state (`project-plan.md:722-728`) — that's the right instinct, just under-extended.
 Cheap additions that compound:
 
-- **Stagger-in on list/grid mount**: rows/cards fade+slide in with a small
-  incremental delay (~30-40ms per item, capped at ~8 items) when a list first
-  populates — reads as "considered," costs nothing functionally.
-- **Number count-up on stat tiles** (ledger totals, dashboard KPIs) — animate from 0
-  to the real value over ~500ms on mount. Small, but this is exactly the kind of
-  detail that makes financial dashboards feel premium instead of static.
-- **Page-level transition** (fade or subtle slide on route change) rather than a
-  hard cut — Angular Router supports this natively via route animations, one config
-  change, applies everywhere.
-- **Skeleton shimmer** instead of blank-then-populate, once the loading-state work
-  from the UX plan lands — this is a case where the *functional* fix (add a loading
-  state) and the *cosmetic* opportunity (make that loading state good-looking)
-  are the same piece of work, worth doing together.
+- ✅ **Stagger-in on list/grid mount — done (batch 1).** `.listing-grid` (BariVara)
+  and `.module-grid` (both apps) fade+slide in, ~30ms incremental delay capped at 8
+  items, `prefers-reduced-motion: reduce` disables it.
+- ✅ **Number count-up on stat tiles — done (batch 2), LandLord only** (BariVara has
+  no stat-tile component). `stat-tile.component.ts` animates numeric values from the
+  previous value to the new one over 500ms with ease-out, only when `value` is a
+  `number` — the one string-valued tile (Occupancy, "x/y") is left untouched.
+  Cancels in-flight animation on rapid updates and respects reduced-motion.
+- ✅ **Page-level route transition — done (batch 2), both apps.** Used the native
+  browser View Transition API via `provideRouter(routes, withViewTransitions())` —
+  **not** `@angular/animations` (that package isn't installed in either app and
+  wasn't needed; adding it would've been a real new dependency, not the "one config
+  change" this bullet originally implied). Degrades to an instant cut on browsers
+  without View Transition support. `prefers-reduced-motion` guard added in both
+  stylesheets.
+- **Skeleton shimmer** — not started. Once the loading-state work from the UX plan
+  lands (it has — see `ui-ux_design_plan-v1.md`), pairing a shimmer with it is still
+  open.
 
 ## 3. Typography & "hero moments"
 
@@ -73,16 +83,20 @@ tables, a little flat for the handful of places that should actually grab attent
   restrained scale — this is deliberately not "make all headings bigger."
 - **LandLord's stat tiles** could go beyond a bare number — a small sparkline or
   trend indicator next to the figure would let typography/data work together
-  instead of the number sitting alone.
+  instead of the number sitting alone. (Count-up animation done, batch 2 — this
+  sparkline/trend-line addition is separate and not started.)
 
 ## 4. Color — use the accent more intentionally
 
 Both apps already have a two-color brand system (blue/LandLord, orange/BariVara) plus
 semantic success/danger/warning tokens. Underused:
 
-- **Accent as a highlight, not a UI-wide tint** — e.g. one bordered/tinted "featured"
-  or "recommended" listing card on BariVara using `--accent` as a background wash,
-  standing out precisely because everything else stays neutral.
+- 🟡 **Accent as a highlight — CSS ready, not wired (batch 1).** `.listing-card.featured`
+  (accent-tinted background wash + badge) exists in BariVara's `styles.css`, but no
+  template applies it — there's no `featured` field on the listing data model, and
+  wiring one in would mean inventing fake data rather than a real signal. Needs a
+  real "featured" concept (landlord-paid promotion? highest-view listing?) before
+  this gets used.
 - **Gradient, used once, on purpose** — Phase 4 banned gradient-*everything*, which
   is right, but a single soft brand-color gradient behind one hero section (not
   every card) is a different move — a signature moment instead of a template tell.
@@ -94,22 +108,24 @@ semantic success/danger/warning tokens. Underused:
 
 ## 5. Iconography consistency
 
-Grep-worth-doing-later item: confirm icon usage (nav, buttons, status badges) comes
-from one consistent set/weight rather than mixed sources — mismatched icon styles
-was explicitly one of Phase 4's "AI-generated tells" to avoid, worth re-checking now
-that more features have shipped since that pass.
+✅ **Audited 2026-08-30 (batch 1) — clean, no fix needed.** Both apps use inline SVG
+exclusively for icons — no `material-icons`, Font Awesome, Feather, Lucide, or
+Bootstrap Icons mixed in. Nothing to change here.
 
 ## 6. Suggested rough sequencing
 
-1. **BariVara listing card hover/zoom + real "no photo" state** — cheap, highest
-   visual payoff for the app where imagery is the product.
-2. **Stagger-in lists + stat-tile count-up** — cheap, compounds with the loading-state
-   work already planned in the UX doc.
-3. **Route transitions** — one Angular config change, applies everywhere.
-4. **One hero display-type moment per app's public landing page** — moderate effort,
-   highest visibility (first thing any new visitor sees).
-5. **Accent-as-highlight pattern (featured card treatment)** — small effort, use
-   sparingly, re-evaluate against the "AI-generated tells" list before shipping.
+1. ✅ **BariVara listing card hover/zoom + real "no photo" state** — hover/zoom done
+   (batch 1); "no photo" state and aspect-ratio turned out to already exist before
+   this plan was written.
+2. ✅ **Stagger-in lists + stat-tile count-up** — done (batch 1 + batch 2).
+3. ✅ **Route transitions** — done (batch 2), via native View Transitions API, not
+   `@angular/animations`.
+4. **One hero display-type moment per app's public landing page** — not started.
+   Moderate effort, highest visibility (first thing any new visitor sees).
+5. 🟡 **Accent-as-highlight pattern (featured card treatment)** — CSS shipped
+   (batch 1), not wired in — blocked on a real "featured" data signal, not effort.
 
-Nothing here requires a framework change or new dependency — all achievable in plain
-CSS/Angular animations, consistent with the existing "no Tailwind/Material" setup.
+Remaining open items (sparkline, skeleton shimmer, hero imagery, hero typography,
+featured-card wiring) still require no framework change or new dependency —
+achievable in plain CSS/Angular, consistent with the existing "no Tailwind/Material"
+setup.

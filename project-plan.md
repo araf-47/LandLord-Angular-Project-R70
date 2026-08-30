@@ -809,6 +809,22 @@ now functionally deeper than a route scaffold.)*
 > exist: `moving-forward-plan/cosmetic-demo.html` (BariVara) and
 > `prototype-ground/cosmetic-demo-landlord.html` (LandLord) — you liked the direction
 > on first look. Not yet scheduled into a phase.
+>
+> **📌 Follow-up (2026-08-30), cosmetic batch 1+2 done:** split into safe (pure-CSS,
+> no shared-component touch) vs. needs-care work, both apps verified with a clean
+> `ng build` after each batch. **Batch 1** (`c5ef6d3`): BariVara listing-photo
+> hover-zoom, stagger-in fade on `.listing-grid`/`.module-grid` (both apps,
+> `prefers-reduced-motion` respected), `.featured` accent-highlight CSS added but
+> not wired to any template (no `featured` field exists on the listing data model
+> yet — wiring it would mean inventing fake data). **Batch 2** (`a23d967`): route
+> transitions via `provideRouter`'s native `withViewTransitions()` (zero new
+> dependency — `@angular/animations` isn't installed and wasn't needed), stat-tile
+> count-up (LandLord only; skips the one string-valued tile, Occupancy). Left
+> untouched: `ConfirmDialogComponent` and `receive-payment.component.ts` (both
+> carry open bugs from the UX-plan session above — didn't want cosmetic work
+> compounding on known-broken files). Still open from the cosmetic plan: hero
+> display-typography moment, stat-tile sparkline, skeleton shimmer, BariVara hero
+> imagery on the landing page.
 4.6. Visual consistency check: both apps now share the exact same token structure,
      type scale, shadow system, and component shapes — same family, distinct skins
      (blue/professional vs. orange/marketplace) purely through the accent color and
