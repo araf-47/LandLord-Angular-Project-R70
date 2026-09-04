@@ -1,6 +1,14 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-09-04 (Phase 7.5 — OTP email delivery — done. `LoggingMailService`
+Last updated: 2026-09-04 (Phase 16.4 — account-lockout/IP-block cleanup sweep —
+done. Turned out OTP itself needed no cleanup, it's pure TTL'd Caffeine cache;
+the real gap was that account lockout and IP blocking both self-expire lazily
+(only on the next attempt from that exact user/IP), so a new hourly
+`AuthMaintenanceScheduler` in `Parts/auth` sweeps both back to unlocked once
+their window elapses. Verified live with a temporarily-shortened cron against a
+real backdated test user. Full detail in Phase 16.4 below.
+
+Last updated before that: 2026-09-04 (Phase 7.5 — OTP email delivery — done. `LoggingMailService`
 stub replaced with real Brevo delivery (`BrevoMailService`, `mail.provider=brevo`),
 gated behind env vars so it stays off by default; added a resend cooldown (separate
 1-minute Caffeine cache, ahead of the existing 3-per-day generation limit). LandLord's
@@ -1249,7 +1257,7 @@ warning gets logged, never a hard failure.
   `GET /api/listings` → `source: landlord-linked` shape was already proven correct
   during 15.4's end-to-end test, so this was a same-shape mock→API swap, low risk.
 
-### Phase 16 — Background jobs & notifications ✅ DONE (16.1–16.3) — 16.4 deferred
+### Phase 16 — Background jobs & notifications ✅ DONE (16.1–16.4)
 16.1. ✅ **Monthly bill generation job — reliability pass.** Core logic extracted
       into a shared `run(trigger)` so the `@Scheduled` cron path and a new
       `@EventListener(ApplicationReadyEvent.class)` startup catch-up path share
@@ -1296,12 +1304,36 @@ warning gets logged, never a hard failure.
       idempotent (no duplicate on a second sweep), confirmed dismiss (`DELETE
       /api/notifications/{id}`) clears it. All test data and reminder-sent
       timestamps cleaned up afterward.
-16.4. **Deferred, no longer blocked.** OTP now has real delivery (Phase 7.5,
-      2026-09-04) and a basic resend cooldown, but the full lockout/cleanup
-      job itself (expiring stale OTP-attempt rows, unlocking timed-out
-      accounts on a schedule, etc.) still isn't built — deliberately scoped
-      out of 7.5 as "basic cooldown now, full system later." Revisit
-      whenever ready; nothing left to unblock it.
+16.4. ✅ **Done (2026-09-04).** Turned out to be narrower than the phase
+      description implied once actually investigated: OTP state (codes,
+      generation/validation attempt counters, resend cooldown) all live in a
+      Caffeine cache with a per-entry TTL already — no DB rows, nothing to
+      sweep, self-cleaning by construction. The real gap was elsewhere: both
+      account lockout (`User.accountLocked`/`lockedUntil`) and IP blocking
+      (`BlockedIp.active`/`unblockAt`) already self-expire *lazily* — the flag
+      only flips back on the next login attempt from that exact user/IP
+      (`AuthProvider.handleSuccessfulLogin`, `IpBlockingServiceImpl.isIpBlocked`).
+      An account or IP nobody retries stayed marked locked/blocked forever past
+      its window — stale for anything reading the flag directly, i.e. the admin
+      blocked-users/blocked-IPs list pages. New `AuthMaintenanceScheduler`
+      (`Parts/auth`, hourly — lockout windows default 30 min) sweeps both:
+      `UserService.unlockExpiredAccounts()` (new) resets any account whose
+      `lockedUntil` has passed; `IpBlockingService.unblockExpired()` (new)
+      does the same for `BlockedIp` rows, a no-op via `NoOpIpBlockingServiceImpl`
+      when `auth.ip.block.enabled=false` (this project's default). `@EnableScheduling`
+      added to `barivara-backend`'s main class (landlord-backend already had it)
+      so the sweep runs in both, since `Parts/auth` is embedded in both independently.
+      **Real subtlety caught during implementation**: the account-unlock sweep must
+      call `userRepository.save(user)` per row, not `saveAll()` — `CACHE_USER`'s
+      `@CachePut` only fires through the proxied `save()` call; `saveAll()`'s
+      internal self-invocation bypasses the Spring proxy and would've left the
+      cache serving a stale `accountLocked=true` after the DB row was already
+      fixed. **Verified live**: temporarily dropped the cron to every 5s,
+      backdated a real test user's `locked_until` via psql, confirmed the sweep
+      picked it up on the next tick (`Account lockout sweep: 1 account(s)
+      unlocked`) and the DB row flipped `account_locked` back to `false`, then
+      reverted to the real hourly schedule and confirmed both backends still
+      boot clean. Test data cleaned up afterward, demo data untouched.
 
 ### Phase 17 — Testing & QA
 17.1. Unit tests for backend business logic (billing calc, move-out calc, lockout)

@@ -45,6 +45,16 @@ public interface UserService extends UserDetailsService {
 
     boolean unblockUser(String username) throws TraceableException;
 
+    /**
+     * Bulk sweep for accounts whose {@code lockedUntil} window elapsed but nobody
+     * has logged back in since (that's the only lazy-unlock path - see
+     * {@code AuthProvider.handleSuccessfulLogin}). Without this, {@code
+     * accountLocked} stays stale {@code true} forever on accounts nobody retries.
+     *
+     * @return number of accounts unlocked
+     */
+    int unlockExpiredAccounts();
+
     /** Seeds the default administrator if it does not yet exist. */
     void init();
 

@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Embeds com.idb.auth (Parts/auth) as a library: its own AuthApplication.main()
@@ -16,6 +17,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * here since they sit outside this app's own package root.
  */
 @SpringBootApplication
+@EnableScheduling
 @ComponentScan(basePackages = {"com.barivara.backend", "com.idb.auth"})
 @EntityScan(basePackages = {"com.barivara.backend", "com.idb.auth.model"})
 @EnableJpaRepositories(basePackages = {"com.barivara.backend", "com.idb.auth.dao"})

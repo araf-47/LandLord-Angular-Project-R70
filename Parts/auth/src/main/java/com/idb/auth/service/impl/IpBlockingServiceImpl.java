@@ -176,6 +176,17 @@ public class IpBlockingServiceImpl implements IpBlockingService {
         return blockedIpRepository.findByIpAddress(ipAddress).orElse(null);
     }
 
+    @Override
+    @Transactional
+    public int unblockExpired() {
+        List<BlockedIp> expired = blockedIpRepository.findByActiveTrueAndUnblockAtBefore(LocalDateTime.now());
+        for (BlockedIp blockedIp : expired) {
+            blockedIp.setActive(false);
+        }
+        blockedIpRepository.saveAll(expired);
+        return expired.size();
+    }
+
     private static int nullSafe(Integer value) {
         return value == null ? 0 : value;
     }

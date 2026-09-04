@@ -1,5 +1,6 @@
 package com.idb.auth.dao;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +19,8 @@ public interface BlockedIpRepository extends JpaRepository<BlockedIp, Long> {
     Optional<BlockedIp> findByIpAddress(String ipAddress);
 
     List<BlockedIp> findByUsername(String username);
+
+    List<BlockedIp> findByActiveTrueAndUnblockAtBefore(LocalDateTime instant);
 
     @Query("""
             SELECT b FROM BlockedIp b

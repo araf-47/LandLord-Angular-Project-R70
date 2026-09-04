@@ -300,4 +300,20 @@ public class UserServiceImpl implements UserService {
             throw TraceableException.of("Failed to unblock user %s", e, "Failed to unblock user", username);
         }
     }
+
+    @Override
+    @Transactional
+    public int unlockExpiredAccounts() {
+        List<User> unlocked = userRepository.findAllLockedUsers().stream()
+                .filter(user -> !user.isTemporarilyLocked())
+                .toList();
+        // Looped save(), not saveAll(): CACHE_USER's @CachePut only fires through
+        // the proxied save() call - saveAll()'s internal self-invocation would
+        // leave the cache serving a stale accountLocked=true.
+        for (User user : unlocked) {
+            user.resetFailedLoginAttempts();
+            userRepository.save(user);
+        }
+        return unlocked.size();
+    }
 }

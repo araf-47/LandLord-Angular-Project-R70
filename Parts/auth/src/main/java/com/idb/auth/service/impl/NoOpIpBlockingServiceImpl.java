@@ -55,4 +55,9 @@ public class NoOpIpBlockingServiceImpl implements IpBlockingService {
     public BlockedIp getBlockedIp(String ipAddress) {
         return null;
     }
+
+    @Override
+    public int unblockExpired() {
+        return 0;
+    }
 }

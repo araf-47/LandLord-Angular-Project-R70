@@ -27,4 +27,14 @@ public interface IpBlockingService {
     int unblockAllForUser(String username) throws TraceableException;
 
     BlockedIp getBlockedIp(String ipAddress);
+
+    /**
+     * Bulk sweep for rows whose block window elapsed but were never queried again
+     * via {@link #isIpBlocked}, so the lazy per-lookup expiry in that method never
+     * ran for them. Without this, {@code active} stays stale {@code true} forever
+     * on IPs nobody happens to check again (e.g. the admin blocked-IP list).
+     *
+     * @return number of rows unblocked
+     */
+    int unblockExpired();
 }
