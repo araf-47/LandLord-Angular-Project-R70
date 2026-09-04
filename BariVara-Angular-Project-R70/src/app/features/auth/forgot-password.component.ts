@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -11,18 +12,25 @@ import { RouterLink } from '@angular/router';
       <h2>Reset your password</h2>
 
       @if (!sent()) {
-        <p>Enter the email on your account and we'll send a password-reset link.</p>
+        <p>Enter your username and we'll email a verification code to reset your password.</p>
         <div class="field">
-          <label for="email">Account email</label>
-          <input id="email" type="email" name="email" [(ngModel)]="email" required />
+          <label for="username">Username</label>
+          <input id="username" name="username" [(ngModel)]="username" required />
         </div>
+
+        @if (error()) {
+          <p class="error-text">{{ error() }}</p>
+        }
+
         <div class="actions-row">
-          <button class="btn btn-primary" (click)="send()">Send password-reset link</button>
+          <button class="btn btn-primary" (click)="send()" [disabled]="loading()">
+            {{ loading() ? 'Sending…' : 'Send code' }}
+          </button>
         </div>
       } @else {
-        <p>A reset link was sent to {{ email }}.</p>
+        <p>A verification code was sent to {{ username }}'s registered email.</p>
         <div class="actions-row">
-          <a class="btn btn-primary" routerLink="/auth/reset-password">Open reset link (demo)</a>
+          <button class="btn btn-primary" (click)="toResetPassword()">Enter code</button>
         </div>
       }
 
@@ -31,11 +39,29 @@ import { RouterLink } from '@angular/router';
   `,
 })
 export class ForgotPasswordComponent {
-  email = '';
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  username = '';
+  readonly error = signal('');
+  readonly loading = signal(false);
   readonly sent = signal(false);
 
-  send(): void {
-    if (!this.email) return;
-    this.sent.set(true);
+  async send(): Promise<void> {
+    if (!this.username) return;
+    this.error.set('');
+    this.loading.set(true);
+    try {
+      await this.auth.requestPasswordResetOtp(this.username);
+      this.sent.set(true);
+    } catch (err: any) {
+      this.error.set(err?.error?.message || err?.message || 'Could not send the reset code.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  toResetPassword(): void {
+    this.router.navigate(['/auth/reset-password'], { queryParams: { username: this.username } });
   }
 }

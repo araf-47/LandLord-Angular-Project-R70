@@ -1,6 +1,13 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-09-04 (Phase 16.4 — account-lockout/IP-block cleanup sweep —
+Last updated: 2026-09-04 (BariVara's forgot-password UI wired to the real
+backend, same pattern as LandLord's Phase 7.5 fix — no backend work needed,
+`barivara-backend` already shares the same `Parts/auth`/Brevo setup. Verified
+live full loop against the real seeded `landlord-linked` account via the
+dev-only mail sink, then restored its original password. Full detail in §3
+under the Phase 7.5 entry.
+
+Last updated before that: 2026-09-04 (Phase 16.4 — account-lockout/IP-block cleanup sweep —
 done. Turned out OTP itself needed no cleanup, it's pure TTL'd Caffeine cache;
 the real gap was that account lockout and IP blocking both self-expire lazily
 (only on the next attempt from that exact user/IP), so a new hourly
@@ -609,6 +616,30 @@ slice only, as a proof-of-pipe before committing to the full schema):
       password actually changed in the DB → login with the new password
       succeeds. BariVara's forgot-password UI not touched — separate app,
       out of scope for this pass.
+- **BariVara's forgot-password UI wired to the real backend, same pattern
+  (2026-09-04)** — was the identical pure client-side theater LandLord's used
+  to be (`send()`/`save()` just flipping local signals, no `HttpClient`,
+  no real OTP). No backend work needed: `barivara-backend` already embeds the
+  same `Parts/auth` and already has the same `mail.provider`/Brevo config as
+  `landlord-backend` (Phase 7.5's `BrevoMailService` is shared code, not
+  LandLord-specific). Ported LandLord's real components directly: BariVara's
+  `AuthService` gained `envelopeErrorMessage()`, `requestPasswordResetOtp()`
+  (`POST /auth/otp`), `resetPassword()` (`POST /auth/forgot-password`);
+  `ForgotPasswordComponent` collects username and sends the code;
+  `ResetPasswordComponent` gained the OTP field, reads username forward via
+  query param, same field-level validation-error surfacing as LandLord's.
+  **Verified live, full loop, against the real seeded `landlord-linked`
+  account**: enabled the dev-only `FileMailSink` (`mail.sink.enabled=true`,
+  writes the OTP to a local JSON file instead of the default
+  `LoggingMailService`, which deliberately never logs the code) to read a real
+  OTP without needing a live Brevo send, then curled `/otp` →
+  `/forgot-password` end to end, confirmed login with the new password
+  worked, then repeated the same OTP round trip to restore the account's
+  original seeded password (`Landlord@12345`, from
+  `barivara-backend/application.properties`) so demo login credentials stay
+  unchanged. Sink disabled again afterward — `mail.sink.enabled=true` must
+  never run outside local/CI, it's plaintext OTPs on disk by design.
+  `ng build` clean.
 - **Everything else still on `MockDataService`** (LandLord app) — Property,
   Units, Tenant, Billing/Move-out, tenant-detail/billing-views,
   Maintenance/Expenses, Ledger, landlord dashboard KPI tiles, Messaging/
