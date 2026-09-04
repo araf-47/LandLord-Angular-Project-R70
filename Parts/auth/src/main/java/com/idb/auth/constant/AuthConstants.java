@@ -72,6 +72,7 @@ public final class AuthConstants {
     // Cache names
     public static final String CACHE_OTP = "otp";
     public static final String CACHE_OTP_ATTEMPTS = "otp-attempts";
+    public static final String CACHE_OTP_RESEND_COOLDOWN = "otp-resend-cooldown";
     public static final String CACHE_PERMISSIONS = "permissions";
 
     // Messages

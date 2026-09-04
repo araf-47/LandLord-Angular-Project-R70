@@ -50,7 +50,7 @@ class OtpServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        CaffeineCacheManager manager = new CaffeineCacheManager("otp", "otp-attempts");
+        CaffeineCacheManager manager = new CaffeineCacheManager("otp", "otp-attempts", "otp-resend-cooldown");
         cacheManager = manager;
         passwordEncoder = new BCryptPasswordEncoder();
         otpService = new OtpServiceImpl(cacheManager, passwordEncoder, mailService, userRepository,
@@ -71,6 +71,15 @@ class OtpServiceImplTest {
         ArgumentCaptor<MailInfo> captor = ArgumentCaptor.forClass(MailInfo.class);
         verify(mailService, org.mockito.Mockito.atLeastOnce()).sendTemplatedEmail(captor.capture());
         return captor.getValue().getTemplateModel().get("otp").toString();
+    }
+
+    /**
+     * Tests that fire several {@code generateOtp} calls back-to-back are
+     * exercising the attempt-cap, not the resend cooldown - evict the
+     * cooldown entry between calls so it doesn't shadow what's under test.
+     */
+    private void evictResendCooldown(String username) {
+        cacheManager.getCache("otp-resend-cooldown").evict(username);
     }
 
     @Test
@@ -153,10 +162,34 @@ class OtpServiceImplTest {
     }
 
     @Test
+    @DisplayName("a second generation request right after the first is rejected by the resend cooldown")
+    void resendCooldownRejectsAnImmediateRetry() throws Exception {
+        assertThat(otpService.generateOtp("alice").getMessage()).contains("OTP generated successfully");
+
+        assertThatThrownBy(() -> otpService.generateOtp("alice"))
+                .isInstanceOf(TraceableException.class)
+                .satisfies(e -> assertThat(((TraceableException) e).getResponse().getMessage())
+                        .contains("Please wait before requesting another OTP"));
+
+        // Only the first call's mail actually went out.
+        verify(mailService, org.mockito.Mockito.times(1)).sendTemplatedEmail(any());
+    }
+
+    @Test
+    @DisplayName("once the cooldown is cleared, generation works again")
+    void generationWorksAgainAfterCooldownClears() throws Exception {
+        otpService.generateOtp("alice");
+        evictResendCooldown("alice");
+
+        assertThat(otpService.generateOtp("alice").getMessage()).contains("OTP generated successfully");
+    }
+
+    @Test
     @DisplayName("generation is capped at three requests per window")
     void generationAttemptsAreCapped() throws Exception {
         for (int i = 0; i < 3; i++) {
             assertThat(otpService.generateOtp("alice").getMessage()).contains("OTP generated successfully");
+            evictResendCooldown("alice");
         }
 
         assertThatThrownBy(() -> otpService.generateOtp("alice"))
@@ -188,6 +221,7 @@ class OtpServiceImplTest {
     void clearRestoresTheGenerationBudget() throws Exception {
         for (int i = 0; i < 3; i++) {
             otpService.generateOtp("alice");
+            evictResendCooldown("alice");
         }
         assertThatThrownBy(() -> otpService.generateOtp("alice")).isInstanceOf(TraceableException.class);
 
@@ -206,6 +240,7 @@ class OtpServiceImplTest {
 
         for (int i = 0; i < 3; i++) {
             otpService.generateOtp("alice");
+            evictResendCooldown("alice");
         }
         assertThatThrownBy(() -> otpService.generateOtp("alice")).isInstanceOf(TraceableException.class);
 

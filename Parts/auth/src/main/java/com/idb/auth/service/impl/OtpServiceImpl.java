@@ -3,6 +3,7 @@ package com.idb.auth.service.impl;
 import static com.idb.auth.common.constant.OperationStatus.SUCCESS;
 import static com.idb.auth.constant.AuthConstants.CACHE_OTP;
 import static com.idb.auth.constant.AuthConstants.CACHE_OTP_ATTEMPTS;
+import static com.idb.auth.constant.AuthConstants.CACHE_OTP_RESEND_COOLDOWN;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
@@ -61,6 +62,11 @@ public class OtpServiceImpl implements OtpService {
 
     @Override
     public ApiResponse<String> generateOtp(String username) throws TraceableException, LogOnlyException {
+        if (cooldownCache().get(username) != null) {
+            log.warn("OTP resend cooldown active for user: {}", username);
+            throw TraceableException.of("OTP resend cooldown active for %s", new RuntimeException(),
+                    "Please wait before requesting another OTP.", username);
+        }
         if (incrementAttempts(KEY_PREFIX_GEN + username) > MAX_GENERATION_ATTEMPTS) {
             log.warn("OTP generation rate limit exceeded for user: {}", username);
             throw TraceableException.of("OTP generation rate limit exceeded for %s", new RuntimeException(),
@@ -77,6 +83,7 @@ public class OtpServiceImpl implements OtpService {
         otpCache().put(username, passwordEncoder.encode(otp));
 
         sendOtpEmail(user, otp);
+        cooldownCache().put(username, Boolean.TRUE);
         return ApiResponse.<String>builder()
                 .status(SUCCESS)
                 .message("OTP generated successfully. Valid for " + OTP_EXPIRY_MINUTES + " minutes")
@@ -130,6 +137,7 @@ public class OtpServiceImpl implements OtpService {
         Cache attempts = attemptsCache();
         attempts.evict(KEY_PREFIX_GEN + username);
         attempts.evict(KEY_PREFIX_VAL + username);
+        cooldownCache().evict(username);
         log.debug("Cleared OTP cache for user: {}", username);
     }
 
@@ -170,6 +178,15 @@ public class OtpServiceImpl implements OtpService {
         Cache cache = cacheManager.getCache(CACHE_OTP_ATTEMPTS);
         if (cache == null) {
             throw new IllegalStateException("OTP attempts cache '" + CACHE_OTP_ATTEMPTS + "' is not configured");
+        }
+        return cache;
+    }
+
+    private Cache cooldownCache() {
+        Cache cache = cacheManager.getCache(CACHE_OTP_RESEND_COOLDOWN);
+        if (cache == null) {
+            throw new IllegalStateException("OTP resend cooldown cache '" + CACHE_OTP_RESEND_COOLDOWN
+                    + "' is not configured");
         }
         return cache;
     }
