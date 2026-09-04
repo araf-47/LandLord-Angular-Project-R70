@@ -47,8 +47,11 @@ export class TenantPaymentHistoryComponent implements OnInit {
     this.history.set([...payments].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id));
   }
 
-  download(paymentId: number): void {
-    // PDF generation is a backend concern; frontend stub only.
-    this.toast.success(`Receipt PDF generated for payment ${paymentId}`);
+  async download(paymentId: number): Promise<void> {
+    try {
+      await this.billingApi.downloadReceipt(paymentId);
+    } catch {
+      this.toast.error('Could not download the receipt.');
+    }
   }
 }

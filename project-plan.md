@@ -1,6 +1,14 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-09-04 (BariVara's forgot-password UI wired to the real
+Last updated: 2026-09-04 (Phase 10.5 — PDF payment receipts — done. New
+`ReceiptService` in `landlord-backend` (OpenPDF) generates a one-page receipt
+on demand from the real payment/invoice/tenant/unit/property rows; new
+`GET /api/payments/{id}/receipt`; wired into the tenant's existing "Download
+receipt" stub and added to the landlord's receive-payment flow. Real bug
+caught live: the ৳ sign silently dropped from PDF text (base fonts don't
+cover the glyph), switched to `Tk`. Full detail in Phase 10.5 below.
+
+Last updated before that: 2026-09-04 (BariVara's forgot-password UI wired to the real
 backend, same pattern as LandLord's Phase 7.5 fix — no backend work needed,
 `barivara-backend` already shares the same `Parts/auth`/Brevo setup. Verified
 live full loop against the real seeded `landlord-linked` account via the
@@ -1093,7 +1101,39 @@ now functionally deeper than a route scaffold.)*
 10.4. Backend: payment recording — **Done, simplified**: `POST /api/payments`
       records straight to `confirmed` status (no pending → landlord-confirms
       step yet), applies to invoice balance, flips unpaid/partial/paid.
-10.5. Backend: receipt generation (PDF) — not started
+10.5. ✅ **Backend: receipt generation (PDF) — Done (2026-09-04).** Generated
+      on demand from the real `Payment`/`Invoice`/`Tenant`/`Unit`/`Property`
+      rows, not stored as its own record — nothing to keep in sync.
+      `com.github.librepdf:openpdf` added to `landlord-backend` (Apache
+      Central, Apache/LGPL/MPL-licensed, first PDF dependency in either
+      backend). New `ReceiptService` builds a one-page receipt (tenant,
+      property, unit, period, date, method, amount paid, invoice total,
+      remaining balance, status); `GET /api/payments/{id}/receipt` on
+      `BillingController` streams it back as `application/pdf`, same
+      tenant-vs-landlord ownership check (`effectiveTenantId`) as every other
+      endpoint on that controller. **Real bug caught and fixed during live
+      testing**: the Taka sign (৳) silently dropped from the PDF text with no
+      error — the standard PDF base fonts (Helvetica) only cover WinAnsi/
+      Latin-1, no Bengali glyphs, and OpenPDF just prints a blank instead of
+      throwing. Switched to `Tk` (ASCII) rather than embedding a Unicode font
+      for one symbol. Frontend: `BillingApiService.downloadReceipt()`
+      (fetches the PDF as a blob so the auth interceptor's Bearer token
+      attaches, then triggers a browser download) wired into
+      tenant `payments/history.component.ts`'s existing "Download receipt"
+      button (was a decorative toast-only stub) and added to
+      `receive-payment.component.ts` (landlord side) right after a payment
+      save, one button per invoice the payment applied to since a single
+      payment can split across several unpaid invoices. **Verified live**:
+      logged in as the real seeded landlord account, pulled real receipts for
+      two different real payments via curl (one whose invoice's `unitId`
+      pointed at a deleted/orphaned unit — confirmed the PDF correctly omits
+      the Property/Unit rows rather than erroring; one with an intact unit —
+      confirmed Property/Unit/all fields render correctly), read both PDFs
+      back to check content. Tenant-side ownership-check path not
+      live-tested this pass — reuses the exact `effectiveTenantId` logic
+      already live-verified in Phase 7's hardening pass, and none of the
+      existing tenant test accounts have a known-recoverable password to test
+      with safely. `ng build` clean.
 10.6. Frontend: "Monthly Bills" view — current month only, filtered by
       `period` — **Done** (`generate-bills.component.ts`, real
       `GET /api/invoices?period=`, bulk-generate for tenants missing one).

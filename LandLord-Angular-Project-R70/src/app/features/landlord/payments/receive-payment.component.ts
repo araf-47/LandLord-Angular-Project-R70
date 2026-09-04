@@ -55,6 +55,9 @@ import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
 
             @if (saved()) {
               <p class="hint-text">Payment saved. {{ amount >= totalDue() ? 'Marked fully paid.' : 'Marked partially paid — remaining ' + (totalDue() - amount) + '.' }}</p>
+              @for (id of lastPaymentIds(); track id) {
+                <button class="btn btn-sm" (click)="downloadReceipt(id)">Download receipt</button>
+              }
             }
             @if (error()) {
               <p class="error-text">{{ error() }}</p>
@@ -77,6 +80,7 @@ export class ReceivePaymentComponent implements OnInit {
   amount = 0;
   readonly saved = signal(false);
   readonly error = signal('');
+  readonly lastPaymentIds = signal<number[]>([]);
 
   readonly status = signal<'loading' | 'error' | 'ready'>('loading');
   readonly loadError = signal<string | undefined>(undefined);
@@ -122,16 +126,27 @@ export class ReceivePaymentComponent implements OnInit {
 
     this.error.set('');
     let remaining = this.amount;
+    const paymentIds: number[] = [];
     const oldest = [...this.unpaidInvoices()].sort((a, b) => a.id - b.id);
     for (const invoice of oldest) {
       if (remaining <= 0) break;
       const applied = Math.min(remaining, invoice.balance);
-      await this.billingApi.recordPayment(this.tenantId, invoice.id, applied, this.method);
+      const payment = await this.billingApi.recordPayment(this.tenantId, invoice.id, applied, this.method);
+      paymentIds.push(payment.id);
       remaining -= applied;
     }
 
     const invoices = await this.billingApi.invoicesForTenant(this.tenantId);
     this.unpaidInvoices.set(invoices.filter((i) => i.status !== 'paid'));
+    this.lastPaymentIds.set(paymentIds);
     this.saved.set(true);
+  }
+
+  async downloadReceipt(paymentId: number): Promise<void> {
+    try {
+      await this.billingApi.downloadReceipt(paymentId);
+    } catch {
+      this.error.set('Could not download the receipt.');
+    }
   }
 }

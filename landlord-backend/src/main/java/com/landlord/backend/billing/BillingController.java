@@ -3,7 +3,10 @@ package com.landlord.backend.billing;
 import com.idb.auth.model.User;
 import com.landlord.backend.tenant.TenantRepository;
 import java.util.List;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,13 +25,15 @@ public class BillingController {
     private final PaymentRepository payments;
     private final BillingService billingService;
     private final TenantRepository tenants;
+    private final ReceiptService receiptService;
 
     public BillingController(InvoiceRepository invoices, PaymentRepository payments, BillingService billingService,
-            TenantRepository tenants) {
+            TenantRepository tenants, ReceiptService receiptService) {
         this.invoices = invoices;
         this.payments = payments;
         this.billingService = billingService;
         this.tenants = tenants;
+        this.receiptService = receiptService;
     }
 
     /**
@@ -96,6 +101,25 @@ public class BillingController {
         payment.setStatus("confirmed");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(payments.save(payment));
+    }
+
+    @GetMapping("/api/payments/{id}/receipt")
+    public ResponseEntity<byte[]> receipt(@AuthenticationPrincipal User principal, @PathVariable Long id) {
+        Payment payment = payments.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+        // Same ownership rule as everywhere else in this controller: a tenant can
+        // only pull their own payment's receipt, a landlord can pull any.
+        boolean isLandlord = principal.getRoles().stream().anyMatch(r -> "LANDLORD".equals(r.getName()));
+        if (!isLandlord && !payment.getTenantId().equals(effectiveTenantId(principal, null))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your payment");
+        }
+
+        byte[] pdf = receiptService.generateReceipt(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+            ContentDisposition.attachment().filename("receipt-" + id + ".pdf").build());
+        return ResponseEntity.ok().headers(headers).body(pdf);
     }
 
     @GetMapping("/api/tenants/{tenantId}/outstanding-balance")

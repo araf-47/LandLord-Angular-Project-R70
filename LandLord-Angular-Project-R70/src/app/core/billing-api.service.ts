@@ -60,4 +60,16 @@ export class BillingApiService {
   async outstandingBalance(tenantId: number): Promise<number> {
     return firstValueFrom(this.http.get<number>(`${BASE}/tenants/${tenantId}/outstanding-balance`));
   }
+
+  async downloadReceipt(paymentId: number): Promise<void> {
+    const blob = await firstValueFrom(
+      this.http.get(`${BASE}/payments/${paymentId}/receipt`, { responseType: 'blob' })
+    );
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `receipt-${paymentId}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 }
