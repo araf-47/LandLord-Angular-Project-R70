@@ -1,6 +1,16 @@
 # LandLord + BariVara.com — Project Plan
 
-Last updated: 2026-08-29 (`ui-ux_design_plan-v1.md` fully implemented — toast/confirm-
+Last updated: 2026-09-04 (Phase 7.5 — OTP email delivery — done. `LoggingMailService`
+stub replaced with real Brevo delivery (`BrevoMailService`, `mail.provider=brevo`),
+gated behind env vars so it stays off by default; added a resend cooldown (separate
+1-minute Caffeine cache, ahead of the existing 3-per-day generation limit). LandLord's
+forgot-password UI — previously pure client-side theater, no backend call at all —
+wired to the real two-step flow (`POST /auth/otp` then `POST /auth/forgot-password`).
+Verified live end to end: real email received, code entered, password actually reset
+in the DB, login with the new password works. Full detail in Phase 7.5 below and
+`moving-forward-plan/phase7.5-Email_OTP-by-Brevo.md`.
+
+Last updated before that: 2026-08-29 (`ui-ux_design_plan-v1.md` fully implemented — toast/confirm-
 dialog infra, loading/error states across all fetch-on-load components, inline-style
 cleanup, dark mode, stat-tile component, mid-breakpoint, and BariVara's filter-chips/
 no-photo-state, both apps rebuild clean; see §5 Phase 4 follow-up and
@@ -546,9 +556,51 @@ slice only, as a proof-of-pipe before committing to the full schema):
       zero auth on BariVara, self-signup → login → `/me` → an owner-scoped
       property create all round-tripped correctly, `ng build` clean on both,
       `roleGuard` no longer touches localStorage directly.
-  - **7.5 (OTP email)**: 2FA/OTP code exists in `Parts/auth` but is
-    non-functional against real users until a real SMTP provider replaces
-    `LoggingMailService` — still an open decision (§6).
+  - **7.5 (OTP email), done (2026-09-04)**: `LoggingMailService` (console-only
+    stub) replaced with a real provider. **Provider: Brevo**, not the
+    originally-listed SendGrid — SendGrid killed its permanent free tier in
+    2025 (now a 60-day trial then $19.95/mo+); Brevo gives 300 emails/day free
+    forever, no card, fitting this project's OTP volume. New
+    `BrevoMailService` (`Parts/auth/common/service/`), active only behind
+    `mail.provider=brevo` (env-var gated, `LoggingMailService` stays the
+    default so nothing sends by accident), posts to Brevo's
+    `/v3/smtp/email` via `RestClient` (already this codebase's convention for
+    inter-service HTTP calls, matching `BariVaraSyncService`/
+    `LandlordSyncService`) — needed a small `BrevoConfig` to supply the
+    `RestClient.Builder` bean, since none is autoconfigured in this project
+    (first real-run attempt failed with `UnsatisfiedDependencyException`
+    until that was added). No template engine exists anywhere in the
+    project, so the OTP email body is rendered inline rather than pulling in
+    Thymeleaf/FreeMarker for one template.
+    - **Resend cooldown added** (new, separate from the existing 3-per-24h
+      generation limit): a 1-minute Caffeine cache (`otp-resend-cooldown`)
+      checked in `OtpServiceImpl.generateOtp` before the attempts check,
+      cleared by `clearCache()` too. Full lockout/cleanup system stays
+      deferred to Phase 16.4 (per §6/16.4 — this is a basic guard, not that).
+    - **Verified live** against a real Brevo account: OTP email actually
+      arrives, immediate resend correctly rejected with the cooldown message,
+      resend allowed again once the window passes.
+    - **Frontend wiring, same day**: `ForgotPasswordComponent` and
+      `ResetPasswordComponent` (LandLord) were previously pure client-side
+      theater — `send()`/`save()` just flipped local signals, no `HttpClient`
+      injected at all, the "success" screen literally read "Open reset link
+      (demo)". Now real: `AuthService` gained `requestPasswordResetOtp()`
+      (`POST /auth/otp`) and `resetPassword()` (`POST /auth/forgot-password`);
+      `ForgotPasswordComponent` collects a username (was "email", but the
+      backend's OTP/forgot-password endpoints are username-keyed — label
+      corrected to match) and sends the code; `ResetPasswordComponent` gained
+      an OTP input field, reads the username forward via a query param, and
+      calls the real reset endpoint. Also fixed a UX bug found during manual
+      testing: a failed `@Valid` request returns a generic top-level
+      `"Validation failed"` with the real reason buried in a `data` map
+      (e.g. password outside the 8-16 char/complexity pattern) — the
+      envelope was showing only the generic message; `AuthService` now pulls
+      the field-level detail out (`envelopeErrorMessage()`) so the user sees
+      the actual problem, plus a password-requirement hint added under the
+      field. **Verified live, full loop**: real OTP email → code entered →
+      password actually changed in the DB → login with the new password
+      succeeds. BariVara's forgot-password UI not touched — separate app,
+      out of scope for this pass.
 - **Everything else still on `MockDataService`** (LandLord app) — Property,
   Units, Tenant, Billing/Move-out, tenant-detail/billing-views,
   Maintenance/Expenses, Ledger, landlord dashboard KPI tiles, Messaging/
@@ -557,11 +609,11 @@ slice only, as a proof-of-pipe before committing to the full schema):
   APIs wide open), no Flyway migrations yet, nothing deployed anywhere
   (localhost only).
 
-**Not done:** Phase 5.5 sign-off (yours to give), Phase 7.5 (OTP email — needs
-a mail provider), the rest of the real backend (BariVara's own
-messaging/notifications, etc. — Phase 16.4, 17-20), testing, deployment. See
-§3a for a tracked backlog of smaller gaps found during review but deliberately
-not fixed (property/unit edit-delete entry below is now resolved).
+**Not done:** Phase 5.5 sign-off (yours to give), the rest of the real backend
+(BariVara's own messaging/notifications, etc. — Phase 16.4, 17-20), testing,
+deployment. See §3a for a tracked backlog of smaller gaps found during review
+but deliberately not fixed (property/unit edit-delete entry below is now
+resolved).
 
 ## 3a. Known gaps — reviewed, tracked, not yet fixed
 
@@ -907,18 +959,18 @@ now functionally deeper than a route scaffold.)*
      column added to a populated table until Flyway lands.**
 6.4. ✅ **Set up API auth (JWT issue/verify, password hashing, OTP delivery) —
      Done (2026-08-27), see Phase 7.** No longer on hold: real auth (`Parts/auth`,
-     embedded per backend) now gates both backends. OTP delivery specifically
-     still stubbed (`LoggingMailService`) until a real SMTP provider is chosen
-     (§6 open decision).
+     embedded per backend) now gates both backends. OTP delivery itself
+     landed later, 2026-09-04, see Phase 7.5 — real Brevo email, no longer
+     stubbed.
 6.5. ✅ **Local dev environment: `docker-compose.yml` at repo root, official
      `postgres:16` image, `landlord_db`, port 5432, named volume**
 
-### Phase 7 — Real authentication (both apps) ✅ DONE (2026-08-27) — 7.5 (OTP email) still open
+### Phase 7 — Real authentication (both apps) ✅ DONE (2026-08-27) — 7.5 (OTP email) ✅ DONE (2026-09-04)
 7.1. ✅ **Backend: signup/login/OTP/forgot-password/reset-password endpoints —
      Done.** `Parts/auth` embedded into both backends (own `users`/`roles`
      rows per backend, no SSO). Real login/logout/change-password/2FA-toggle;
-     OTP and forgot-password endpoints exist but stay non-functional against
-     real users until 7.5's mail provider lands (`LoggingMailService` stub).
+     OTP and forgot-password endpoints now fully functional against real
+     users as of 7.5 (real email delivery + frontend wiring).
 7.2. ✅ **Backend: account lockout after failed attempts — Done.** Per-account
      lockout (`security.account-lockout.*`) and IP blocking (off by default,
      `auth.ip.block.enabled=false`) both come from `Parts/auth` as-is.
@@ -931,8 +983,13 @@ now functionally deeper than a route scaffold.)*
      `/api/tenants/me` / `/api/tenant-profiles/me` / `/api/owner-profiles/me`
      endpoints. Login pages' role dropdown removed on both apps — role comes
      from the account now.
-7.5. Wire OTP email delivery (transactional email provider) — still open,
-     same decision as §6's email/OTP provider row.
+7.5. ✅ **Wire OTP email delivery (transactional email provider) — Done
+     (2026-09-04).** Provider: Brevo (see §3 log and §6 — SendGrid's free
+     tier was gone by the time this was picked). `BrevoMailService` replaces
+     `LoggingMailService` behind `mail.provider=brevo`; resend cooldown
+     added; LandLord's forgot-password frontend wired to the real endpoints
+     for the first time. Verified live end to end, both directions
+     (email delivery and full password reset).
 
 ### Phase 8 — Properties & Units (real data)
 8.1. Backend: CRUD endpoints for properties and units — **Done. Property
@@ -1239,8 +1296,12 @@ warning gets logged, never a hard failure.
       idempotent (no duplicate on a second sweep), confirmed dismiss (`DELETE
       /api/notifications/{id}`) clears it. All test data and reminder-sent
       timestamps cleaned up afterward.
-16.4. **Deferred — no OTP/lockout mechanism exists to clean up** (Phase 7 auth
-      still on hold). Revisit once Phase 7 lands.
+16.4. **Deferred, no longer blocked.** OTP now has real delivery (Phase 7.5,
+      2026-09-04) and a basic resend cooldown, but the full lockout/cleanup
+      job itself (expiring stale OTP-attempt rows, unlocking timed-out
+      accounts on a schedule, etc.) still isn't built — deliberately scoped
+      out of 7.5 as "basic cooldown now, full system later." Revisit
+      whenever ready; nothing left to unblock it.
 
 ### Phase 17 — Testing & QA
 17.1. Unit tests for backend business logic (billing calc, move-out calc, lockout)
@@ -1275,6 +1336,10 @@ warning gets logged, never a hard failure.
 Decided along the way (kept here for the record, not open anymore):
 - **Backend language/framework** → Spring Boot 4.1 / Java 21, both backends (Phase 6).
 - **Messaging transport** → Polling, 10s interval (Phase 12) — revisit at Phase 16 if traffic ever justifies WebSocket infra.
+- **Email/OTP provider** → **Brevo** (Phase 7.5, 2026-09-04) — SendGrid, the
+  original default pick, killed its permanent free tier in 2025; Brevo's
+  300/day-free-forever tier fit this project's low OTP volume better. SMS OTP
+  (Twilio) never became relevant — email-only stayed sufficient.
 
 Still open:
 
@@ -1282,7 +1347,6 @@ Still open:
 |---|---|---|
 | Hosting/infra | Phase 19 | Self-managed VPS, AWS, GCP, Vercel+Supabase, Firebase |
 | Payment gateway | Phase 10.8 — **on hold**, your call ("sounds complicated") | bKash/Nagad (BD market), Stripe, SSLCommerz |
-| Email/OTP provider | Phase 6–7 — **on hold** alongside real auth | e.g. SendGrid, SES, Twilio (for SMS OTP if needed) |
 
 ## 7. Assumptions
 
