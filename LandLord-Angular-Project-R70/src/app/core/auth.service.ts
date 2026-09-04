@@ -28,6 +28,21 @@ interface ApiEnvelope<T> {
   status: string;
 }
 
+/**
+ * Field-validation failures come back as {"message":"Validation failed",
+ * "data":{"password":"..."}} - the top-level message alone is useless, so
+ * pull the per-field detail out when present.
+ */
+function envelopeErrorMessage(res: ApiEnvelope<unknown>): string {
+  if (res.data && typeof res.data === 'object') {
+    const details = Object.values(res.data as Record<string, string>).join(' ');
+    if (details) {
+      return details;
+    }
+  }
+  return res.message;
+}
+
 interface MeResponse {
   username: string;
   roles: string[];
@@ -77,6 +92,26 @@ export class AuthService {
     };
     this.userSignal.set(user);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+
+  async requestPasswordResetOtp(username: string): Promise<string> {
+    const res = await firstValueFrom(
+      this.http.post<ApiEnvelope<unknown>>(`${AUTH_BASE}/otp`, { id: username })
+    );
+    if (res.status !== 'SUCCESS') {
+      throw new Error(envelopeErrorMessage(res) || 'Could not send the reset code.');
+    }
+    return res.message;
+  }
+
+  async resetPassword(username: string, otp: string, password: string): Promise<string> {
+    const res = await firstValueFrom(
+      this.http.post<ApiEnvelope<unknown>>(`${AUTH_BASE}/forgot-password`, { username, otp, password })
+    );
+    if (res.status !== 'SUCCESS') {
+      throw new Error(envelopeErrorMessage(res) || 'Could not reset the password.');
+    }
+    return res.message;
   }
 
   logout(): void {
