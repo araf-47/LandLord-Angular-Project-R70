@@ -5,11 +5,12 @@ import { BillingApiService } from '../../core/billing-api.service';
 import { UnitApiService } from '../../core/unit-api.service';
 import { periodKey, periodLabel } from '../../core/mock-data.service';
 import { StatTileComponent } from '../../shared/stat-tile.component';
+import { NavIconComponent, NavIconName } from '../../shared/nav-icon.component';
 
 @Component({
   selector: 'app-landlord-dashboard',
   standalone: true,
-  imports: [RouterLink, StatTileComponent],
+  imports: [RouterLink, StatTileComponent, NavIconComponent],
   template: `
     @switch (status()) {
       @case ('loading') {
@@ -24,18 +25,18 @@ import { StatTileComponent } from '../../shared/stat-tile.component';
       @case ('ready') {
         <h1>{{ currentPeriodLabel() }} overview</h1>
         <div class="module-grid mb-lg">
-          <app-stat-tile label="Occupancy" [value]="occupancy().occupied + '/' + occupancy().total" />
-          <app-stat-tile label="Collected this month" [value]="collected()" color="success" />
-          <app-stat-tile label="Outstanding this month" [value]="outstanding()" color="danger" />
-          <app-stat-tile label="Net this month" [value]="net()" />
-          <app-stat-tile label="Pending maintenance" [value]="pendingMaintenance()" />
+          <app-stat-tile label="Occupancy" [value]="occupancy().occupied + '/' + occupancy().total" color="primary" icon="home" />
+          <app-stat-tile label="Collected this month" [value]="collected()" color="success" icon="coins" />
+          <app-stat-tile label="Outstanding this month" [value]="outstanding()" color="danger" icon="alert" />
+          <app-stat-tile label="Net this month" [value]="net()" color="primary" icon="trend" />
+          <app-stat-tile label="Pending maintenance" [value]="pendingMaintenance()" color="warning" icon="alert" />
         </div>
 
         <h1>Manage your property</h1>
         <div class="module-grid">
           @for (m of modules; track m.link) {
             <a class="module-tile" [routerLink]="m.link">
-              <div class="module-title">{{ m.title }}</div>
+              <div class="module-title"><app-nav-icon [name]="m.icon" />{{ m.title }}</div>
               <p>{{ m.desc }}</p>
             </a>
           }
@@ -96,15 +97,16 @@ export class LandlordDashboardComponent implements OnInit {
     return periodLabel(this.period);
   }
 
-  readonly modules = [
-    { title: 'Property & Units', desc: 'Manage properties and unit status.', link: '/landlord/properties' },
-    { title: 'Tenant Management', desc: 'Register, view, and move out tenants.', link: '/landlord/tenants' },
-    { title: 'Marketplace & Leads', desc: 'Ads and booking requests.', link: '/landlord/marketplace' },
-    { title: 'Rental Agreements', desc: 'View and edit lease terms.', link: '/landlord/rentals' },
-    { title: 'Payments', desc: 'Generate bills, receive payments.', link: '/landlord/payments' },
-    { title: 'Expenses', desc: 'Track property and tenant expenses.', link: '/landlord/expenses' },
-    { title: 'Ledger', desc: 'All money in and out, one cash book.', link: '/landlord/ledger' },
-    { title: 'Maintenance', desc: 'Log and resolve issues.', link: '/landlord/maintenance' },
-    { title: 'Messages', desc: 'Chat with tenants and applicants.', link: '/landlord/messages' },
+  readonly modules: { title: string; desc: string; link: string; icon: NavIconName }[] = [
+    { title: 'Property & Units', desc: 'Manage properties and unit status.', link: '/landlord/properties', icon: 'property' },
+    { title: 'Tenant Management', desc: 'Register, view, and move out tenants.', link: '/landlord/tenants', icon: 'tenant' },
+    { title: 'Marketplace & Leads', desc: 'Ads and booking requests.', link: '/landlord/marketplace', icon: 'marketplace' },
+    { title: 'Rental Agreements', desc: 'View and edit lease terms.', link: '/landlord/rentals', icon: 'rentals' },
+    { title: 'Payments', desc: 'Generate bills, receive payments.', link: '/landlord/payments', icon: 'payments' },
+    { title: 'Expenses', desc: 'Track property and tenant expenses.', link: '/landlord/expenses', icon: 'expenses' },
+    { title: 'Ledger', desc: 'All money in and out, one cash book.', link: '/landlord/ledger', icon: 'ledger' },
+    { title: 'Reports', desc: 'Income, expenses, and collection trends.', link: '/landlord/reports', icon: 'reports' },
+    { title: 'Maintenance', desc: 'Log and resolve issues.', link: '/landlord/maintenance', icon: 'maintenance' },
+    { title: 'Messages', desc: 'Chat with tenants and applicants.', link: '/landlord/messages', icon: 'messages' },
   ];
 }

@@ -1,5 +1,8 @@
 # LandLord + BariVara.com — Project Plan
 
+See also `project-improvement-plan.md` (repo root) — separate file for
+improvement ideas, kept apart from this primary plan.
+
 Last updated: 2026-09-04 (Phase 10.5 — PDF payment receipts — done. New
 `ReceiptService` in `landlord-backend` (OpenPDF) generates a one-page receipt
 on demand from the real payment/invoice/tenant/unit/property rows; new

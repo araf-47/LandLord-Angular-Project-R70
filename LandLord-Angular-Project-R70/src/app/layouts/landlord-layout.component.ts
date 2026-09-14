@@ -2,11 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { LogoComponent } from '../shared/logo.component';
+import { NavIconComponent } from '../shared/nav-icon.component';
 
 @Component({
   selector: 'app-landlord-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, LogoComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LogoComponent, NavIconComponent],
   template: `
     <div class="app-shell">
       @if (sidebarOpen()) {
@@ -15,16 +16,17 @@ import { LogoComponent } from '../shared/logo.component';
       <aside class="sidebar" [class.open]="sidebarOpen()">
         <div class="sidebar-brand"><app-logo theme="dark" /></div>
         <nav class="sidebar-nav" (click)="sidebarOpen.set(false)">
-          <a routerLink="/landlord/dashboard" routerLinkActive="active">Dashboard</a>
-          <a routerLink="/landlord/properties" routerLinkActive="active">Property &amp; Units</a>
-          <a routerLink="/landlord/tenants" routerLinkActive="active">Tenant Management</a>
-          <a routerLink="/landlord/marketplace" routerLinkActive="active">Marketplace &amp; Leads</a>
-          <a routerLink="/landlord/rentals" routerLinkActive="active">Rental Agreements</a>
-          <a routerLink="/landlord/payments" routerLinkActive="active">Payments</a>
-          <a routerLink="/landlord/expenses" routerLinkActive="active">Expenses</a>
-          <a routerLink="/landlord/ledger" routerLinkActive="active">Ledger</a>
-          <a routerLink="/landlord/maintenance" routerLinkActive="active">Maintenance</a>
-          <a routerLink="/landlord/messages" routerLinkActive="active">Messages</a>
+          <a routerLink="/landlord/dashboard" routerLinkActive="active"><app-nav-icon name="dashboard" />Dashboard</a>
+          <a routerLink="/landlord/properties" routerLinkActive="active"><app-nav-icon name="property" />Property &amp; Units</a>
+          <a routerLink="/landlord/tenants" routerLinkActive="active"><app-nav-icon name="tenant" />Tenant Management</a>
+          <a routerLink="/landlord/marketplace" routerLinkActive="active"><app-nav-icon name="marketplace" />Marketplace &amp; Leads</a>
+          <a routerLink="/landlord/rentals" routerLinkActive="active"><app-nav-icon name="rentals" />Rental Agreements</a>
+          <a routerLink="/landlord/payments" routerLinkActive="active"><app-nav-icon name="payments" />Payments</a>
+          <a routerLink="/landlord/expenses" routerLinkActive="active"><app-nav-icon name="expenses" />Expenses</a>
+          <a routerLink="/landlord/ledger" routerLinkActive="active"><app-nav-icon name="ledger" />Ledger</a>
+          <a routerLink="/landlord/reports" routerLinkActive="active"><app-nav-icon name="reports" />Reports</a>
+          <a routerLink="/landlord/maintenance" routerLinkActive="active"><app-nav-icon name="maintenance" />Maintenance</a>
+          <a routerLink="/landlord/messages" routerLinkActive="active"><app-nav-icon name="messages" />Messages</a>
         </nav>
         <div class="sidebar-footer">
           <button class="btn btn-ghost sidebar-logout-btn" (click)="logout()">

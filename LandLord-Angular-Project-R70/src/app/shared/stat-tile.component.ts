@@ -1,11 +1,36 @@
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges, signal } from '@angular/core';
 
+export type StatTileColor = 'success' | 'danger' | 'warning' | 'primary';
+export type StatTileIcon = 'home' | 'coins' | 'alert' | 'trend';
+
 @Component({
   selector: 'app-stat-tile',
   standalone: true,
   template: `
-    <div class="card">
-      <p class="hint-text">{{ label }}</p>
+    <div class="card stat-card" [class.stat-card-success]="color === 'success'"
+         [class.stat-card-danger]="color === 'danger'" [class.stat-card-warning]="color === 'warning'"
+         [class.stat-card-primary]="color === 'primary' || !color">
+      <div class="stat-card-head">
+        @if (icon) {
+          <span class="stat-icon">
+            @switch (icon) {
+              @case ('home') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7" /><path d="M5 10v10h14V10" /></svg>
+              }
+              @case ('coins') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v12c0 1.66 3.13 3 7 3s7-1.34 7-3V6" /><path d="M5 12c0 1.66 3.13 3 7 3s7-1.34 7-3" /></svg>
+              }
+              @case ('alert') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z" /><path d="M12 10v4" /><path d="M12 17h.01" /></svg>
+              }
+              @case ('trend') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>
+              }
+            }
+          </span>
+        }
+        <p class="hint-text">{{ label }}</p>
+      </div>
       <h2 [class.text-success]="color === 'success'" [class.text-danger]="color === 'danger'">{{ displayValue() }}</h2>
     </div>
   `,
@@ -13,7 +38,8 @@ import { Component, Input, OnChanges, OnDestroy, SimpleChanges, signal } from '@
 export class StatTileComponent implements OnChanges, OnDestroy {
   @Input() label = '';
   @Input() value: string | number = '';
-  @Input() color?: 'success' | 'danger';
+  @Input() color?: StatTileColor;
+  @Input() icon?: StatTileIcon;
 
   readonly displayValue = signal<string | number>('');
 
