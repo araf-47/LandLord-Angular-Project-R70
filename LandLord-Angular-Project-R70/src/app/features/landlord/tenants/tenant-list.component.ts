@@ -56,9 +56,6 @@ import { UnitApiService } from '../../../core/unit-api.service';
                   <td>{{ t.status }}</td>
                   <td class="actions-row mb-0" (click)="$event.stopPropagation()">
                     <a class="btn btn-sm" [routerLink]="['/landlord/tenants', t.id]">View</a>
-                    @if (t.status === 'active') {
-                      <a class="btn btn-sm btn-danger" [routerLink]="['/landlord/tenants', t.id, 'move-out']">Move out</a>
-                    }
                   </td>
                 </tr>
               } @empty {

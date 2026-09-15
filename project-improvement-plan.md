@@ -92,6 +92,16 @@ from the sandbox these dev servers run in).
    `styles.css`, same treatment as `.property-row`. Verified via
    `tsc --noEmit` clean; live browser click-through on the user.
 
+7. **Move "Move out" button to tenant detail page** — ✅ done. Removed
+   per-row "Move out" link from `tenant-list.component.ts` actions cell
+   (list now shows only "View", relying on idea #6's row-click). Added a
+   "Move out" button (`btn btn-danger`, active-status only) to
+   `tenant-detail.component.ts`'s header info card, next to "Message
+   tenant". New `moveOut()` method navigates to the existing
+   `:tenantId/move-out` route/component (`tenant-moveout.component.ts`,
+   unchanged) — only the entry point moved, not the flow itself. Verified
+   via `tsc --noEmit` clean; live browser click-through on the user.
+
 ## Not yet started (from the original 8, deprioritized for now)
 
 - Multi-landlord/portfolio support (`LandlordUser` entity) — bigger

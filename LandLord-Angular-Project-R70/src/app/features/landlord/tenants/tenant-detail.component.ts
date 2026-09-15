@@ -33,6 +33,9 @@ import { UnitApiService } from '../../../core/unit-api.service';
         <p><strong>Unit:</strong> {{ unitLabel() }}</p>
         <p><strong>Status:</strong> {{ tenant()!.status }}</p>
         <button class="btn" (click)="messageTenant()">Message tenant</button>
+        @if (tenant()!.status === 'active') {
+          <button type="button" class="btn btn-danger" (click)="moveOut()">Move out</button>
+        }
       </div>
 
       @if (agreement()) {
@@ -232,5 +235,9 @@ export class TenantDetailComponent implements OnInit {
       conversation = await this.messagingApi.createConversation(this.tenantId, this.tenant()!.name);
     }
     this.router.navigate(['/landlord/messages', conversation.id]);
+  }
+
+  moveOut(): void {
+    this.router.navigate(['/landlord/tenants', this.tenantId, 'move-out']);
   }
 }
