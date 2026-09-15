@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MaintenanceApiService } from '../../../core/maintenance-api.service';
@@ -28,7 +28,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
             <label for="tenant">Tenant &amp; unit</label>
             <select id="tenant" name="tenant" (change)="onTenantChange($event)">
               <option value="">— choose —</option>
-              @for (t of tenantApi.tenants(); track t.id) {
+              @for (t of activeTenants(); track t.id) {
                 <option [value]="t.id" [selected]="t.id === tenantId">{{ t.name }} — {{ unitLabel(t.unitId) }}</option>
               }
             </select>
@@ -53,6 +53,8 @@ export class LandlordTicketNewComponent implements OnInit {
   protected readonly tenantApi = inject(TenantApiService);
   private readonly unitApi = inject(UnitApiService);
   private readonly router = inject(Router);
+
+  readonly activeTenants = computed(() => this.tenantApi.tenants().filter((t) => t.status === 'active'));
 
   tenantId: number | null = null;
   description = '';

@@ -123,10 +123,20 @@ from the sandbox these dev servers run in).
    (`.combobox-caret`). Selecting an item sets `tenantId` + loads that
    tenant's unpaid invoices, same as the old `(change)` handler did.
    Dropdown list is scoped to `status === 'active'` tenants only (you can't
-   receive payment against a moved-out tenant). Only applied to this one
-   spot — `ticket-new.component.ts` and `expense-management.component.ts`
-   have the identical plain-`<select>` tenant picker but user chose to
-   leave those as-is for now. Verified via `ng build` clean.
+   receive payment against a moved-out tenant). Verified via `ng build`
+   clean.
+
+10. **Active-tenant filter on remaining tenant dropdowns** — ✅ done.
+    Follow-up to #9: user asked to apply the same active-only filter to
+    the two other plain-`<select>` tenant pickers —
+    `maintenance/ticket-new.component.ts` ("Log new issue" → Tenant &
+    unit) and `expenses/expense-management.component.ts` ("Log expense" →
+    Tenant, shown when bearer is tenant). Both got a new `activeTenants`
+    computed (`filter((t) => t.status === 'active')` over
+    `tenantApi.tenants()`), same shape as receive-payment's filter, wired
+    into their `@for` loops. No combobox/search UI added here — just the
+    status filter; kept scope to what was asked. Verified via `ng build`
+    clean.
 
 ## Not yet started (from the original 8, deprioritized for now)
 
