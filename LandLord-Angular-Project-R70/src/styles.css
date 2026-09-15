@@ -517,6 +517,56 @@ a {
   color: var(--text);
 }
 
+.combobox {
+  position: relative;
+}
+
+.combobox-input-wrap {
+  position: relative;
+}
+
+.combobox-input-wrap input {
+  width: 100%;
+  padding-right: 2rem;
+}
+
+.combobox-caret {
+  position: absolute;
+  top: 50%;
+  right: 0.7rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-muted, #6b7280);
+  font-size: 0.75rem;
+}
+
+.combobox-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin: 0.15rem 0 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.combobox-list li {
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+}
+
+.combobox-list li:hover,
+.combobox-list li.active {
+  background: var(--surface-hover, #f8fafc);
+}
+
 input, select, textarea {
   font: inherit;
   padding: 0.55rem 0.7rem;

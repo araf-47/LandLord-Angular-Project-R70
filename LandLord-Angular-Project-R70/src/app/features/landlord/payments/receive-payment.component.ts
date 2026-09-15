@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiInvoice, ApiPayment, BillingApiService } from '../../../core/billing-api.service';
 import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
@@ -22,14 +22,33 @@ import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
       }
       @case ('ready') {
         <div class="card stack max-w-md">
-          <div class="field">
-            <label for="tenant">Select tenant</label>
-            <select id="tenant" name="tenant" (change)="onTenantChange($event)">
-              <option value="">— choose —</option>
-              @for (t of tenants(); track t.id) {
-                <option [value]="t.id" [selected]="t.id === tenantId">{{ t.name }}</option>
-              }
-            </select>
+          <div class="field combobox">
+            <label for="tenant-search">Select tenant</label>
+            <div class="combobox-input-wrap">
+              <input
+                id="tenant-search"
+                type="text"
+                placeholder="Search by name"
+                autocomplete="off"
+                [ngModel]="tenantQuery()"
+                (ngModelChange)="tenantQuery.set($event)"
+                (focus)="dropdownOpen.set(true)"
+                (blur)="closeDropdownSoon()"
+                name="tenantQuery"
+              />
+              <span class="combobox-caret" aria-hidden="true">▾</span>
+            </div>
+            @if (dropdownOpen()) {
+              <ul class="combobox-list">
+                @for (t of filteredTenants(); track t.id) {
+                  <li (mousedown)="$event.preventDefault(); selectTenant(t)" [class.active]="t.id === tenantId">
+                    {{ t.name }}
+                  </li>
+                } @empty {
+                  <li class="hint-text">No tenants match.</li>
+                }
+              </ul>
+            }
           </div>
 
           @if (tenantId) {
@@ -74,6 +93,13 @@ export class ReceivePaymentComponent implements OnInit {
 
   readonly tenants = signal<ApiTenant[]>([]);
   readonly unpaidInvoices = signal<ApiInvoice[]>([]);
+  readonly tenantQuery = signal('');
+  readonly dropdownOpen = signal(false);
+
+  readonly filteredTenants = computed(() => {
+    const q = this.tenantQuery().trim().toLowerCase();
+    return !q ? this.tenants() : this.tenants().filter((t) => t.name.toLowerCase().includes(q));
+  });
 
   tenantId: number | '' = '';
   method: ApiPayment['method'] = 'cash';
@@ -89,7 +115,7 @@ export class ReceivePaymentComponent implements OnInit {
     this.status.set('loading');
     try {
       await this.tenantApi.load();
-      this.tenants.set(this.tenantApi.tenants());
+      this.tenants.set(this.tenantApi.tenants().filter((t) => t.status === 'active'));
       this.status.set('ready');
     } catch {
       this.loadError.set('Check your connection and try again.');
@@ -97,15 +123,16 @@ export class ReceivePaymentComponent implements OnInit {
     }
   }
 
-  async onTenantChange(event: Event): Promise<void> {
-    const value = (event.target as HTMLSelectElement).value;
-    this.tenantId = value ? Number(value) : '';
+  closeDropdownSoon(): void {
+    setTimeout(() => this.dropdownOpen.set(false), 150);
+  }
+
+  async selectTenant(t: ApiTenant): Promise<void> {
+    this.tenantId = t.id;
+    this.tenantQuery.set(t.name);
+    this.dropdownOpen.set(false);
 
     this.saved.set(false);
-    if (!this.tenantId) {
-      this.unpaidInvoices.set([]);
-      return;
-    }
     const invoices = await this.billingApi.invoicesForTenant(this.tenantId);
     this.unpaidInvoices.set(invoices.filter((i) => i.status !== 'paid'));
   }

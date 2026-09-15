@@ -102,6 +102,32 @@ from the sandbox these dev servers run in).
    unchanged) — only the entry point moved, not the flow itself. Verified
    via `tsc --noEmit` clean; live browser click-through on the user.
 
+## Status: 2026-09-15 (cont'd)
+
+8. **Tenant search null-phone crash fix** — ✅ done. Outside the original 8;
+   user reported Tenant Management search "doing nothing" on keystroke.
+   Root cause: `tenant-list.component.ts` filter called
+   `t.phone.toLowerCase()` unguarded, but backend `Tenant.phone` has no
+   `@NotBlank` (nullable) — any tenant with a null phone threw once a
+   non-empty query was typed (empty query short-circuited past it),
+   crashing the whole filtered list. Fixed with `(t.phone ?? '')`.
+
+9. **Receive payment: searchable tenant combobox** — ✅ done. User asked for
+   name search on the tenant picker in Payments → Receive payment
+   (`receive-payment.component.ts`), then asked for it "integrated" rather
+   than a separate search box + native `<select>`. Replaced with a
+   hand-rolled combobox: single text input filters `tenants()` by name
+   (case-insensitive `includes`), matches render as a clickable `<ul>`
+   dropdown positioned under the input (new `.combobox`/`.combobox-list`
+   CSS in `styles.css`), with a decorative caret icon inside the input
+   (`.combobox-caret`). Selecting an item sets `tenantId` + loads that
+   tenant's unpaid invoices, same as the old `(change)` handler did.
+   Dropdown list is scoped to `status === 'active'` tenants only (you can't
+   receive payment against a moved-out tenant). Only applied to this one
+   spot — `ticket-new.component.ts` and `expense-management.component.ts`
+   have the identical plain-`<select>` tenant picker but user chose to
+   leave those as-is for now. Verified via `ng build` clean.
+
 ## Not yet started (from the original 8, deprioritized for now)
 
 - Multi-landlord/portfolio support (`LandlordUser` entity) — bigger
