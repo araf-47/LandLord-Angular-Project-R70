@@ -101,7 +101,7 @@ export class TenantListComponent implements OnInit {
         !q ||
         t.name.toLowerCase().includes(q) ||
         t.nationalId.toLowerCase().includes(q) ||
-        t.phone.toLowerCase().includes(q);
+        (t.phone ?? '').toLowerCase().includes(q);
       return matchesStatus && matchesQuery;
     });
   });
