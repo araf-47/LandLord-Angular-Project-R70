@@ -631,6 +631,8 @@ th {
 /* Property list accordion — click a property row to expand its units */
 .property-row { cursor: pointer; }
 .property-row:hover { background: var(--surface-hover, #f8fafc); }
+.tenant-row { cursor: pointer; }
+.tenant-row:hover { background: var(--surface-hover, #f8fafc); }
 .expand-cell { width: 2rem; }
 .chevron { display: inline-block; transition: transform 0.15s ease; }
 .chevron.rotated { transform: rotate(90deg); }

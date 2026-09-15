@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ApiTenant, TenantApiService } from '../../../core/tenant-api.service';
 import { UnitApiService } from '../../../core/unit-api.service';
 
@@ -47,13 +47,14 @@ import { UnitApiService } from '../../../core/unit-api.service';
             </thead>
             <tbody>
               @for (t of filteredTenants(); track t.id) {
-                <tr>
+                <tr class="tenant-row" role="button" tabindex="0"
+                    (click)="goToTenant(t.id)" (keydown.enter)="goToTenant(t.id)">
                   <td>{{ t.name }}</td>
                   <td>{{ t.nationalId }}</td>
                   <td>{{ t.phone }}</td>
                   <td>{{ unitLabel(t.unitId) }}</td>
                   <td>{{ t.status }}</td>
-                  <td class="actions-row mb-0">
+                  <td class="actions-row mb-0" (click)="$event.stopPropagation()">
                     <a class="btn btn-sm" [routerLink]="['/landlord/tenants', t.id]">View</a>
                     @if (t.status === 'active') {
                       <a class="btn btn-sm btn-danger" [routerLink]="['/landlord/tenants', t.id, 'move-out']">Move out</a>
@@ -74,6 +75,7 @@ import { UnitApiService } from '../../../core/unit-api.service';
 export class TenantListComponent implements OnInit {
   protected readonly api = inject(TenantApiService);
   protected readonly unitApi = inject(UnitApiService);
+  private readonly router = inject(Router);
 
   readonly query = signal('');
   readonly statusFilter = signal<'active' | 'inactive' | 'all'>('active');
@@ -106,6 +108,10 @@ export class TenantListComponent implements OnInit {
       return matchesStatus && matchesQuery;
     });
   });
+
+  goToTenant(id: number): void {
+    this.router.navigate(['/landlord/tenants', id]);
+  }
 
   unitLabel(unitId: number | null): string {
     return this.unitApi.units().find((u) => u.id === unitId)?.unitNumber ?? '—';

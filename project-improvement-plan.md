@@ -81,6 +81,17 @@ from the sandbox these dev servers run in).
    clean. Password-change and 2FA-toggle flows verified via curl but not yet
    click-tested in the browser UI itself.
 
+6. **Tenant list row-click UX** — ✅ done. Outside the original 8 ideas;
+   user asked for tenant row click to behave like the "View" button. Whole
+   `<tr>` in `tenant-list.component.ts` now navigates to
+   `/landlord/tenants/:id` on click or Enter (`role="button"`, `tabindex="0"`,
+   mirrors the row-click pattern from idea #4's property-list accordion, but
+   navigates instead of expanding since tenants use a separate detail page).
+   Actions cell (`View`/`Move out`) stops click propagation so those links
+   keep working independently. New `.tenant-row` hover style in
+   `styles.css`, same treatment as `.property-row`. Verified via
+   `tsc --noEmit` clean; live browser click-through on the user.
+
 ## Not yet started (from the original 8, deprioritized for now)
 
 - Multi-landlord/portfolio support (`LandlordUser` entity) — bigger
