@@ -48,6 +48,39 @@ from the sandbox these dev servers run in).
    units). Verified via `ng build` clean; live browser click-through on the
    user.
 
+5. **Landlord Settings tab** — ✅ done. Outside the original 8 ideas above;
+   user asked directly for an account-settings surface. New
+   `features/landlord/settings/settings.component.ts` (single sectioned
+   page), routed at `landlord/settings`, new sidebar nav entry + gear icon.
+   Sections:
+   - **Profile & Security** — edit email/phone, change password (OTP-gated),
+     2FA toggle, "log out of all devices". All wired to `Parts/auth`
+     `UserController` endpoints (`update`, `change-password`, `toggle-2fa`,
+     `logout-all`) that existed on the backend but had no frontend caller
+     before this.
+   - **Appearance** — theme toggle relocated alongside the existing floating
+     button (kept both; not confirmed with user whether to remove the
+     floating one).
+   - **Notification preferences** — new. Added 4 boolean columns to
+     `com.idb.auth.model.User` (rent-due email/SMS, payment-received email,
+     maintenance email) + new `/api/v3/user/notification-prefs` endpoint.
+     `/api/auth/me` extended to return `id`, `email`, `phone`,
+     `twoFactorEnabled`, and the 4 notification flags so the page can
+     prefill.
+   - Payment/billing settings excluded — Phase 10.8 gateway is on hold.
+
+   **Bug caught during verification**: the already-running `landlord-backend`
+   JVM was serving stale code (started before these edits), so the new
+   columns/endpoint weren't live until restarted. On restart, Hibernate's
+   `ddl-auto=update` failed to add the 4 new `NOT NULL` boolean columns
+   against the existing non-empty `users` table (`contains null values`) —
+   fixed by adding `@ColumnDefault(...)` to each field so Postgres can
+   backfill existing rows. Verified end-to-end via curl against the real
+   backend (login → `/api/auth/me` → update notification prefs → confirmed
+   persisted) after the fix; `ng build`/`tsc --noEmit`/`mvn compile` all
+   clean. Password-change and 2FA-toggle flows verified via curl but not yet
+   click-tested in the browser UI itself.
+
 ## Not yet started (from the original 8, deprioritized for now)
 
 - Multi-landlord/portfolio support (`LandlordUser` entity) — bigger

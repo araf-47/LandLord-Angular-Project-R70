@@ -15,6 +15,7 @@ public final class AuthConstants {
     public static final String ENDPOINT_ROLE_PERMISSIONS = "/role-permissions";
     public static final String ENDPOINT_CHANGE_PASSWORD = "/change-password";
     public static final String ENDPOINT_LOGOUT_ALL = "/logout-all";
+    public static final String ENDPOINT_NOTIFICATION_PREFS = "/notification-prefs";
     public static final String ENDPOINT_IP_BLOCK_LIST = "/list";
     public static final String ENDPOINT_IP_BLOCK_UNBLOCK = "/unblock";
     public static final String ENDPOINT_IP_BLOCK_UNBLOCK_USER = "/unblock-user";

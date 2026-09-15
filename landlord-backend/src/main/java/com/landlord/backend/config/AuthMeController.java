@@ -14,11 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthMeController {
 
-    public record MeResponse(String username, List<String> roles) {}
+    public record MeResponse(Long id, String username, List<String> roles, String email, String phone,
+            boolean twoFactorEnabled, boolean notifyRentDueEmail, boolean notifyRentDueSms,
+            boolean notifyPaymentReceivedEmail, boolean notifyMaintenanceEmail) {}
 
     @GetMapping("/api/auth/me")
     public MeResponse me(@AuthenticationPrincipal User principal) {
-        return new MeResponse(principal.getUsername(),
-                principal.getRoles().stream().map(r -> r.getName()).toList());
+        return new MeResponse(principal.getId(), principal.getUsername(),
+                principal.getRoles().stream().map(r -> r.getName()).toList(),
+                principal.getEmail(), principal.getPhone(), principal.isTwoFactorEnabled(),
+                principal.isNotifyRentDueEmail(), principal.isNotifyRentDueSms(),
+                principal.isNotifyPaymentReceivedEmail(), principal.isNotifyMaintenanceEmail());
     }
 }

@@ -12,6 +12,7 @@ import com.idb.auth.common.dto.response.ApiResponse;
 import com.idb.auth.common.exception.LogOnlyException;
 import com.idb.auth.common.exception.TraceableException;
 import com.idb.auth.dto.request.ChangePasswordRequest;
+import com.idb.auth.dto.request.NotificationPrefsRequest;
 import com.idb.auth.dto.request.UserRegistrationRequest;
 import com.idb.auth.model.User;
 
@@ -28,6 +29,8 @@ public interface UserService extends UserDetailsService {
     ApiResponse<String> revokeAllSessions() throws LogOnlyException;
 
     ApiResponse<String> toggleTwoFactorAuth(boolean enabled) throws TraceableException;
+
+    ApiResponse<String> updateNotificationPrefs(NotificationPrefsRequest request) throws TraceableException;
 
     boolean isTwoFactorEnabled(String username);
 

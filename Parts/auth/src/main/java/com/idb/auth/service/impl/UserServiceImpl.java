@@ -22,6 +22,7 @@ import com.idb.auth.common.util.ValidationUtil;
 import com.idb.auth.dao.RoleRepository;
 import com.idb.auth.dao.UserRepository;
 import com.idb.auth.dto.request.ChangePasswordRequest;
+import com.idb.auth.dto.request.NotificationPrefsRequest;
 import com.idb.auth.dto.request.UserRegistrationRequest;
 import com.idb.auth.model.User;
 import com.idb.auth.service.OtpService;
@@ -250,6 +251,27 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw TraceableException.of("Failed to toggle two-factor authentication", e,
                     "Failed to update two-factor authentication settings");
+        }
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse<String> updateNotificationPrefs(NotificationPrefsRequest request) throws TraceableException {
+        try {
+            User user = UserService.getCurrentUserDetails();
+            user.setNotifyRentDueEmail(request.isNotifyRentDueEmail());
+            user.setNotifyRentDueSms(request.isNotifyRentDueSms());
+            user.setNotifyPaymentReceivedEmail(request.isNotifyPaymentReceivedEmail());
+            user.setNotifyMaintenanceEmail(request.isNotifyMaintenanceEmail());
+            userRepository.save(user);
+
+            return ApiResponse.<String>builder()
+                    .status(SUCCESS)
+                    .message("Notification preferences updated successfully")
+                    .build();
+        } catch (Exception e) {
+            throw TraceableException.of("Failed to update notification preferences", e,
+                    "Failed to update notification preferences");
         }
     }
 

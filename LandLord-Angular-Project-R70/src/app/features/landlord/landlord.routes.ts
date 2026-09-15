@@ -13,4 +13,5 @@ export const LANDLORD_ROUTES: Routes = [
   { path: 'reports', loadComponent: () => import('./reports/reports.component').then((m) => m.ReportsComponent) },
   { path: 'maintenance', loadChildren: () => import('./maintenance/maintenance.routes').then((m) => m.LANDLORD_MAINTENANCE_ROUTES) },
   { path: 'messages', loadChildren: () => import('./messages/messages.routes').then((m) => m.LANDLORD_MESSAGES_ROUTES) },
+  { path: 'settings', loadComponent: () => import('./settings/settings.component').then((m) => m.SettingsComponent) },
 ];

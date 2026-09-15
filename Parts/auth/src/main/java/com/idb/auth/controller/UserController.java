@@ -7,6 +7,7 @@ import static com.idb.auth.common.constant.CommonConstants.ENDPOINT_UPDATE;
 import static com.idb.auth.common.constant.OperationStatus.SUCCESS;
 import static com.idb.auth.constant.AuthConstants.ENDPOINT_CHANGE_PASSWORD;
 import static com.idb.auth.constant.AuthConstants.ENDPOINT_LOGOUT_ALL;
+import static com.idb.auth.constant.AuthConstants.ENDPOINT_NOTIFICATION_PREFS;
 import static com.idb.auth.constant.AuthConstants.URL_USER_CONTROLLER;
 
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import com.idb.auth.common.dto.response.ApiResponse;
 import com.idb.auth.common.exception.LogOnlyException;
 import com.idb.auth.common.exception.TraceableException;
 import com.idb.auth.dto.request.ChangePasswordRequest;
+import com.idb.auth.dto.request.NotificationPrefsRequest;
 import com.idb.auth.dto.request.UserRegistrationRequest;
 import com.idb.auth.service.OtpService;
 import com.idb.auth.service.UserService;
@@ -81,5 +83,11 @@ public class UserController {
     @PostMapping(ENDPOINT_LOGOUT_ALL)
     public ResponseEntity<ApiResponse<String>> logoutAll() throws LogOnlyException {
         return ResponseEntity.ok(userService.revokeAllSessions());
+    }
+
+    @PostMapping(ENDPOINT_NOTIFICATION_PREFS)
+    public ResponseEntity<ApiResponse<String>> updateNotificationPrefs(
+            @RequestBody NotificationPrefsRequest request) throws TraceableException {
+        return ResponseEntity.ok(userService.updateNotificationPrefs(request));
     }
 }

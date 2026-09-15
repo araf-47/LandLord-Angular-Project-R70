@@ -27,6 +27,7 @@ import { NavIconComponent } from '../shared/nav-icon.component';
           <a routerLink="/landlord/reports" routerLinkActive="active"><app-nav-icon name="reports" />Reports</a>
           <a routerLink="/landlord/maintenance" routerLinkActive="active"><app-nav-icon name="maintenance" />Maintenance</a>
           <a routerLink="/landlord/messages" routerLinkActive="active"><app-nav-icon name="messages" />Messages</a>
+          <a routerLink="/landlord/settings" routerLinkActive="active"><app-nav-icon name="settings" />Settings</a>
         </nav>
         <div class="sidebar-footer">
           <button class="btn btn-ghost sidebar-logout-btn" (click)="logout()">

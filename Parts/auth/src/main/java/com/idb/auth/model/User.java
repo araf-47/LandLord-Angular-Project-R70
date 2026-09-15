@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -57,6 +58,22 @@ public class User extends AuditableModel implements UserDetails {
 
     @Column(name = "two_factor_enabled", nullable = false)
     private boolean twoFactorEnabled = false;
+
+    @ColumnDefault("true")
+    @Column(name = "notify_rent_due_email", nullable = false)
+    private boolean notifyRentDueEmail = true;
+
+    @ColumnDefault("false")
+    @Column(name = "notify_rent_due_sms", nullable = false)
+    private boolean notifyRentDueSms = false;
+
+    @ColumnDefault("true")
+    @Column(name = "notify_payment_received_email", nullable = false)
+    private boolean notifyPaymentReceivedEmail = true;
+
+    @ColumnDefault("true")
+    @Column(name = "notify_maintenance_email", nullable = false)
+    private boolean notifyMaintenanceEmail = true;
 
     @Column(name = "last_failed_login_at")
     private LocalDateTime lastFailedLoginAt;
