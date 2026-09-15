@@ -34,6 +34,20 @@ All three verified via `ng build` clean; live browser click-through is on the
 user (Claude-in-Chrome drives the user's real browser, which isn't reachable
 from the sandbox these dev servers run in).
 
+## Status: 2026-09-15
+
+4. **Property-list inline accordion** — ✅ done. Clicking a property row in
+   `property-list.component.ts` expands its units inline as an
+   `app-unit-card` grid (single-open accordion — expanding one auto-collapses
+   any other, re-clicking collapses it), replacing the old separate
+   "Manage units" page. `unit-list.component.ts` and its `:propertyId/units`
+   route deleted; `unit-form.component.ts` now redirects back to the property
+   list on save (was navigating to the now-removed unit-list route). Tenant
+   name/overdue-balance derivation moved into `property-list.component.ts`,
+   computed portfolio-wide up front (page already eager-loads all properties/
+   units). Verified via `ng build` clean; live browser click-through on the
+   user.
+
 ## Not yet started (from the original 8, deprioritized for now)
 
 - Multi-landlord/portfolio support (`LandlordUser` entity) — bigger
