@@ -116,6 +116,6 @@ export class UnitFormComponent implements OnInit {
       await this.api.uploadPhoto(unitId, this.selectedFile);
     }
 
-    this.router.navigate(['/landlord/properties', this.propertyId, 'units']);
+    this.router.navigate(['/landlord/properties']);
   }
 }
