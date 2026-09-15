@@ -33,9 +33,6 @@ import { UnitApiService } from '../../../core/unit-api.service';
         <p><strong>Unit:</strong> {{ unitLabel() }}</p>
         <p><strong>Status:</strong> {{ tenant()!.status }}</p>
         <button class="btn" (click)="messageTenant()">Message tenant</button>
-        @if (tenant()!.status === 'active') {
-          <button type="button" class="btn btn-danger" (click)="moveOut()">Move out</button>
-        }
       </div>
 
       @if (agreement()) {
@@ -148,6 +145,12 @@ import { UnitApiService } from '../../../core/unit-api.service';
         </table>
         </div>
       </div>
+
+      @if (tenant()!.status === 'active') {
+        <div class="card">
+          <button type="button" class="btn btn-danger" (click)="moveOut()">Move out</button>
+        </div>
+      }
     }
       }
     }
