@@ -25,6 +25,7 @@ import { NavIconComponent } from '../shared/nav-icon.component';
           <a routerLink="/landlord/expenses" routerLinkActive="active"><app-nav-icon name="expenses" />Expenses</a>
           <a routerLink="/landlord/ledger" routerLinkActive="active"><app-nav-icon name="ledger" />Ledger</a>
           <a routerLink="/landlord/reports" routerLinkActive="active"><app-nav-icon name="reports" />Reports</a>
+          <a routerLink="/landlord/insights" routerLinkActive="active"><app-nav-icon name="insights" />AI Insights</a>
           <a routerLink="/landlord/maintenance" routerLinkActive="active"><app-nav-icon name="maintenance" />Maintenance</a>
           <a routerLink="/landlord/messages" routerLinkActive="active"><app-nav-icon name="messages" />Messages</a>
           <a routerLink="/landlord/settings" routerLinkActive="active"><app-nav-icon name="settings" />Settings</a>

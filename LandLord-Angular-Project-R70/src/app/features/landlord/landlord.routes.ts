@@ -11,6 +11,7 @@ export const LANDLORD_ROUTES: Routes = [
   { path: 'expenses', loadComponent: () => import('./expenses/expense-management.component').then((m) => m.ExpenseManagementComponent) },
   { path: 'ledger', loadComponent: () => import('./ledger.component').then((m) => m.LedgerComponent) },
   { path: 'reports', loadComponent: () => import('./reports/reports.component').then((m) => m.ReportsComponent) },
+  { path: 'insights', loadComponent: () => import('./insights/insights.component').then((m) => m.InsightsComponent) },
   { path: 'maintenance', loadChildren: () => import('./maintenance/maintenance.routes').then((m) => m.LANDLORD_MAINTENANCE_ROUTES) },
   { path: 'messages', loadChildren: () => import('./messages/messages.routes').then((m) => m.LANDLORD_MESSAGES_ROUTES) },
   { path: 'settings', loadComponent: () => import('./settings/settings.component').then((m) => m.SettingsComponent) },

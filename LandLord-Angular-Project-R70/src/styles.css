@@ -937,6 +937,19 @@ th {
   margin-top: 1rem;
 }
 
+.chat-bubble {
+  background: var(--bg-subtle, #f3f4f6);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+  max-width: 80%;
+  align-self: flex-start;
+}
+
+.chat-bubble-user {
+  background: var(--primary-light, #eff6ff);
+  align-self: flex-end;
+}
+
 .steps {
   display: flex;
   gap: 0.5rem;
