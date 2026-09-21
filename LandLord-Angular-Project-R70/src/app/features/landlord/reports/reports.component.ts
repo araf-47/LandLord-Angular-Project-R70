@@ -68,275 +68,291 @@ import { BarChartComponent, BarChartPoint } from '../../../shared/charts/bar-cha
 
         <h2 class="mb-sm">Exportable reports</h2>
 
-        <div class="card mb-lg">
-          <div class="module-title mb-sm">Income statement</div>
-          <div class="actions-row mb-sm">
-            <div class="field">
-              <label for="income-start">From</label>
-              <input id="income-start" type="date" [(ngModel)]="incomeStart" name="incomeStart" />
-            </div>
-            <div class="field">
-              <label for="income-end">To</label>
-              <input id="income-end" type="date" [(ngModel)]="incomeEnd" name="incomeEnd" />
-            </div>
-            <div class="field">
-              <label for="income-property">Property</label>
-              <select id="income-property" name="incomeProperty" [(ngModel)]="incomeProperty">
-                <option [ngValue]="undefined">All properties</option>
-                @for (p of properties(); track p.id) {
-                  <option [ngValue]="p.id">{{ p.name }}</option>
-                }
-              </select>
-            </div>
-            <button type="button" class="btn btn-sm" (click)="loadIncomeStatement()">Run report</button>
-            <button type="button" class="btn btn-sm" (click)="downloadIncomeStatementPdf()">Download PDF</button>
-            <button type="button" class="btn btn-sm" (click)="downloadIncomeStatementExcel()">Download Excel</button>
-          </div>
-
-          @if (incomeStatus() === 'loading') {
-            <p class="hint-text">Loading…</p>
-          }
-          @if (incomeStatus() === 'error') {
-            <p class="text-danger">Couldn't load the income statement.</p>
-          }
-          @if (incomeStatus() === 'ready' && incomeStatement()) {
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Property</th>
-                    <th>Billed</th>
-                    <th>Collected</th>
-                    <th>Outstanding</th>
-                    <th>Collection rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (r of incomeStatement()!.rows; track r.propertyId) {
-                    <tr>
-                      <td>{{ r.propertyName }}</td>
-                      <td>{{ r.billed | number: '1.2-2' }}</td>
-                      <td>{{ r.collected | number: '1.2-2' }}</td>
-                      <td>{{ r.outstanding | number: '1.2-2' }}</td>
-                      <td>{{ r.collectionRatePercent }}%</td>
-                    </tr>
-                  } @empty {
-                    <tr><td colspan="5" class="hint-text">No invoices in this range.</td></tr>
-                  }
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td><strong>Total</strong></td>
-                    <td>{{ incomeStatement()!.totalBilled | number: '1.2-2' }}</td>
-                    <td>{{ incomeStatement()!.totalCollected | number: '1.2-2' }}</td>
-                    <td>{{ incomeStatement()!.totalOutstanding | number: '1.2-2' }}</td>
-                    <td>{{ incomeStatement()!.collectionRatePercent }}%</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          }
-        </div>
-
-        <div class="card mb-lg">
-          <div class="module-title mb-sm">Expense report</div>
-          <div class="actions-row mb-sm">
-            <div class="field">
-              <label for="expense-start">From</label>
-              <input id="expense-start" type="date" [(ngModel)]="expenseStart" name="expenseStart" />
-            </div>
-            <div class="field">
-              <label for="expense-end">To</label>
-              <input id="expense-end" type="date" [(ngModel)]="expenseEnd" name="expenseEnd" />
-            </div>
-            <div class="field">
-              <label for="expense-property">Property</label>
-              <select id="expense-property" name="expenseProperty" [(ngModel)]="expenseProperty">
-                <option [ngValue]="undefined">All properties</option>
-                @for (p of properties(); track p.id) {
-                  <option [ngValue]="p.id">{{ p.name }}</option>
-                }
-              </select>
-            </div>
-            <button type="button" class="btn btn-sm" (click)="loadExpenseReport()">Run report</button>
-            <button type="button" class="btn btn-sm" (click)="downloadExpenseReportPdf()">Download PDF</button>
-            <button type="button" class="btn btn-sm" (click)="downloadExpenseReportExcel()">Download Excel</button>
-          </div>
-
-          @if (expenseStatus() === 'loading') {
-            <p class="hint-text">Loading…</p>
-          }
-          @if (expenseStatus() === 'error') {
-            <p class="text-danger">Couldn't load the expense report.</p>
-          }
-          @if (expenseStatus() === 'ready' && expenseReport()) {
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Category</th>
-                    <th>Landlord-borne</th>
-                    <th>Tenant-borne</th>
-                    <th>Total</th>
-                    <th>Count</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (r of expenseReport()!.rows; track r.category) {
-                    <tr>
-                      <td>{{ r.category }}</td>
-                      <td>{{ r.landlordAmount | number: '1.2-2' }}</td>
-                      <td>{{ r.tenantAmount | number: '1.2-2' }}</td>
-                      <td>{{ r.total | number: '1.2-2' }}</td>
-                      <td>{{ r.count }}</td>
-                    </tr>
-                  } @empty {
-                    <tr><td colspan="5" class="hint-text">No expenses in this range.</td></tr>
-                  }
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colspan="3"><strong>Total</strong></td>
-                    <td>{{ expenseReport()!.totalAmount | number: '1.2-2' }}</td>
-                    <td></td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          }
-        </div>
-
-        <div class="card mb-lg">
-          <div class="module-title mb-sm">Occupancy report</div>
-          <div class="actions-row mb-sm">
-            <div class="field">
-              <label for="occupancy-property">Property</label>
-              <select id="occupancy-property" name="occupancyProperty" [(ngModel)]="occupancyProperty">
-                <option [ngValue]="undefined">All properties</option>
-                @for (p of properties(); track p.id) {
-                  <option [ngValue]="p.id">{{ p.name }}</option>
-                }
-              </select>
-            </div>
-            <button type="button" class="btn btn-sm" (click)="loadOccupancyReport()">Run report</button>
-            <button type="button" class="btn btn-sm" (click)="downloadOccupancyReportPdf()">Download PDF</button>
-            <button type="button" class="btn btn-sm" (click)="downloadOccupancyReportExcel()">Download Excel</button>
-          </div>
-
-          @if (occupancyReportStatus() === 'loading') {
-            <p class="hint-text">Loading…</p>
-          }
-          @if (occupancyReportStatus() === 'error') {
-            <p class="text-danger">Couldn't load the occupancy report.</p>
-          }
-          @if (occupancyReportStatus() === 'ready' && occupancyReport()) {
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Property</th>
-                    <th>Units</th>
-                    <th>Occupied</th>
-                    <th>Vacant</th>
-                    <th>Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (r of occupancyReport()!.rows; track r.propertyId) {
-                    <tr>
-                      <td>{{ r.propertyName }}</td>
-                      <td>{{ r.totalUnits }}</td>
-                      <td>{{ r.occupiedUnits }}</td>
-                      <td>{{ r.vacantUnits }}</td>
-                      <td>{{ r.occupancyRatePercent }}%</td>
-                    </tr>
-                  } @empty {
-                    <tr><td colspan="5" class="hint-text">No units found.</td></tr>
-                  }
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td><strong>Total</strong></td>
-                    <td>{{ occupancyReport()!.totalUnits }}</td>
-                    <td>{{ occupancyReport()!.totalOccupied }}</td>
-                    <td>{{ occupancyReport()!.totalUnits - occupancyReport()!.totalOccupied }}</td>
-                    <td>{{ occupancyReport()!.occupancyRatePercent }}%</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          }
-        </div>
-
         <div class="card">
-          <div class="module-title mb-sm">Tenant ledger</div>
-          <div class="actions-row mb-sm">
-            <div class="field">
-              <label for="ledger-tenant">Tenant</label>
-              <select id="ledger-tenant" name="ledgerTenant" [(ngModel)]="ledgerTenantId">
-                <option [ngValue]="undefined">Select a tenant</option>
-                @for (t of tenants(); track t.id) {
-                  <option [ngValue]="t.id">{{ t.name }}</option>
-                }
-              </select>
-            </div>
-            <div class="field">
-              <label for="ledger-start">From</label>
-              <input id="ledger-start" type="date" [(ngModel)]="ledgerStart" name="ledgerStart" />
-            </div>
-            <div class="field">
-              <label for="ledger-end">To</label>
-              <input id="ledger-end" type="date" [(ngModel)]="ledgerEnd" name="ledgerEnd" />
-            </div>
-            <button type="button" class="btn btn-sm" [disabled]="!ledgerTenantId" (click)="loadTenantLedger()">Run report</button>
-            <button type="button" class="btn btn-sm" [disabled]="!ledgerTenantId" (click)="downloadTenantLedgerPdf()">Download PDF</button>
-            <button type="button" class="btn btn-sm" [disabled]="!ledgerTenantId" (click)="downloadTenantLedgerExcel()">Download Excel</button>
+          <div class="tabs">
+            <button type="button" [class.active]="reportTab() === 'income'" (click)="reportTab.set('income')">Income statement</button>
+            <button type="button" [class.active]="reportTab() === 'expense'" (click)="reportTab.set('expense')">Expense report</button>
+            <button type="button" [class.active]="reportTab() === 'occupancy'" (click)="reportTab.set('occupancy')">Occupancy report</button>
+            <button type="button" [class.active]="reportTab() === 'ledger'" (click)="reportTab.set('ledger')">Tenant ledger</button>
           </div>
 
-          @if (ledgerStatus() === 'loading') {
-            <p class="hint-text">Loading…</p>
-          }
-          @if (ledgerStatus() === 'error') {
-            <p class="text-danger">Couldn't load the tenant ledger.</p>
-          }
-          @if (ledgerStatus() === 'ready' && tenantLedger()) {
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Period</th>
-                    <th>Invoiced</th>
-                    <th>Paid</th>
-                    <th>Balance</th>
-                    <th>Status</th>
-                    <th>Due date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (r of tenantLedger()!.rows; track r.period) {
-                    <tr>
-                      <td>{{ r.period }}</td>
-                      <td>{{ r.amount | number: '1.2-2' }}</td>
-                      <td>{{ r.paid | number: '1.2-2' }}</td>
-                      <td>{{ r.balance | number: '1.2-2' }}</td>
-                      <td>{{ r.status }}</td>
-                      <td>{{ r.dueDate ?? '-' }}</td>
-                    </tr>
-                  } @empty {
-                    <tr><td colspan="6" class="hint-text">No invoices for this tenant.</td></tr>
+          @if (reportTab() === 'income') {
+            <div class="report-filters">
+              <div class="field">
+                <label for="income-start">From</label>
+                <input id="income-start" type="date" [(ngModel)]="incomeStart" name="incomeStart" />
+              </div>
+              <div class="field">
+                <label for="income-end">To</label>
+                <input id="income-end" type="date" [(ngModel)]="incomeEnd" name="incomeEnd" />
+              </div>
+              <div class="field">
+                <label for="income-property">Property</label>
+                <select id="income-property" name="incomeProperty" [(ngModel)]="incomeProperty">
+                  <option [ngValue]="undefined">All properties</option>
+                  @for (p of properties(); track p.id) {
+                    <option [ngValue]="p.id">{{ p.name }}</option>
                   }
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td><strong>Total</strong></td>
-                    <td>{{ tenantLedger()!.totalInvoiced | number: '1.2-2' }}</td>
-                    <td>{{ tenantLedger()!.totalPaid | number: '1.2-2' }}</td>
-                    <td>{{ tenantLedger()!.totalOutstanding | number: '1.2-2' }}</td>
-                    <td colspan="2"></td>
-                  </tr>
-                </tfoot>
-              </table>
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" (click)="loadIncomeStatement()">Run</button>
+              <div class="report-download-group">
+                <button type="button" class="btn btn-sm" (click)="downloadIncomeStatementPdf()" title="Download as PDF">PDF</button>
+                <button type="button" class="btn btn-sm" (click)="downloadIncomeStatementExcel()" title="Download as Excel">Excel</button>
+              </div>
             </div>
+
+            @if (incomeStatus() === 'loading') {
+              <p class="hint-text">Loading…</p>
+            }
+            @if (incomeStatus() === 'error') {
+              <p class="text-danger">Couldn't load the income statement.</p>
+            }
+            @if (incomeStatus() === 'ready' && incomeStatement()) {
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Billed</th>
+                      <th>Collected</th>
+                      <th>Outstanding</th>
+                      <th>Collection rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (r of incomeStatement()!.rows; track r.propertyId) {
+                      <tr>
+                        <td>{{ r.propertyName }}</td>
+                        <td>{{ r.billed | number: '1.2-2' }}</td>
+                        <td>{{ r.collected | number: '1.2-2' }}</td>
+                        <td>{{ r.outstanding | number: '1.2-2' }}</td>
+                        <td>{{ r.collectionRatePercent }}%</td>
+                      </tr>
+                    } @empty {
+                      <tr><td colspan="5" class="hint-text">No invoices in this range.</td></tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td><strong>Total</strong></td>
+                      <td>{{ incomeStatement()!.totalBilled | number: '1.2-2' }}</td>
+                      <td>{{ incomeStatement()!.totalCollected | number: '1.2-2' }}</td>
+                      <td>{{ incomeStatement()!.totalOutstanding | number: '1.2-2' }}</td>
+                      <td>{{ incomeStatement()!.collectionRatePercent }}%</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            }
+          }
+
+          @if (reportTab() === 'expense') {
+            <div class="report-filters">
+              <div class="field">
+                <label for="expense-start">From</label>
+                <input id="expense-start" type="date" [(ngModel)]="expenseStart" name="expenseStart" />
+              </div>
+              <div class="field">
+                <label for="expense-end">To</label>
+                <input id="expense-end" type="date" [(ngModel)]="expenseEnd" name="expenseEnd" />
+              </div>
+              <div class="field">
+                <label for="expense-property">Property</label>
+                <select id="expense-property" name="expenseProperty" [(ngModel)]="expenseProperty">
+                  <option [ngValue]="undefined">All properties</option>
+                  @for (p of properties(); track p.id) {
+                    <option [ngValue]="p.id">{{ p.name }}</option>
+                  }
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" (click)="loadExpenseReport()">Run</button>
+              <div class="report-download-group">
+                <button type="button" class="btn btn-sm" (click)="downloadExpenseReportPdf()" title="Download as PDF">PDF</button>
+                <button type="button" class="btn btn-sm" (click)="downloadExpenseReportExcel()" title="Download as Excel">Excel</button>
+              </div>
+            </div>
+
+            @if (expenseStatus() === 'loading') {
+              <p class="hint-text">Loading…</p>
+            }
+            @if (expenseStatus() === 'error') {
+              <p class="text-danger">Couldn't load the expense report.</p>
+            }
+            @if (expenseStatus() === 'ready' && expenseReport()) {
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Landlord-borne</th>
+                      <th>Tenant-borne</th>
+                      <th>Total</th>
+                      <th>Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (r of expenseReport()!.rows; track r.category) {
+                      <tr>
+                        <td>{{ r.category }}</td>
+                        <td>{{ r.landlordAmount | number: '1.2-2' }}</td>
+                        <td>{{ r.tenantAmount | number: '1.2-2' }}</td>
+                        <td>{{ r.total | number: '1.2-2' }}</td>
+                        <td>{{ r.count }}</td>
+                      </tr>
+                    } @empty {
+                      <tr><td colspan="5" class="hint-text">No expenses in this range.</td></tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="3"><strong>Total</strong></td>
+                      <td>{{ expenseReport()!.totalAmount | number: '1.2-2' }}</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            }
+          }
+
+          @if (reportTab() === 'occupancy') {
+            <div class="report-filters">
+              <div class="field">
+                <label for="occupancy-property">Property</label>
+                <select id="occupancy-property" name="occupancyProperty" [(ngModel)]="occupancyProperty">
+                  <option [ngValue]="undefined">All properties</option>
+                  @for (p of properties(); track p.id) {
+                    <option [ngValue]="p.id">{{ p.name }}</option>
+                  }
+                </select>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" (click)="loadOccupancyReport()">Run</button>
+              <div class="report-download-group">
+                <button type="button" class="btn btn-sm" (click)="downloadOccupancyReportPdf()" title="Download as PDF">PDF</button>
+                <button type="button" class="btn btn-sm" (click)="downloadOccupancyReportExcel()" title="Download as Excel">Excel</button>
+              </div>
+            </div>
+
+            @if (occupancyReportStatus() === 'loading') {
+              <p class="hint-text">Loading…</p>
+            }
+            @if (occupancyReportStatus() === 'error') {
+              <p class="text-danger">Couldn't load the occupancy report.</p>
+            }
+            @if (occupancyReportStatus() === 'ready' && occupancyReport()) {
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Units</th>
+                      <th>Occupied</th>
+                      <th>Vacant</th>
+                      <th>Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (r of occupancyReport()!.rows; track r.propertyId) {
+                      <tr>
+                        <td>{{ r.propertyName }}</td>
+                        <td>{{ r.totalUnits }}</td>
+                        <td>{{ r.occupiedUnits }}</td>
+                        <td>{{ r.vacantUnits }}</td>
+                        <td>{{ r.occupancyRatePercent }}%</td>
+                      </tr>
+                    } @empty {
+                      <tr><td colspan="5" class="hint-text">No units found.</td></tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td><strong>Total</strong></td>
+                      <td>{{ occupancyReport()!.totalUnits }}</td>
+                      <td>{{ occupancyReport()!.totalOccupied }}</td>
+                      <td>{{ occupancyReport()!.totalUnits - occupancyReport()!.totalOccupied }}</td>
+                      <td>{{ occupancyReport()!.occupancyRatePercent }}%</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            }
+          }
+
+          @if (reportTab() === 'ledger') {
+            <div class="report-filters">
+              <div class="field">
+                <label for="ledger-tenant">Tenant</label>
+                <select id="ledger-tenant" name="ledgerTenant" [(ngModel)]="ledgerTenantId">
+                  <option [ngValue]="undefined">Select a tenant</option>
+                  @for (t of tenants(); track t.id) {
+                    <option [ngValue]="t.id">{{ t.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label for="ledger-start">From</label>
+                <input id="ledger-start" type="date" [(ngModel)]="ledgerStart" name="ledgerStart" />
+              </div>
+              <div class="field">
+                <label for="ledger-end">To</label>
+                <input id="ledger-end" type="date" [(ngModel)]="ledgerEnd" name="ledgerEnd" />
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" [disabled]="!ledgerTenantId" (click)="loadTenantLedger()">Run</button>
+              <div class="report-download-group">
+                <button type="button" class="btn btn-sm" [disabled]="!ledgerTenantId" (click)="downloadTenantLedgerPdf()" title="Download as PDF">PDF</button>
+                <button type="button" class="btn btn-sm" [disabled]="!ledgerTenantId" (click)="downloadTenantLedgerExcel()" title="Download as Excel">Excel</button>
+              </div>
+            </div>
+
+            @if (!ledgerTenantId) {
+              <p class="hint-text">Pick a tenant to view their ledger.</p>
+            }
+            @if (ledgerStatus() === 'loading') {
+              <p class="hint-text">Loading…</p>
+            }
+            @if (ledgerStatus() === 'error') {
+              <p class="text-danger">Couldn't load the tenant ledger.</p>
+            }
+            @if (ledgerStatus() === 'ready' && tenantLedger()) {
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Period</th>
+                      <th>Invoiced</th>
+                      <th>Paid</th>
+                      <th>Balance</th>
+                      <th>Status</th>
+                      <th>Due date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (r of tenantLedger()!.rows; track r.period) {
+                      <tr>
+                        <td>{{ r.period }}</td>
+                        <td>{{ r.amount | number: '1.2-2' }}</td>
+                        <td>{{ r.paid | number: '1.2-2' }}</td>
+                        <td>{{ r.balance | number: '1.2-2' }}</td>
+                        <td>{{ r.status }}</td>
+                        <td>{{ r.dueDate ?? '-' }}</td>
+                      </tr>
+                    } @empty {
+                      <tr><td colspan="6" class="hint-text">No invoices for this tenant.</td></tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td><strong>Total</strong></td>
+                      <td>{{ tenantLedger()!.totalInvoiced | number: '1.2-2' }}</td>
+                      <td>{{ tenantLedger()!.totalPaid | number: '1.2-2' }}</td>
+                      <td>{{ tenantLedger()!.totalOutstanding | number: '1.2-2' }}</td>
+                      <td colspan="2"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            }
           }
         </div>
       }
@@ -357,6 +373,8 @@ export class ReportsComponent implements OnInit {
   readonly occupancy = signal<PropertyOccupancy[]>([]);
   readonly properties = signal<ApiProperty[]>([]);
   readonly tenants = signal<ApiTenant[]>([]);
+
+  readonly reportTab = signal<'income' | 'expense' | 'occupancy' | 'ledger'>('income');
 
   incomeStart = '';
   incomeEnd = '';

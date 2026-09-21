@@ -192,7 +192,8 @@ a {
   margin-bottom: 1.25rem;
 }
 
-.tabs a {
+.tabs a,
+.tabs button {
   color: var(--text-muted);
   text-decoration: none;
   padding: 0.6rem 0.9rem;
@@ -200,13 +201,20 @@ a {
   font-weight: 600;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
 }
 
-.tabs a:hover {
+.tabs a:hover,
+.tabs button:hover {
   color: var(--text);
 }
 
-.tabs a.active {
+.tabs a.active,
+.tabs button.active {
   color: var(--primary);
   border-bottom-color: var(--primary);
 }
@@ -933,8 +941,31 @@ th {
 
 .actions-row {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 0.6rem;
   margin-top: 1rem;
+}
+
+.report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.report-filters .field {
+  margin-bottom: 0;
+  min-width: 9rem;
+}
+
+.report-download-group {
+  display: flex;
+  gap: 0.4rem;
+  margin-left: auto;
 }
 
 .chat-bubble {
