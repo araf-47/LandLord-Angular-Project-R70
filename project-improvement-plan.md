@@ -138,6 +138,36 @@ from the sandbox these dev servers run in).
     status filter; kept scope to what was asked. Verified via `ng build`
     clean.
 
+## Status: 2026-09-21
+
+11. **Exportable reports (PDF/Excel) + free-tier AI portfolio insights** — ✅
+    done. Outside the original 8 ideas; user asked directly for "Jasper-style"
+    reports and a free AI feature. Two separate additions:
+    - **Reports & Exports** — new `landlord-backend/.../report/` module
+      (`ReportController`, `ReportService`, shared `ReportTable` model +
+      generic `ReportPdfService`/`ReportExcelService` renderer). Four fixed
+      reports — Income Statement, Expense Report, Occupancy Report, Tenant
+      Ledger — each servable as JSON/PDF/XLSX with date-range/property/
+      tenant/category filters. PDF reuses the OpenPDF pattern from Phase
+      10.5's `ReceiptService`; Excel is new (`Apache POI` added to
+      `pom.xml`). Frontend: `reports.component.ts` extended with a filter
+      bar + download buttons per report, new `report-api.service.ts`.
+      Aggregation is in-memory over existing repositories (no new `@Query`
+      SUM/COUNT) — fine at current portfolio scale, revisit if that grows.
+    - **AI Insights (chat)** — new `landlord-backend/.../insights/` module.
+      `GeminiClient` calls Google's free-tier Gemini API (`gemini-3.6-flash`
+      — `gemini-2.0-flash`, the original pick, was retired by Google mid-build
+      and swapped out), config via `GEMINI_API_KEY` env var following the
+      Brevo integration's pattern (never committed to a file).
+      `InsightsContextBuilder` is the scoping piece: builds a small,
+      pre-aggregated text summary (occupancy, this month's income/expenses,
+      top-20 overdue tenants by balance, maintenance ticket counts) and only
+      that bounded summary reaches the LLM — never raw entity dumps. New
+      "AI Insights" sidebar page, chat-style Q&A. Both features verified
+      end-to-end against the live backend and real seed data (all 12
+      report endpoints, plus a live Gemini round-trip); `mvn compile` and
+      `ng build --configuration production` both clean.
+
 ## Not yet started (from the original 8, deprioritized for now)
 
 - Multi-landlord/portfolio support (`LandlordUser` entity) — bigger
@@ -145,5 +175,3 @@ from the sandbox these dev servers run in).
 - Rent-health badge for tenants (gamified on-time-payment indicator).
 - SMS/WhatsApp reminders (extend Phase 7.5's Brevo-email channel).
 - Command palette (Ctrl+K global search/nav).
-- Ledger/report export (PDF/Excel), natural extension of Phase 10.5's
-  receipt pipeline.
