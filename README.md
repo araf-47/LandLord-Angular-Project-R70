@@ -113,26 +113,6 @@ troubleshooting), see [`startup-guide-v2-araf.md`](startup-guide-v2-araf.md). Mo
 project to a different machine? See
 [`teach-and-learn/moving-project-to-new-pc.md`](teach-and-learn/moving-project-to-new-pc.md).
 
-## Project layout
-
-```
-LandLord-Angular-Project-R70/   LandLord frontend
-BariVara-Angular-Project-R70/   BariVara frontend
-landlord-backend/               LandLord backend (Spring Boot)
-barivara-backend/               BariVara backend (Spring Boot)
-Parts/auth/                     Shared auth module used by both backends
-docker-compose.yml              PostgreSQL container definition
-dev-up.sh                       One-shot launcher for the full stack
-teach-and-learn/                Beginner-friendly explainers on how pieces of this project work
-```
-
-## Learning notes
-
-The [`teach-and-learn/`](teach-and-learn) folder collects plain-language explainers written
-while building this project — how the Angular/Spring Boot/Postgres pieces talk to each
-other, how OTP email delivery works, how the hosting story fits together, and more. Written
-for a beginner audience, kept around as a reference.
-
 ---
 
 <p align="center"><sub>Built by <a href="https://github.com/araf-47">araf-47</a> as a personal full-stack learning project.</sub></p>
