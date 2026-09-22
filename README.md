@@ -20,10 +20,6 @@
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white">
 </p>
 
-<p align="center">
-  <img src="pics/rental-site-demo.png" alt="LandLord dashboard preview" width="850">
-</p>
-
 ---
 
 ## What this is
