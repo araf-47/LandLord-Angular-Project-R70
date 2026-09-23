@@ -140,6 +140,14 @@ export class ReportApiService {
     return this.download('tenant-ledger.xlsx', filters);
   }
 
+  downloadFullReportPdf(filters: ReportFilters = {}): Promise<void> {
+    return this.download('full-report.pdf', filters);
+  }
+
+  downloadFullReportExcel(filters: ReportFilters = {}): Promise<void> {
+    return this.download('full-report.xlsx', filters);
+  }
+
   private async download(path: string, filters: ReportFilters): Promise<void> {
     const blob = await firstValueFrom(
       this.http.get(`${BASE}/${path}`, { params: this.toParams(filters), responseType: 'blob' })

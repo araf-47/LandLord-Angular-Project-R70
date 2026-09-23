@@ -168,6 +168,45 @@ from the sandbox these dev servers run in).
       report endpoints, plus a live Gemini round-trip); `mvn compile` and
       `ng build --configuration production` both clean.
 
+## Status: 2026-09-23
+
+12. **Combined "Full report" export (PDF/Excel)** — ✅ done. Follow-up to
+    #11: user wanted one combined document instead of downloading the 4
+    fixed reports separately. Scope: bundles Income Statement + Expense
+    Report + Occupancy Report only (Tenant Ledger excluded — it's
+    per-tenant, doesn't fit a portfolio-wide doc); PDF + Excel only, no
+    JSON endpoint.
+    - Backend: `ReportService.fullReport()` composes the 3 existing report
+      builds into a new `FullReport` record (no new aggregation logic —
+      pure composition). `ReportTables.of(FullReport)` converts it to
+      `List<ReportTable>`. `ReportPdfService`/`ReportExcelService` each
+      got a `List<ReportTable>` overload (single-table `render()` kept
+      unchanged — its body was extracted into a private
+      `addTableSection`/`writeSheet` helper reused by both overloads). PDF:
+      one document, one shared logo header/page-footer (`ReportPageEvent`
+      was already document-scoped), page break between each of the 3
+      sections. Excel: one workbook, 3 sheets (named per `table.title()`,
+      same as today just looped). New endpoints
+      `GET /api/reports/full-report.pdf` / `.xlsx` on `ReportController`,
+      `category` filter intentionally left out (not meaningful across a
+      combined doc).
+    - Frontend: 5th tab "Full report" on `reports.component.ts` — date
+      range + property filter, PDF/Excel download buttons only (no
+      "Run"/results-table, per the JSON-less scope). New
+      `downloadFullReportPdf/Excel()` on `report-api.service.ts` mirroring
+      the existing `download()` helper pattern.
+    - Gotcha hit during verification: the running `landlord-backend`
+      Spring Boot process (started via `dev-up.sh`, no devtools hot-reload)
+      kept serving the pre-change compiled classes, so the new endpoints
+      404'd under the hood — masked by the auth filter returning 401 for
+      *any* path under `/api/reports/**` regardless of whether the route
+      exists, so `curl` couldn't distinguish "not authed" from "route
+      doesn't exist." Fixed by killing the port-8080 process and
+      relaunching `spring-boot:run` to pick up the rebuild. **Takeaway:**
+      after backend code changes, the dev server needs a restart to take
+      effect — it does not hot-reload.
+    - `mvn compile` and `ng build --configuration production` both clean.
+
 ## Not yet started (from the original 8, deprioritized for now)
 
 - Multi-landlord/portfolio support (`LandlordUser` entity) — bigger

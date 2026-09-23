@@ -39,71 +39,103 @@ public class ReportPdfService {
             writer.setPageEvent(new ReportPageEvent(table.title()));
             document.open();
 
-            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, HEADER_ROW_BG);
-            Font subtitleFont = FontFactory.getFont(FontFactory.HELVETICA, 11, java.awt.Color.DARK_GRAY);
             Font metaFont = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9, java.awt.Color.GRAY);
-            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, java.awt.Color.WHITE);
-            Font valueFont = FontFactory.getFont(FontFactory.HELVETICA, 10, java.awt.Color.DARK_GRAY);
-            Font totalsFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, HEADER_ROW_BG);
-
-            Paragraph title = new Paragraph(table.title(), titleFont);
-            title.setSpacingAfter(4);
-            document.add(title);
-
-            Paragraph subtitle = new Paragraph(table.subtitle(), subtitleFont);
-            subtitle.setSpacingAfter(2);
-            document.add(subtitle);
-
             Paragraph generatedAt = new Paragraph(
                 "Generated on " + LocalDateTime.now().format(GENERATED_AT_FORMAT), metaFont);
             generatedAt.setSpacingAfter(16);
             document.add(generatedAt);
 
-            PdfPTable pdfTable = new PdfPTable(table.headers().size());
-            pdfTable.setWidthPercentage(100);
-            pdfTable.setHeaderRows(1);
-
-            boolean[] numericColumn = detectNumericColumns(table);
-
-            for (String header : table.headers()) {
-                PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
-                cell.setBackgroundColor(HEADER_ROW_BG);
-                cell.setPaddingTop(7);
-                cell.setPaddingBottom(7);
-                cell.setPaddingLeft(6);
-                cell.setPaddingRight(6);
-                cell.setBorderColor(HEADER_ROW_BG);
-                pdfTable.addCell(cell);
-            }
-
-            int rowIndex = 0;
-            for (List<String> row : table.rows()) {
-                java.awt.Color rowBg = rowIndex % 2 == 1 ? ALT_ROW_BG : java.awt.Color.WHITE;
-                for (int col = 0; col < row.size(); col++) {
-                    addCell(pdfTable, row.get(col), valueFont, rowBg, numericColumn[col]);
-                }
-                rowIndex++;
-            }
-
-            for (int col = 0; col < table.totalsRow().size(); col++) {
-                PdfPCell cell = new PdfPCell(new Phrase(displayValue(table.totalsRow().get(col)), totalsFont));
-                cell.setPaddingTop(7);
-                cell.setPaddingBottom(7);
-                cell.setPaddingLeft(6);
-                cell.setPaddingRight(6);
-                cell.setBorder(Rectangle.TOP);
-                cell.setBorderWidth(1.2f);
-                cell.setBorderColor(HEADER_ROW_BG);
-                cell.setHorizontalAlignment(numericColumn[col] ? Element.ALIGN_RIGHT : Element.ALIGN_LEFT);
-                pdfTable.addCell(cell);
-            }
-
-            document.add(pdfTable);
+            addTableSection(document, table);
             document.close();
             return out.toByteArray();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate report", e);
         }
+    }
+
+    public byte[] render(String documentTitle, List<ReportTable> tables) {
+        try {
+            Document document = new Document(com.lowagie.text.PageSize.A4, 40, 40, 70, 50);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            PdfWriter writer = PdfWriter.getInstance(document, out);
+            writer.setPageEvent(new ReportPageEvent(documentTitle));
+            document.open();
+
+            Font metaFont = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9, java.awt.Color.GRAY);
+            Paragraph generatedAt = new Paragraph(
+                "Generated on " + LocalDateTime.now().format(GENERATED_AT_FORMAT), metaFont);
+            generatedAt.setSpacingAfter(16);
+            document.add(generatedAt);
+
+            for (int i = 0; i < tables.size(); i++) {
+                addTableSection(document, tables.get(i));
+                if (i < tables.size() - 1) {
+                    document.newPage();
+                }
+            }
+
+            document.close();
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate report", e);
+        }
+    }
+
+    private void addTableSection(Document document, ReportTable table) throws Exception {
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, HEADER_ROW_BG);
+        Font subtitleFont = FontFactory.getFont(FontFactory.HELVETICA, 11, java.awt.Color.DARK_GRAY);
+        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, java.awt.Color.WHITE);
+        Font valueFont = FontFactory.getFont(FontFactory.HELVETICA, 10, java.awt.Color.DARK_GRAY);
+        Font totalsFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, HEADER_ROW_BG);
+
+        Paragraph title = new Paragraph(table.title(), titleFont);
+        title.setSpacingAfter(4);
+        document.add(title);
+
+        Paragraph subtitle = new Paragraph(table.subtitle(), subtitleFont);
+        subtitle.setSpacingAfter(16);
+        document.add(subtitle);
+
+        PdfPTable pdfTable = new PdfPTable(table.headers().size());
+        pdfTable.setWidthPercentage(100);
+        pdfTable.setHeaderRows(1);
+
+        boolean[] numericColumn = detectNumericColumns(table);
+
+        for (String header : table.headers()) {
+            PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
+            cell.setBackgroundColor(HEADER_ROW_BG);
+            cell.setPaddingTop(7);
+            cell.setPaddingBottom(7);
+            cell.setPaddingLeft(6);
+            cell.setPaddingRight(6);
+            cell.setBorderColor(HEADER_ROW_BG);
+            pdfTable.addCell(cell);
+        }
+
+        int rowIndex = 0;
+        for (List<String> row : table.rows()) {
+            java.awt.Color rowBg = rowIndex % 2 == 1 ? ALT_ROW_BG : java.awt.Color.WHITE;
+            for (int col = 0; col < row.size(); col++) {
+                addCell(pdfTable, row.get(col), valueFont, rowBg, numericColumn[col]);
+            }
+            rowIndex++;
+        }
+
+        for (int col = 0; col < table.totalsRow().size(); col++) {
+            PdfPCell cell = new PdfPCell(new Phrase(displayValue(table.totalsRow().get(col)), totalsFont));
+            cell.setPaddingTop(7);
+            cell.setPaddingBottom(7);
+            cell.setPaddingLeft(6);
+            cell.setPaddingRight(6);
+            cell.setBorder(Rectangle.TOP);
+            cell.setBorderWidth(1.2f);
+            cell.setBorderColor(HEADER_ROW_BG);
+            cell.setHorizontalAlignment(numericColumn[col] ? Element.ALIGN_RIGHT : Element.ALIGN_LEFT);
+            pdfTable.addCell(cell);
+        }
+
+        document.add(pdfTable);
     }
 
     private void addCell(PdfPTable table, String text, Font font, java.awt.Color background, boolean numeric) {

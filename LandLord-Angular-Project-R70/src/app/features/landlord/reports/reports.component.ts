@@ -74,6 +74,7 @@ import { BarChartComponent, BarChartPoint } from '../../../shared/charts/bar-cha
             <button type="button" [class.active]="reportTab() === 'expense'" (click)="reportTab.set('expense')">Expense report</button>
             <button type="button" [class.active]="reportTab() === 'occupancy'" (click)="reportTab.set('occupancy')">Occupancy report</button>
             <button type="button" [class.active]="reportTab() === 'ledger'" (click)="reportTab.set('ledger')">Tenant ledger</button>
+            <button type="button" [class.active]="reportTab() === 'full'" (click)="reportTab.set('full')">Full report</button>
           </div>
 
           @if (reportTab() === 'income') {
@@ -354,6 +355,34 @@ import { BarChartComponent, BarChartPoint } from '../../../shared/charts/bar-cha
               </div>
             }
           }
+
+          @if (reportTab() === 'full') {
+            <div class="report-filters">
+              <div class="field">
+                <label for="full-start">From</label>
+                <input id="full-start" type="date" [(ngModel)]="fullStart" name="fullStart" />
+              </div>
+              <div class="field">
+                <label for="full-end">To</label>
+                <input id="full-end" type="date" [(ngModel)]="fullEnd" name="fullEnd" />
+              </div>
+              <div class="field">
+                <label for="full-property">Property</label>
+                <select id="full-property" name="fullProperty" [(ngModel)]="fullProperty">
+                  <option [ngValue]="undefined">All properties</option>
+                  @for (p of properties(); track p.id) {
+                    <option [ngValue]="p.id">{{ p.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="report-download-group">
+                <button type="button" class="btn btn-sm" (click)="downloadFullReportPdf()" title="Download as PDF">PDF</button>
+                <button type="button" class="btn btn-sm" (click)="downloadFullReportExcel()" title="Download as Excel">Excel</button>
+              </div>
+            </div>
+
+            <p class="hint-text">Combines the Income Statement, Expense Report, and Occupancy Report into one document.</p>
+          }
         </div>
       }
     }
@@ -374,7 +403,7 @@ export class ReportsComponent implements OnInit {
   readonly properties = signal<ApiProperty[]>([]);
   readonly tenants = signal<ApiTenant[]>([]);
 
-  readonly reportTab = signal<'income' | 'expense' | 'occupancy' | 'ledger'>('income');
+  readonly reportTab = signal<'income' | 'expense' | 'occupancy' | 'ledger' | 'full'>('income');
 
   incomeStart = '';
   incomeEnd = '';
@@ -397,6 +426,10 @@ export class ReportsComponent implements OnInit {
   ledgerEnd = '';
   readonly ledgerStatus = signal<'idle' | 'loading' | 'error' | 'ready'>('idle');
   readonly tenantLedger = signal<TenantLedgerReport | undefined>(undefined);
+
+  fullStart = '';
+  fullEnd = '';
+  fullProperty: number | undefined = undefined;
 
   chartPoints(): BarChartPoint[] {
     return this.monthly().map((m) => ({ label: m.label.split(' ')[0].slice(0, 3), collected: m.collected, expenses: m.expenses }));
@@ -541,6 +574,22 @@ export class ReportsComponent implements OnInit {
       tenantId: this.ledgerTenantId,
       startDate: this.ledgerStart || undefined,
       endDate: this.ledgerEnd || undefined,
+    });
+  }
+
+  downloadFullReportPdf(): Promise<void> {
+    return this.reportApi.downloadFullReportPdf({
+      startDate: this.fullStart || undefined,
+      endDate: this.fullEnd || undefined,
+      propertyId: this.fullProperty,
+    });
+  }
+
+  downloadFullReportExcel(): Promise<void> {
+    return this.reportApi.downloadFullReportExcel({
+      startDate: this.fullStart || undefined,
+      endDate: this.fullEnd || undefined,
+      propertyId: this.fullProperty,
     });
   }
 }

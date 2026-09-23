@@ -55,6 +55,10 @@ public class ReportTables {
             List.of("Period", "Invoiced", "Paid", "Balance", "Status", "Due date"), rows, totals);
     }
 
+    public List<ReportTable> of(FullReport report) {
+        return List.of(of(report.incomeStatement()), of(report.expenseReport()), of(report.occupancyReport()));
+    }
+
     private String rangeLabel(LocalDate start, LocalDate end) {
         if (start == null && end == null) return "All time";
         String from = start == null ? "start" : DATE_FORMAT.format(start);

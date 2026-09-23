@@ -1,6 +1,7 @@
 package com.landlord.backend.report;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -137,6 +138,26 @@ public class ReportController {
         return excelResponse(table, "tenant-ledger.xlsx");
     }
 
+    // --- Full report (combined) ---
+
+    @GetMapping("/full-report.pdf")
+    public ResponseEntity<byte[]> fullReportPdf(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long propertyId) {
+        List<ReportTable> tables = reportTables.of(reportService.fullReport(startDate, endDate, propertyId));
+        return pdfResponse("Full Report", tables, "full-report.pdf");
+    }
+
+    @GetMapping("/full-report.xlsx")
+    public ResponseEntity<byte[]> fullReportExcel(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long propertyId) {
+        List<ReportTable> tables = reportTables.of(reportService.fullReport(startDate, endDate, propertyId));
+        return excelResponse(tables, "full-report.xlsx");
+    }
+
     private ResponseEntity<byte[]> pdfResponse(ReportTable table, String filename) {
         byte[] pdf = reportPdfService.render(table);
         HttpHeaders headers = new HttpHeaders();
@@ -147,6 +168,22 @@ public class ReportController {
 
     private ResponseEntity<byte[]> excelResponse(ReportTable table, String filename) {
         byte[] xlsx = reportExcelService.render(table);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(XLSX);
+        headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
+        return ResponseEntity.ok().headers(headers).body(xlsx);
+    }
+
+    private ResponseEntity<byte[]> pdfResponse(String documentTitle, List<ReportTable> tables, String filename) {
+        byte[] pdf = reportPdfService.render(documentTitle, tables);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());
+        return ResponseEntity.ok().headers(headers).body(pdf);
+    }
+
+    private ResponseEntity<byte[]> excelResponse(List<ReportTable> tables, String filename) {
+        byte[] xlsx = reportExcelService.render(tables);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(XLSX);
         headers.setContentDisposition(ContentDisposition.attachment().filename(filename).build());

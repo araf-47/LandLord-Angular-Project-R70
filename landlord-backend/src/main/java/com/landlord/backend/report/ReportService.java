@@ -169,6 +169,14 @@ public class ReportService {
         return new TenantLedgerReport(tenantId, tenant.getName(), rows, totalInvoiced, totalPaid, totalOutstanding);
     }
 
+    public FullReport fullReport(LocalDate startDate, LocalDate endDate, Long propertyId) {
+        return new FullReport(
+            incomeStatement(startDate, endDate, propertyId),
+            expenseReport(startDate, endDate, propertyId, null),
+            occupancyReport(propertyId)
+        );
+    }
+
     private Long propertyIdOf(Invoice invoice, Map<Long, Unit> unitsById) {
         Unit unit = invoice.getUnitId() == null ? null : unitsById.get(invoice.getUnitId());
         return unit == null ? null : unit.getPropertyId();
