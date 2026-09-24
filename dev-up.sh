@@ -61,7 +61,7 @@ echo "== Postgres =="
 docker compose -f "$REPO/docker-compose.yml" up -d
 
 echo "== Launching services =="
-start_service landlord-backend  8080 "$REPO/landlord-backend"                "./mvnw spring-boot:run"
+start_service landlord-backend  8080 "$REPO/landlord-backend"                "[ -f .env.local ] && set -a && source .env.local && set +a; ./mvnw spring-boot:run"
 start_service barivara-backend  8081 "$REPO/barivara-backend"                "./mvnw spring-boot:run"
 start_service landlord-frontend 4200 "$REPO/LandLord-Angular-Project-R70"    "npx ng serve --port 4200 --host 0.0.0.0"
 start_service barivara-frontend 4201 "$REPO/BariVara-Angular-Project-R70"    "npx ng serve --port 4201 --host 0.0.0.0"
