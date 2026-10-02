@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Operations"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/more_marketplace"
+            style="@style/MoreRow"
+            android:text="Marketplace" />
+
+        <TextView
+            android:id="@+id/more_maintenance"
+            style="@style/MoreRow"
+            android:text="Maintenance" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Finance"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/more_expenses"
+            style="@style/MoreRow"
+            android:text="Expenses" />
+
+        <TextView
+            android:id="@+id/more_ledger"
+            style="@style/MoreRow"
+            android:text="Ledger" />
+
+        <TextView
+            android:id="@+id/more_payment_receipts"
+            style="@style/MoreRow"
+            android:text="Payment Receipts" />
+
+        <TextView
+            android:id="@+id/more_reports"
+            style="@style/MoreRow"
+            android:text="Reports" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Communication"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/more_messages"
+            style="@style/MoreRow"
+            android:text="Messages" />
+
+        <TextView
+            android:id="@+id/more_notifications"
+            style="@style/MoreRow"
+            android:text="Notifications" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Intelligence"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/more_insights"
+            style="@style/MoreRow"
+            android:text="AI Insights" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Account"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/more_settings"
+            style="@style/MoreRow"
+            android:text="Settings" />
+
+    </LinearLayout>
+</ScrollView>

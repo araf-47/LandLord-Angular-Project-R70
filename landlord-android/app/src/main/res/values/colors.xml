@@ -1,0 +1,8 @@
+<resources>
+    <color name="landlord_primary">#2E6F40</color>
+    <color name="landlord_primary_dark">#1B4332</color>
+    <color name="landlord_secondary">#C9A227</color>
+    <color name="landlord_background">#FFFFFF</color>
+    <color name="landlord_surface">#F5F5F5</color>
+    <color name="landlord_on_primary">#FFFFFF</color>
+</resources>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_dashboard">
+
+    <fragment
+        android:id="@+id/nav_dashboard"
+        android:name="com.landlord.android.feature.dashboard.DashboardFragment"
+        android:label="@string/nav_dashboard" />
+
+    <fragment
+        android:id="@+id/nav_properties"
+        android:name="com.landlord.android.feature.properties.PropertiesFragment"
+        android:label="@string/nav_properties">
+        <action
+            android:id="@+id/action_properties_to_detail"
+            app:destination="@id/nav_property_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_property_detail"
+        android:name="com.landlord.android.feature.properties.PropertyDetailFragment"
+        android:label="Property">
+        <argument
+            android:name="propertyLocalId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_tenants"
+        android:name="com.landlord.android.feature.tenants.TenantsFragment"
+        android:label="@string/nav_tenants">
+        <action
+            android:id="@+id/action_tenants_to_detail"
+            app:destination="@id/nav_tenant_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_tenant_detail"
+        android:name="com.landlord.android.feature.tenants.TenantDetailFragment"
+        android:label="Tenant">
+        <argument
+            android:name="tenantLocalId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_payments"
+        android:name="com.landlord.android.feature.payments.PaymentsFragment"
+        android:label="@string/nav_payments" />
+
+    <fragment
+        android:id="@+id/nav_more"
+        android:name="com.landlord.android.feature.properties.MoreFragment"
+        android:label="@string/nav_more" />
+
+    <fragment
+        android:id="@+id/nav_marketplace"
+        android:name="com.landlord.android.feature.marketplace.MarketplaceFragment"
+        android:label="Marketplace" />
+
+    <fragment
+        android:id="@+id/nav_expenses"
+        android:name="com.landlord.android.feature.expenses.ExpensesFragment"
+        android:label="Expenses" />
+
+    <fragment
+        android:id="@+id/nav_ledger"
+        android:name="com.landlord.android.feature.ledger.LedgerFragment"
+        android:label="Ledger" />
+
+    <fragment
+        android:id="@+id/nav_payment_history"
+        android:name="com.landlord.android.feature.payments.PaymentHistoryFragment"
+        android:label="Payment receipts" />
+
+    <fragment
+        android:id="@+id/nav_maintenance"
+        android:name="com.landlord.android.feature.maintenance.MaintenanceFragment"
+        android:label="Maintenance" />
+
+    <fragment
+        android:id="@+id/nav_messages"
+        android:name="com.landlord.android.feature.messages.MessagesFragment"
+        android:label="Messages">
+        <action
+            android:id="@+id/action_messages_to_thread"
+            app:destination="@id/nav_message_thread" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_message_thread"
+        android:name="com.landlord.android.feature.messages.MessageThreadFragment"
+        android:label="Conversation">
+        <argument
+            android:name="conversationLocalId"
+            app:argType="string" />
+        <argument
+            android:name="withName"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_notifications"
+        android:name="com.landlord.android.feature.notifications.NotificationsFragment"
+        android:label="Notifications" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.landlord.android.feature.settings.SettingsFragment"
+        android:label="Settings" />
+
+    <fragment
+        android:id="@+id/nav_insights"
+        android:name="com.landlord.android.feature.insights.InsightsFragment"
+        android:label="AI Insights" />
+
+    <fragment
+        android:id="@+id/nav_reports"
+        android:name="com.landlord.android.feature.reports.ReportsFragment"
+        android:label="Reports" />
+
+</navigation>

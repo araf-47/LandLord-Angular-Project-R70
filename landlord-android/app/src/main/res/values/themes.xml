@@ -1,0 +1,27 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.LandLord" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/landlord_primary</item>
+        <item name="colorPrimaryDark">@color/landlord_primary_dark</item>
+        <item name="colorSecondary">@color/landlord_secondary</item>
+        <item name="colorOnPrimary">@color/landlord_on_primary</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/landlord_primary_dark</item>
+    </style>
+
+    <style name="SettingsDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginVertical">16dp</item>
+        <item name="android:background">#DDDDDD</item>
+    </style>
+
+    <style name="MoreRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingHorizontal">20dp</item>
+        <item name="android:paddingVertical">16dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+</resources>

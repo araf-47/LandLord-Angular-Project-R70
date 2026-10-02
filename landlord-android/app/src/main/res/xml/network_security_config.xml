@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only convenience: the server address is user-editable (Settings >
+     Server) since the dev backend's LAN IP changes as the dev machine moves
+     between networks. Cleartext is allowed broadly here rather than pinned
+     to one IP, since whatever address the user types needs to work without
+     a rebuild. Never ship this permissive a config in a release build. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

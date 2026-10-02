@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">LandLord</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_properties">Properties</string>
+    <string name="nav_tenants">Tenants</string>
+    <string name="nav_payments">Payments</string>
+    <string name="nav_more">More</string>
+    <string name="placeholder_coming_soon">Coming soon — Phase build in progress</string>
+</resources>
