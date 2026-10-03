@@ -16,13 +16,7 @@ public class InvoiceAdapter extends ListAdapter<InvoiceEntity, InvoiceAdapter.VH
 
     private final ListAnimations listAnimations = new ListAnimations();
 
-    public interface OnInvoiceClick {
-        void onClick(InvoiceEntity entity);
-    }
-
-    private final OnInvoiceClick onClick;
-
-    public InvoiceAdapter(OnInvoiceClick onClick) {
+    public InvoiceAdapter() {
         super(new DiffUtil.ItemCallback<InvoiceEntity>() {
             @Override
             public boolean areItemsTheSame(@NonNull InvoiceEntity a, @NonNull InvoiceEntity b) {
@@ -36,7 +30,6 @@ public class InvoiceAdapter extends ListAdapter<InvoiceEntity, InvoiceAdapter.VH
                         && java.util.Objects.equals(a.status, b.status);
             }
         });
-        this.onClick = onClick;
     }
 
     @NonNull
@@ -61,7 +54,6 @@ public class InvoiceAdapter extends ListAdapter<InvoiceEntity, InvoiceAdapter.VH
             holder.badge.setText(entity.sync.syncState == SyncState.CONFLICT
                     ? "Sync issue" : "Pending sync");
         }
-        holder.itemView.setOnClickListener(v -> onClick.onClick(entity));
     }
 
     static class VH extends RecyclerView.ViewHolder {

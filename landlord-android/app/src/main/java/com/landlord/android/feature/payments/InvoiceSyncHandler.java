@@ -66,6 +66,7 @@ public class InvoiceSyncHandler implements EntitySyncHandler {
             if (entity != null) {
                 entity.period = dto.period;
                 entity.rent = dto.rent;
+                entity.prevUnpaidRolled = dto.prevUnpaidRolled;
                 entity.amount = dto.amount;
                 entity.balance = dto.balance;
                 entity.status = dto.status;
@@ -135,6 +136,7 @@ public class InvoiceSyncHandler implements EntitySyncHandler {
         entity.period = dto.period;
         entity.rent = dto.rent;
         entity.utilitiesTotal = dto.utilitiesTotal != null ? dto.utilitiesTotal : 0;
+        entity.prevUnpaidRolled = dto.prevUnpaidRolled;
         entity.amount = dto.amount;
         entity.balance = dto.balance;
         entity.status = dto.status;

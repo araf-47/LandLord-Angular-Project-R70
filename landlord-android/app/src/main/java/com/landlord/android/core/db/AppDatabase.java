@@ -49,7 +49,7 @@ import com.landlord.android.feature.notifications.NotificationEntity;
                 MessageEntity.class,
                 NotificationEntity.class
         },
-        version = 1,
+        version = 2,
         exportSchema = false
 )
 @TypeConverters({SyncTypeConverters.class})

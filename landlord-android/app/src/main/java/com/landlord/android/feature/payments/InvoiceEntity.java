@@ -19,6 +19,7 @@ public class InvoiceEntity {
     public String period;
     public Double rent;
     public double utilitiesTotal;
+    public Double prevUnpaidRolled;
     public Double amount;
     public Double balance;
     public String status = "unpaid";
