@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material3 tokens, dark -->
+    <color name="md_primary">#9CD6A6</color>
+    <color name="md_on_primary">#003914</color>
+    <color name="md_primary_container">#14532A</color>
+    <color name="md_on_primary_container">#B8F0C4</color>
+
+    <color name="md_secondary">#E4C470</color>
+    <color name="md_on_secondary">#3F2E00</color>
+    <color name="md_secondary_container">#594300</color>
+    <color name="md_on_secondary_container">#FFE8A3</color>
+
+    <color name="md_tertiary">#A3C9FF</color>
+    <color name="md_on_tertiary">#00315A</color>
+    <color name="md_tertiary_container">#1C4777</color>
+    <color name="md_on_tertiary_container">#D3E4FF</color>
+
+    <color name="md_error">#FFB4AB</color>
+    <color name="md_on_error">#690005</color>
+    <color name="md_error_container">#93000A</color>
+    <color name="md_on_error_container">#FFDAD6</color>
+
+    <color name="md_background">#11140F</color>
+    <color name="md_on_background">#E2E3DD</color>
+    <color name="md_surface">#11140F</color>
+    <color name="md_on_surface">#E2E3DD</color>
+    <color name="md_surface_variant">#424940</color>
+    <color name="md_on_surface_variant">#C2C9BC</color>
+
+    <color name="md_surface_container_lowest">#0C0F0A</color>
+    <color name="md_surface_container_low">#191C15</color>
+    <color name="md_surface_container">#1D2019</color>
+    <color name="md_surface_container_high">#272A23</color>
+    <color name="md_surface_container_highest">#32352D</color>
+
+    <color name="md_outline">#8C9388</color>
+    <color name="md_outline_variant">#424940</color>
+    <color name="md_scrim">#000000</color>
+    <color name="md_inverse_surface">#E2E3DD</color>
+    <color name="md_inverse_on_surface">#2F312D</color>
+    <color name="md_inverse_primary">#2E6F40</color>
+
+    <color name="landlord_gold_accent">#E4C470</color>
+
+    <!-- Deprecated aliases, kept so any stray reference keeps compiling -->
+    <color name="landlord_primary">@color/md_primary</color>
+    <color name="landlord_primary_dark">#0D2818</color>
+    <color name="landlord_secondary">@color/landlord_gold_accent</color>
+    <color name="landlord_background">@color/md_background</color>
+    <color name="landlord_surface">@color/md_surface_container_low</color>
+    <color name="landlord_on_primary">@color/md_on_primary</color>
+</resources>

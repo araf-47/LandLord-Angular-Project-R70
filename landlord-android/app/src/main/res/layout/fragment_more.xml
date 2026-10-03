@@ -19,11 +19,13 @@
         <TextView
             android:id="@+id/more_marketplace"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_marketplace"
             android:text="Marketplace" />
 
         <TextView
             android:id="@+id/more_maintenance"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_maintenance"
             android:text="Maintenance" />
 
         <TextView
@@ -37,21 +39,25 @@
         <TextView
             android:id="@+id/more_expenses"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_expenses"
             android:text="Expenses" />
 
         <TextView
             android:id="@+id/more_ledger"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_ledger"
             android:text="Ledger" />
 
         <TextView
             android:id="@+id/more_payment_receipts"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_receipts"
             android:text="Payment Receipts" />
 
         <TextView
             android:id="@+id/more_reports"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_reports"
             android:text="Reports" />
 
         <TextView
@@ -65,11 +71,13 @@
         <TextView
             android:id="@+id/more_messages"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_messages"
             android:text="Messages" />
 
         <TextView
             android:id="@+id/more_notifications"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_notifications"
             android:text="Notifications" />
 
         <TextView
@@ -83,6 +91,7 @@
         <TextView
             android:id="@+id/more_insights"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_insights"
             android:text="AI Insights" />
 
         <TextView
@@ -96,6 +105,7 @@
         <TextView
             android:id="@+id/more_settings"
             style="@style/MoreRow"
+            android:drawableStart="@drawable/ic_more_settings"
             android:text="Settings" />
 
     </LinearLayout>

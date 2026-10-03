@@ -1,22 +1,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_dashboard"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/ic_nav_dashboard"
         android:title="@string/nav_dashboard" />
     <item
         android:id="@+id/nav_properties"
-        android:icon="@android:drawable/ic_menu_mapmode"
+        android:icon="@drawable/ic_nav_properties"
         android:title="@string/nav_properties" />
     <item
         android:id="@+id/nav_tenants"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/ic_nav_tenants"
         android:title="@string/nav_tenants" />
     <item
         android:id="@+id/nav_payments"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@drawable/ic_nav_payments"
         android:title="@string/nav_payments" />
     <item
         android:id="@+id/nav_more"
-        android:icon="@android:drawable/ic_menu_more"
+        android:icon="@drawable/ic_nav_more"
         android:title="@string/nav_more" />
 </menu>

@@ -1,8 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="landlord_primary">#2E6F40</color>
+    <!-- Material3 tokens, light -->
+    <color name="md_primary">#2E6F40</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#B8F0C4</color>
+    <color name="md_on_primary_container">#002109</color>
+
+    <color name="md_secondary">#6B5A1E</color>
+    <color name="md_on_secondary">#FFFFFF</color>
+    <color name="md_secondary_container">#FFE8A3</color>
+    <color name="md_on_secondary_container">#241A00</color>
+
+    <color name="md_tertiary">#3A608A</color>
+    <color name="md_on_tertiary">#FFFFFF</color>
+    <color name="md_tertiary_container">#D3E4FF</color>
+    <color name="md_on_tertiary_container">#001C37</color>
+
+    <color name="md_error">#BA1A1A</color>
+    <color name="md_on_error">#FFFFFF</color>
+    <color name="md_error_container">#FFDAD6</color>
+    <color name="md_on_error_container">#410002</color>
+
+    <color name="md_background">#FBFDF8</color>
+    <color name="md_on_background">#1A1C19</color>
+    <color name="md_surface">#FBFDF8</color>
+    <color name="md_on_surface">#1A1C19</color>
+    <color name="md_surface_variant">#DEE5D8</color>
+    <color name="md_on_surface_variant">#424940</color>
+
+    <color name="md_surface_container_lowest">#FFFFFF</color>
+    <color name="md_surface_container_low">#F5F7F0</color>
+    <color name="md_surface_container">#EFF1EB</color>
+    <color name="md_surface_container_high">#E9EBE5</color>
+    <color name="md_surface_container_highest">#E3E6DF</color>
+
+    <color name="md_outline">#72796F</color>
+    <color name="md_outline_variant">#C2C9BC</color>
+    <color name="md_scrim">#000000</color>
+    <color name="md_inverse_surface">#2F312D</color>
+    <color name="md_inverse_on_surface">#F1F2EC</color>
+    <color name="md_inverse_primary">#9CD6A6</color>
+
+    <!-- Accent used for gold highlight chips/badges, distinct from muted secondary token -->
+    <color name="landlord_gold_accent">#C9A227</color>
+
+    <!-- Deprecated aliases, kept so any stray reference keeps compiling -->
+    <color name="landlord_primary">@color/md_primary</color>
     <color name="landlord_primary_dark">#1B4332</color>
-    <color name="landlord_secondary">#C9A227</color>
-    <color name="landlord_background">#FFFFFF</color>
-    <color name="landlord_surface">#F5F5F5</color>
-    <color name="landlord_on_primary">#FFFFFF</color>
+    <color name="landlord_secondary">@color/landlord_gold_accent</color>
+    <color name="landlord_background">@color/md_background</color>
+    <color name="landlord_surface">@color/md_surface_container_low</color>
+    <color name="landlord_on_primary">@color/md_on_primary</color>
 </resources>
