@@ -1,6 +1,7 @@
 package com.landlord.android.feature.tenants;
 
 import android.os.Bundle;
+import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,10 +23,14 @@ public class TenantDetailFragment extends Fragment {
     private String tenantLocalId;
     private Long tenantServerId;
     private String currentTerms = "";
+    private boolean enterTransitionStarted = false;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        setSharedElementEnterTransition(TransitionInflater.from(requireContext())
+                .inflateTransition(android.R.transition.move));
+        postponeEnterTransition();
         return inflater.inflate(R.layout.fragment_tenant_detail, container, false);
     }
 
@@ -39,6 +44,10 @@ public class TenantDetailFragment extends Fragment {
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
                 .get(TenantDetailViewModel.class);
 
+        View headerCard = view.findViewById(R.id.detail_header_card);
+        headerCard.setTransitionName("tenant_card_" + tenantLocalId);
+        view.postDelayed(this::startEnterTransitionOnce, 300);
+
         TextView nameView = view.findViewById(R.id.tenant_name);
         TextView contactView = view.findViewById(R.id.tenant_contact);
         TextView statusView = view.findViewById(R.id.tenant_status);
@@ -50,6 +59,7 @@ public class TenantDetailFragment extends Fragment {
         TextView startDateView = view.findViewById(R.id.agreement_start_date);
 
         viewModel.tenant(tenantLocalId).observe(getViewLifecycleOwner(), tenant -> {
+            startEnterTransitionOnce();
             if (tenant == null) return;
 
             nameView.setText(tenant.name);
@@ -69,6 +79,12 @@ public class TenantDetailFragment extends Fragment {
         });
 
         view.findViewById(R.id.edit_terms_button).setOnClickListener(v -> showEditTermsDialog(view));
+    }
+
+    private void startEnterTransitionOnce() {
+        if (enterTransitionStarted) return;
+        enterTransitionStarted = true;
+        startPostponedEnterTransition();
     }
 
     private void loadAgreement(ProgressBar progress, TextView status, MaterialCardView card,

@@ -14,10 +14,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.FormBottomSheet;
 import com.landlord.android.feature.tenants.TenantEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,20 +87,15 @@ public class MessagesFragment extends Fragment {
         tenantSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, labels));
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("New conversation")
-                .setView(dialogView)
-                .setPositiveButton("Start", (dialog, which) -> {
-                    String withName = String.valueOf(withNameInput.getText()).trim();
-                    if (withName.isEmpty()) return;
+        FormBottomSheet.show(requireContext(), "New conversation", "Start", dialogView, () -> {
+            String withName = String.valueOf(withNameInput.getText()).trim();
+            if (withName.isEmpty()) return;
 
-                    int selected = tenantSpinner.getSelectedItemPosition();
-                    String tenantLocalId = (selected > 0 && selected - 1 < availableTenants.size())
-                            ? availableTenants.get(selected - 1).localId : null;
+            int selected = tenantSpinner.getSelectedItemPosition();
+            String tenantLocalId = (selected > 0 && selected - 1 < availableTenants.size())
+                    ? availableTenants.get(selected - 1).localId : null;
 
-                    viewModel.createConversation(tenantLocalId, withName);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            viewModel.createConversation(tenantLocalId, withName);
+        });
     }
 }

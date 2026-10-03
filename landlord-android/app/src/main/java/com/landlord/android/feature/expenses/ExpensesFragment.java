@@ -13,11 +13,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.FormBottomSheet;
 import com.landlord.android.feature.properties.PropertyEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,32 +88,27 @@ public class ExpensesFragment extends Fragment {
         propertySpinner.setAdapter(new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, labels));
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Add expense")
-                .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    int selected = propertySpinner.getSelectedItemPosition();
-                    if (selected < 0 || selected >= availableProperties.size()) return;
+        FormBottomSheet.show(requireContext(), "Add expense", "Save", dialogView, () -> {
+            int selected = propertySpinner.getSelectedItemPosition();
+            if (selected < 0 || selected >= availableProperties.size()) return;
 
-                    String category = String.valueOf(categoryInput.getText()).trim();
-                    if (category.isEmpty()) return;
+            String category = String.valueOf(categoryInput.getText()).trim();
+            if (category.isEmpty()) return;
 
-                    double amount;
-                    try {
-                        amount = Double.parseDouble(String.valueOf(amountInput.getText()).trim());
-                    } catch (NumberFormatException e) {
-                        amount = 0;
-                    }
+            double amount;
+            try {
+                amount = Double.parseDouble(String.valueOf(amountInput.getText()).trim());
+            } catch (NumberFormatException e) {
+                amount = 0;
+            }
 
-                    viewModel.createExpense(
-                            availableProperties.get(selected).localId,
-                            category,
-                            String.valueOf(descriptionInput.getText()).trim(),
-                            amount,
-                            "landlord"
-                    );
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            viewModel.createExpense(
+                    availableProperties.get(selected).localId,
+                    category,
+                    String.valueOf(descriptionInput.getText()).trim(),
+                    amount,
+                    "landlord"
+            );
+        });
     }
 }

@@ -12,12 +12,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.FormBottomSheet;
 import com.landlord.android.feature.properties.UnitEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,10 +56,13 @@ public class TenantsFragment extends Fragment {
         TextView empty = view.findViewById(R.id.tenants_empty);
         FloatingActionButton fab = view.findViewById(R.id.add_tenant_fab);
 
-        adapter = new TenantAdapter(entity -> {
+        adapter = new TenantAdapter((entity, cardView) -> {
             Bundle args = new Bundle();
             args.putString("tenantLocalId", entity.localId);
-            Navigation.findNavController(view).navigate(R.id.action_tenants_to_detail, args);
+            FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                    .addSharedElement(cardView, cardView.getTransitionName())
+                    .build();
+            Navigation.findNavController(view).navigate(R.id.action_tenants_to_detail, args, null, extras);
         });
         list.setLayoutManager(new LinearLayoutManager(requireContext()));
         list.setAdapter(adapter);
@@ -97,35 +101,30 @@ public class TenantsFragment extends Fragment {
                 android.R.layout.simple_spinner_dropdown_item, unitLabels);
         unitSpinner.setAdapter(spinnerAdapter);
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Register tenant")
-                .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    int selected = unitSpinner.getSelectedItemPosition();
-                    if (selected < 0 || selected >= availableUnits.size()) return;
+        FormBottomSheet.show(requireContext(), "Register tenant", "Save", dialogView, () -> {
+            int selected = unitSpinner.getSelectedItemPosition();
+            if (selected < 0 || selected >= availableUnits.size()) return;
 
-                    String name = String.valueOf(nameInput.getText()).trim();
-                    String nationalId = String.valueOf(nidInput.getText()).trim();
-                    if (name.isEmpty() || nationalId.isEmpty()) return;
+            String name = String.valueOf(nameInput.getText()).trim();
+            String nationalId = String.valueOf(nidInput.getText()).trim();
+            if (name.isEmpty() || nationalId.isEmpty()) return;
 
-                    double deposit;
-                    try {
-                        deposit = Double.parseDouble(String.valueOf(depositInput.getText()).trim());
-                    } catch (NumberFormatException e) {
-                        deposit = 0;
-                    }
+            double deposit;
+            try {
+                deposit = Double.parseDouble(String.valueOf(depositInput.getText()).trim());
+            } catch (NumberFormatException e) {
+                deposit = 0;
+            }
 
-                    viewModel.registerTenant(
-                            availableUnits.get(selected).localId,
-                            name,
-                            String.valueOf(phoneInput.getText()).trim(),
-                            String.valueOf(emailInput.getText()).trim(),
-                            nationalId,
-                            "Standard lease",
-                            deposit
-                    );
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            viewModel.registerTenant(
+                    availableUnits.get(selected).localId,
+                    name,
+                    String.valueOf(phoneInput.getText()).trim(),
+                    String.valueOf(emailInput.getText()).trim(),
+                    nationalId,
+                    "Standard lease",
+                    deposit
+            );
+        });
     }
 }

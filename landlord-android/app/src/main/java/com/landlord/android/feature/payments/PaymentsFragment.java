@@ -13,11 +13,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.FormBottomSheet;
 import com.landlord.android.feature.tenants.TenantEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,24 +87,19 @@ public class PaymentsFragment extends Fragment {
         tenantSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, labels));
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Generate invoice")
-                .setView(dialogView)
-                .setPositiveButton("Generate", (dialog, which) -> {
-                    int selected = tenantSpinner.getSelectedItemPosition();
-                    if (selected < 0 || selected >= availableTenants.size()) return;
+        FormBottomSheet.show(requireContext(), "Generate invoice", "Generate", dialogView, () -> {
+            int selected = tenantSpinner.getSelectedItemPosition();
+            if (selected < 0 || selected >= availableTenants.size()) return;
 
-                    double utilities;
-                    try {
-                        utilities = Double.parseDouble(String.valueOf(utilitiesInput.getText()).trim());
-                    } catch (NumberFormatException e) {
-                        utilities = 0;
-                    }
+            double utilities;
+            try {
+                utilities = Double.parseDouble(String.valueOf(utilitiesInput.getText()).trim());
+            } catch (NumberFormatException e) {
+                utilities = 0;
+            }
 
-                    viewModel.generateInvoice(availableTenants.get(selected).localId, utilities);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            viewModel.generateInvoice(availableTenants.get(selected).localId, utilities);
+        });
     }
 
     private void showRecordPaymentDialog(InvoiceEntity invoice) {
@@ -114,23 +109,18 @@ public class PaymentsFragment extends Fragment {
         TextInputEditText amountInput = dialogView.findViewById(R.id.input_amount);
         TextInputEditText methodInput = dialogView.findViewById(R.id.input_method);
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Record payment")
-                .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    double amount;
-                    try {
-                        amount = Double.parseDouble(String.valueOf(amountInput.getText()).trim());
-                    } catch (NumberFormatException e) {
-                        return;
-                    }
+        FormBottomSheet.show(requireContext(), "Record payment", "Save", dialogView, () -> {
+            double amount;
+            try {
+                amount = Double.parseDouble(String.valueOf(amountInput.getText()).trim());
+            } catch (NumberFormatException e) {
+                return;
+            }
 
-                    String method = String.valueOf(methodInput.getText()).trim();
-                    if (method.isEmpty()) method = "cash";
+            String method = String.valueOf(methodInput.getText()).trim();
+            if (method.isEmpty()) method = "cash";
 
-                    viewModel.recordPayment(invoice.localId, invoice.tenantLocalId, amount, method);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            viewModel.recordPayment(invoice.localId, invoice.tenantLocalId, amount, method);
+        });
     }
 }

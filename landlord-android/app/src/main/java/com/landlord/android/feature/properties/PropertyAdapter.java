@@ -17,7 +17,7 @@ public class PropertyAdapter extends ListAdapter<PropertyEntity, PropertyAdapter
     private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnPropertyClick {
-        void onClick(PropertyEntity entity);
+        void onClick(PropertyEntity entity, View cardView);
     }
 
     private final OnPropertyClick onClick;
@@ -58,7 +58,8 @@ public class PropertyAdapter extends ListAdapter<PropertyEntity, PropertyAdapter
             holder.badge.setText(entity.sync.syncState == SyncState.CONFLICT
                     ? "Sync issue" : "Pending sync");
         }
-        holder.itemView.setOnClickListener(v -> onClick.onClick(entity));
+        holder.itemView.setTransitionName("property_card_" + entity.localId);
+        holder.itemView.setOnClickListener(v -> onClick.onClick(entity, holder.itemView));
     }
 
     static class VH extends RecyclerView.ViewHolder {

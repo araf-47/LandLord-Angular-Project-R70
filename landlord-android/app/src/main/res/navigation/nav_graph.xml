@@ -15,11 +15,7 @@
         android:label="@string/nav_properties">
         <action
             android:id="@+id/action_properties_to_detail"
-            app:destination="@id/nav_property_detail"
-            app:enterAnim="@anim/nav_slide_enter"
-            app:exitAnim="@anim/nav_slide_exit"
-            app:popEnterAnim="@anim/nav_slide_pop_enter"
-            app:popExitAnim="@anim/nav_slide_pop_exit" />
+            app:destination="@id/nav_property_detail" />
     </fragment>
 
     <fragment
@@ -37,11 +33,7 @@
         android:label="@string/nav_tenants">
         <action
             android:id="@+id/action_tenants_to_detail"
-            app:destination="@id/nav_tenant_detail"
-            app:enterAnim="@anim/nav_slide_enter"
-            app:exitAnim="@anim/nav_slide_exit"
-            app:popEnterAnim="@anim/nav_slide_pop_enter"
-            app:popExitAnim="@anim/nav_slide_pop_exit" />
+            app:destination="@id/nav_tenant_detail" />
     </fragment>
 
     <fragment

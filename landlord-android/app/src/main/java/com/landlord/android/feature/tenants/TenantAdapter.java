@@ -17,7 +17,7 @@ public class TenantAdapter extends ListAdapter<TenantEntity, TenantAdapter.VH> {
     private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnTenantClick {
-        void onClick(TenantEntity entity);
+        void onClick(TenantEntity entity, View cardView);
     }
 
     private final OnTenantClick onClick;
@@ -58,7 +58,8 @@ public class TenantAdapter extends ListAdapter<TenantEntity, TenantAdapter.VH> {
             holder.badge.setText(entity.sync.syncState == SyncState.CONFLICT
                     ? "Sync issue" : "Pending sync");
         }
-        holder.itemView.setOnClickListener(v -> onClick.onClick(entity));
+        holder.itemView.setTransitionName("tenant_card_" + entity.localId);
+        holder.itemView.setOnClickListener(v -> onClick.onClick(entity, holder.itemView));
     }
 
     static class VH extends RecyclerView.ViewHolder {

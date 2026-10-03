@@ -22,6 +22,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.FormBottomSheet;
 import com.landlord.android.feature.properties.UnitEntity;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -154,19 +155,14 @@ public class MaintenanceFragment extends Fragment {
         unitSpinner.setAdapter(new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, labels));
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Report maintenance issue")
-                .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    int selected = unitSpinner.getSelectedItemPosition();
-                    if (selected < 0 || selected >= availableUnits.size()) return;
+        FormBottomSheet.show(requireContext(), "Report maintenance issue", "Save", dialogView, () -> {
+            int selected = unitSpinner.getSelectedItemPosition();
+            if (selected < 0 || selected >= availableUnits.size()) return;
 
-                    String description = String.valueOf(descriptionInput.getText()).trim();
-                    if (description.isEmpty()) return;
+            String description = String.valueOf(descriptionInput.getText()).trim();
+            if (description.isEmpty()) return;
 
-                    viewModel.createTicket(availableUnits.get(selected).localId, description);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            viewModel.createTicket(availableUnits.get(selected).localId, description);
+        });
     }
 }

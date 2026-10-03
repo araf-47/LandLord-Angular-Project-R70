@@ -11,12 +11,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.FragmentNavigator;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncScheduler;
+import com.landlord.android.core.ui.FormBottomSheet;
 
 public class PropertiesFragment extends Fragment {
 
@@ -47,10 +48,13 @@ public class PropertiesFragment extends Fragment {
             view.postDelayed(() -> refreshLayout.setRefreshing(false), 800);
         });
 
-        adapter = new PropertyAdapter(entity -> {
+        adapter = new PropertyAdapter((entity, cardView) -> {
             Bundle args = new Bundle();
             args.putString("propertyLocalId", entity.localId);
-            Navigation.findNavController(view).navigate(R.id.action_properties_to_detail, args);
+            FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                    .addSharedElement(cardView, cardView.getTransitionName())
+                    .build();
+            Navigation.findNavController(view).navigate(R.id.action_properties_to_detail, args, null, extras);
         });
         list.setLayoutManager(new LinearLayoutManager(requireContext()));
         list.setAdapter(adapter);
@@ -73,23 +77,18 @@ public class PropertiesFragment extends Fragment {
         TextInputEditText area = dialogView.findViewById(R.id.input_area);
         TextInputEditText type = dialogView.findViewById(R.id.input_type);
 
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Add property")
-                .setView(dialogView)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String nameValue = String.valueOf(name.getText()).trim();
-                    String addressValue = String.valueOf(address.getText()).trim();
-                    if (nameValue.isEmpty() || addressValue.isEmpty()) return;
+        FormBottomSheet.show(requireContext(), "Add property", "Save", dialogView, () -> {
+            String nameValue = String.valueOf(name.getText()).trim();
+            String addressValue = String.valueOf(address.getText()).trim();
+            if (nameValue.isEmpty() || addressValue.isEmpty()) return;
 
-                    viewModel.createProperty(
-                            nameValue,
-                            addressValue,
-                            String.valueOf(district.getText()).trim(),
-                            String.valueOf(area.getText()).trim(),
-                            String.valueOf(type.getText()).trim()
-                    );
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+            viewModel.createProperty(
+                    nameValue,
+                    addressValue,
+                    String.valueOf(district.getText()).trim(),
+                    String.valueOf(area.getText()).trim(),
+                    String.valueOf(type.getText()).trim()
+            );
+        });
     }
 }
