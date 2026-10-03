@@ -20,6 +20,9 @@ public interface InvoiceDao {
     @Query("SELECT * FROM invoices WHERE deleted_locally = 0 ORDER BY createdAt DESC")
     LiveData<List<InvoiceEntity>> observeAll();
 
+    @Query("SELECT * FROM invoices WHERE deleted_locally = 0")
+    List<InvoiceEntity> getAllSync();
+
     @Query("SELECT * FROM invoices WHERE localId = :localId LIMIT 1")
     InvoiceEntity findByLocalId(String localId);
 

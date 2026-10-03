@@ -20,6 +20,9 @@ public interface TenantDao {
     @Query("SELECT * FROM tenants WHERE deleted_locally = 0 ORDER BY createdAt DESC")
     LiveData<List<TenantEntity>> observeAll();
 
+    @Query("SELECT * FROM tenants WHERE deleted_locally = 0")
+    List<TenantEntity> getAllSync();
+
     @Query("SELECT * FROM tenants WHERE localId = :localId LIMIT 1")
     TenantEntity findByLocalId(String localId);
 

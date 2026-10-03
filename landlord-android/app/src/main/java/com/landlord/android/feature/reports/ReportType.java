@@ -5,7 +5,10 @@ public enum ReportType {
     EXPENSE_REPORT("Expense report", true, true, false, true, true),
     OCCUPANCY_REPORT("Occupancy report", false, true, false, false, true),
     TENANT_LEDGER("Tenant ledger", true, false, true, false, true),
-    FULL_REPORT("Full report (combined)", true, true, false, false, false);
+    FULL_REPORT("Full report (combined)", true, true, false, false, false),
+    /** Computed entirely on-device from already-synced Invoice/Tenant tables -
+     *  no backend endpoint exists for this one, so PDF/XLSX export isn't offered. */
+    TENANT_DUES("Tenant dues", false, false, false, false, true);
 
     public final String label;
     public final boolean needsDateRange;

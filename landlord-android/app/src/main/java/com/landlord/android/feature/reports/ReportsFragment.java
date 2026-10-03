@@ -180,6 +180,10 @@ public class ReportsFragment extends Fragment {
 
     private void onExport(boolean pdf) {
         ReportType type = selectedType();
+        if (type == ReportType.TENANT_DUES) {
+            Snackbar.make(requireView(), "Tenant dues is view-only for now - tap \"View\"", Snackbar.LENGTH_LONG).show();
+            return;
+        }
         progress.setVisibility(View.VISIBLE);
 
         retrofit2.Call<okhttp3.ResponseBody> call = viewModel.buildExportCall(

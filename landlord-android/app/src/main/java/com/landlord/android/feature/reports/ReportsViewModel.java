@@ -9,12 +9,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.landlord.android.core.common.AppExecutors;
 import com.landlord.android.core.common.Result;
 import com.landlord.android.core.db.AppDatabase;
 import com.landlord.android.core.network.NetworkModule;
+import com.landlord.android.feature.payments.InvoiceEntity;
 import com.landlord.android.feature.properties.PropertyEntity;
 import com.landlord.android.feature.tenants.TenantEntity;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -41,8 +45,14 @@ public class ReportsViewModel extends AndroidViewModel {
 
     public LiveData<Result<String>> viewJson(ReportType type, String startDate, String endDate,
                                               Long propertyId, Long tenantId, String category) {
-        Call<ResponseBody> call = buildJsonCall(type, startDate, endDate, propertyId, tenantId, category);
         MutableLiveData<Result<String>> result = new MutableLiveData<>(Result.loading());
+
+        if (type == ReportType.TENANT_DUES) {
+            AppExecutors.DB.execute(() -> result.postValue(Result.success(buildTenantDuesJson())));
+            return result;
+        }
+
+        Call<ResponseBody> call = buildJsonCall(type, startDate, endDate, propertyId, tenantId, category);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -69,6 +79,31 @@ public class ReportsViewModel extends AndroidViewModel {
         return result;
     }
 
+    private String buildTenantDuesJson() {
+        AppDatabase db = AppDatabase.getInstance(getApplication());
+        List<InvoiceEntity> invoices = db.invoiceDao().getAllSync();
+        List<TenantEntity> tenants = db.tenantDao().getAllSync();
+
+        java.util.Map<String, Double> balanceByTenant = new java.util.HashMap<>();
+        java.util.Map<String, Boolean> hasUnpaidByTenant = new java.util.HashMap<>();
+        for (InvoiceEntity invoice : invoices) {
+            if ("paid".equals(invoice.status) || invoice.tenantLocalId == null || invoice.balance == null) continue;
+            balanceByTenant.merge(invoice.tenantLocalId, invoice.balance, Double::sum);
+            if ("unpaid".equals(invoice.status)) hasUnpaidByTenant.put(invoice.tenantLocalId, true);
+        }
+
+        List<TenantDueRow> rows = new ArrayList<>();
+        for (TenantEntity tenant : tenants) {
+            if (!"active".equals(tenant.status)) continue;
+            Double due = balanceByTenant.get(tenant.localId);
+            if (due == null || due <= 0) continue;
+            String status = Boolean.TRUE.equals(hasUnpaidByTenant.get(tenant.localId)) ? "unpaid" : "partial";
+            rows.add(new TenantDueRow(tenant.name, due, status));
+        }
+        Collections.sort(rows, (a, b) -> Double.compare(b.totalDue, a.totalDue));
+        return prettyGson.toJson(rows);
+    }
+
     public Call<ResponseBody> buildExportCall(ReportType type, boolean pdf, String startDate, String endDate,
                                                Long propertyId, Long tenantId, String category) {
         switch (type) {
@@ -83,6 +118,8 @@ public class ReportsViewModel extends AndroidViewModel {
             case TENANT_LEDGER:
                 return pdf ? api.tenantLedgerPdf(tenantId, startDate, endDate)
                         : api.tenantLedgerXlsx(tenantId, startDate, endDate);
+            case TENANT_DUES:
+                throw new IllegalArgumentException("Tenant dues has no backend export - caller must check hasJsonView/type first");
             case FULL_REPORT:
             default:
                 return pdf ? api.fullReportPdf(startDate, endDate, propertyId)
