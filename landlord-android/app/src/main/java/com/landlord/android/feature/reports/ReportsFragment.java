@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -41,6 +43,12 @@ public class ReportsFragment extends Fragment {
     private TextInputEditText categoryInput;
     private ProgressBar progress;
     private TextView output;
+    private View jsonCard;
+    private View tenantDuesCard;
+    private TextView tenantDuesSummary;
+    private TextView tenantDuesEmpty;
+    private RecyclerView tenantDuesList;
+    private TenantDuesAdapter tenantDuesAdapter;
 
     @Nullable
     @Override
@@ -71,6 +79,14 @@ public class ReportsFragment extends Fragment {
         categoryInput = view.findViewById(R.id.input_category);
         progress = view.findViewById(R.id.report_progress);
         output = view.findViewById(R.id.report_json_output);
+        jsonCard = view.findViewById(R.id.report_json_card);
+        tenantDuesCard = view.findViewById(R.id.tenant_dues_card);
+        tenantDuesSummary = view.findViewById(R.id.tenant_dues_summary);
+        tenantDuesEmpty = view.findViewById(R.id.tenant_dues_empty);
+        tenantDuesList = view.findViewById(R.id.tenant_dues_list);
+        tenantDuesAdapter = new TenantDuesAdapter();
+        tenantDuesList.setLayoutManager(new LinearLayoutManager(requireContext()));
+        tenantDuesList.setAdapter(tenantDuesAdapter);
 
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, labelsOf(ReportType.values()));
@@ -123,6 +139,8 @@ public class ReportsFragment extends Fragment {
         tenantRow.setVisibility(type.needsTenant ? View.VISIBLE : View.GONE);
         categoryRow.setVisibility(type.needsCategory ? View.VISIBLE : View.GONE);
         requireView().findViewById(R.id.view_report_button).setEnabled(type.hasJsonView);
+        jsonCard.setVisibility(View.GONE);
+        tenantDuesCard.setVisibility(View.GONE);
     }
 
     private ReportType selectedType() {
@@ -163,6 +181,13 @@ public class ReportsFragment extends Fragment {
             return;
         }
 
+        if (type == ReportType.TENANT_DUES) {
+            onViewTenantDues();
+            return;
+        }
+
+        jsonCard.setVisibility(View.VISIBLE);
+        tenantDuesCard.setVisibility(View.GONE);
         progress.setVisibility(View.VISIBLE);
         output.setText("");
 
@@ -176,6 +201,30 @@ public class ReportsFragment extends Fragment {
                         output.setText("Error: " + ((Result.Error<?>) result).message);
                     }
                 });
+    }
+
+    private void onViewTenantDues() {
+        jsonCard.setVisibility(View.GONE);
+        tenantDuesCard.setVisibility(View.VISIBLE);
+        progress.setVisibility(View.VISIBLE);
+
+        viewModel.viewTenantDues().observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Loading) return;
+            progress.setVisibility(View.GONE);
+            if (!(result instanceof Result.Success)) return;
+
+            List<TenantDueRow> rows = ((Result.Success<List<TenantDueRow>>) result).data;
+            tenantDuesAdapter.submitList(rows);
+            tenantDuesEmpty.setVisibility(rows.isEmpty() ? View.VISIBLE : View.GONE);
+            tenantDuesList.setVisibility(rows.isEmpty() ? View.GONE : View.VISIBLE);
+
+            double total = 0;
+            for (TenantDueRow row : rows) total += row.totalDue;
+            tenantDuesSummary.setText(rows.isEmpty()
+                    ? "All active tenants are paid up"
+                    : String.format(java.util.Locale.getDefault(),
+                            "%d tenant%s owe a total of %.2f", rows.size(), rows.size() == 1 ? "" : "s", total));
+        });
     }
 
     private void onExport(boolean pdf) {

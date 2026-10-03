@@ -46,12 +46,6 @@ public class ReportsViewModel extends AndroidViewModel {
     public LiveData<Result<String>> viewJson(ReportType type, String startDate, String endDate,
                                               Long propertyId, Long tenantId, String category) {
         MutableLiveData<Result<String>> result = new MutableLiveData<>(Result.loading());
-
-        if (type == ReportType.TENANT_DUES) {
-            AppExecutors.DB.execute(() -> result.postValue(Result.success(buildTenantDuesJson())));
-            return result;
-        }
-
         Call<ResponseBody> call = buildJsonCall(type, startDate, endDate, propertyId, tenantId, category);
 
         call.enqueue(new Callback<ResponseBody>() {
@@ -79,7 +73,13 @@ public class ReportsViewModel extends AndroidViewModel {
         return result;
     }
 
-    private String buildTenantDuesJson() {
+    public LiveData<Result<List<TenantDueRow>>> viewTenantDues() {
+        MutableLiveData<Result<List<TenantDueRow>>> result = new MutableLiveData<>(Result.loading());
+        AppExecutors.DB.execute(() -> result.postValue(Result.success(buildTenantDuesRows())));
+        return result;
+    }
+
+    private List<TenantDueRow> buildTenantDuesRows() {
         AppDatabase db = AppDatabase.getInstance(getApplication());
         List<InvoiceEntity> invoices = db.invoiceDao().getAllSync();
         List<TenantEntity> tenants = db.tenantDao().getAllSync();
@@ -101,7 +101,7 @@ public class ReportsViewModel extends AndroidViewModel {
             rows.add(new TenantDueRow(tenant.name, due, status));
         }
         Collections.sort(rows, (a, b) -> Double.compare(b.totalDue, a.totalDue));
-        return prettyGson.toJson(rows);
+        return rows;
     }
 
     public Call<ResponseBody> buildExportCall(ReportType type, boolean pdf, String startDate, String endDate,
