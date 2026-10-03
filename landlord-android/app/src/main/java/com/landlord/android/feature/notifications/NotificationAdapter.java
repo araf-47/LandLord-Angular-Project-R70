@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class NotificationAdapter extends ListAdapter<NotificationEntity, NotificationAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnClick {
         void onClick(NotificationEntity entity);
@@ -44,6 +47,7 @@ public class NotificationAdapter extends ListAdapter<NotificationEntity, Notific
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         NotificationEntity entity = getItem(position);
         holder.title.setText(entity.title);
         holder.body.setText(entity.body);

@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.landlord.android.core.sync.SyncScheduler;
 
 public class LedgerFragment extends Fragment {
 
@@ -24,6 +26,13 @@ public class LedgerFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.ledger_list_refresh);
+        refreshLayout.setColorSchemeResources(R.color.md_primary);
+        refreshLayout.setOnRefreshListener(() -> {
+            SyncScheduler.requestImmediateSync(requireContext().getApplicationContext());
+            view.postDelayed(() -> refreshLayout.setRefreshing(false), 800);
+        });
 
         LedgerViewModel viewModel = new ViewModelProvider(this,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))

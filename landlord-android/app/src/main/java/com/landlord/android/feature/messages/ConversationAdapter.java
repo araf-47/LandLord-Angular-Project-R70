@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class ConversationAdapter extends ListAdapter<ConversationEntity, ConversationAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnClick {
         void onClick(ConversationEntity entity);
@@ -44,6 +47,7 @@ public class ConversationAdapter extends ListAdapter<ConversationEntity, Convers
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         ConversationEntity entity = getItem(position);
         holder.name.setText(entity.withName);
         if (entity.sync.syncState == SyncState.SYNCED) {

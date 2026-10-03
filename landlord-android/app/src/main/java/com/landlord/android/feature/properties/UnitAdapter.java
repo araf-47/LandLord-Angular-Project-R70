@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class UnitAdapter extends ListAdapter<UnitEntity, UnitAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public UnitAdapter() {
         super(new DiffUtil.ItemCallback<UnitEntity>() {
@@ -37,6 +40,7 @@ public class UnitAdapter extends ListAdapter<UnitEntity, UnitAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         UnitEntity entity = getItem(position);
         holder.number.setText(entity.unitNumber);
         holder.rentStatus.setText("Rent: " + entity.rent + " - " + entity.status);

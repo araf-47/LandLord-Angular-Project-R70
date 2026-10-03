@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class TenantAdapter extends ListAdapter<TenantEntity, TenantAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnTenantClick {
         void onClick(TenantEntity entity);
@@ -44,6 +47,7 @@ public class TenantAdapter extends ListAdapter<TenantEntity, TenantAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         TenantEntity entity = getItem(position);
         holder.name.setText(entity.name);
         holder.contact.setText(entity.phone + " - " + entity.status);

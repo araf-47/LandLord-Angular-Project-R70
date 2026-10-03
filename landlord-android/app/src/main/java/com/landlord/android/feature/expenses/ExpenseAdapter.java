@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class ExpenseAdapter extends ListAdapter<ExpenseEntity, ExpenseAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public ExpenseAdapter() {
         super(new DiffUtil.ItemCallback<ExpenseEntity>() {
@@ -37,6 +40,7 @@ public class ExpenseAdapter extends ListAdapter<ExpenseEntity, ExpenseAdapter.VH
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         ExpenseEntity entity = getItem(position);
         holder.category.setText(entity.category);
         holder.amount.setText(entity.amount + " - " + entity.bearer);

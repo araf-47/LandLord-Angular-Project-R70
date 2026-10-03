@@ -9,8 +9,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:background="@drawable/bg_message_bubble"
-        android:padding="12dp"
+        android:background="@drawable/bg_message_bubble_theirs"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="10dp"
         android:textAppearance="?attr/textAppearanceBodyMedium"
         tools:text="Hello, when can I expect the repair?" />
 

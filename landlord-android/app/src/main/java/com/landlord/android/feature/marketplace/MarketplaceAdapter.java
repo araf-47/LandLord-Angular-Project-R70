@@ -11,8 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class MarketplaceAdapter extends ListAdapter<MarketplaceRequestEntity, MarketplaceAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnDecision {
         void onApprove(MarketplaceRequestEntity entity);
@@ -46,6 +49,7 @@ public class MarketplaceAdapter extends ListAdapter<MarketplaceRequestEntity, Ma
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         MarketplaceRequestEntity entity = getItem(position);
         holder.applicant.setText(entity.applicantName);
         holder.status.setText(entity.status);

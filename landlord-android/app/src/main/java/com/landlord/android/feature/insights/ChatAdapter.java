@@ -7,19 +7,30 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.R.attr;
+import com.google.android.material.color.MaterialColors;
 import com.landlord.android.R;
-import java.util.ArrayList;
-import java.util.List;
+import com.landlord.android.core.ui.ListAnimations;
 
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.VH> {
+public class ChatAdapter extends ListAdapter<ChatMessage, ChatAdapter.VH> {
 
-    private final List<ChatMessage> items = new ArrayList<>();
+    private final ListAnimations listAnimations = new ListAnimations();
 
-    public void submitList(List<ChatMessage> messages) {
-        items.clear();
-        items.addAll(messages);
-        notifyDataSetChanged();
+    public ChatAdapter() {
+        super(new DiffUtil.ItemCallback<ChatMessage>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull ChatMessage a, @NonNull ChatMessage b) {
+                return a == b;
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull ChatMessage a, @NonNull ChatMessage b) {
+                return a.text.equals(b.text) && a.fromUser == b.fromUser && a.isError == b.isError;
+            }
+        });
     }
 
     @NonNull
@@ -32,18 +43,22 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        ChatMessage message = items.get(position);
+        listAnimations.animate(holder.itemView, position);
+        ChatMessage message = getItem(position);
         holder.text.setText(message.text);
-        holder.text.setTextColor(message.isError ? 0xFFB3261E : 0xFF000000);
 
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) holder.text.getLayoutParams();
         params.gravity = message.fromUser ? Gravity.END : Gravity.START;
         holder.text.setLayoutParams(params);
-    }
 
-    @Override
-    public int getItemCount() {
-        return items.size();
+        holder.text.setBackgroundResource(message.fromUser
+                ? R.drawable.bg_message_bubble_mine
+                : R.drawable.bg_message_bubble_theirs);
+
+        int textColorAttr = message.isError
+                ? attr.colorError
+                : (message.fromUser ? attr.colorOnPrimaryContainer : attr.colorOnSurface);
+        holder.text.setTextColor(MaterialColors.getColor(holder.text, textColorAttr));
     }
 
     static class VH extends RecyclerView.ViewHolder {

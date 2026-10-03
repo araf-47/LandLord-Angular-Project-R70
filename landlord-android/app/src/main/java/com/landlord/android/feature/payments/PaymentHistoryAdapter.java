@@ -11,8 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class PaymentHistoryAdapter extends ListAdapter<PaymentEntity, PaymentHistoryAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnReceiptClick {
         void onClick(PaymentEntity entity);
@@ -45,6 +48,7 @@ public class PaymentHistoryAdapter extends ListAdapter<PaymentEntity, PaymentHis
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         PaymentEntity entity = getItem(position);
         holder.amount.setText(entity.amount + " - " + entity.method);
 

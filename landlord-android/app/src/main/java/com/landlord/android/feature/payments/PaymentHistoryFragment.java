@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 import com.landlord.android.R;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.landlord.android.core.sync.SyncScheduler;
 
 public class PaymentHistoryFragment extends Fragment {
 
@@ -25,6 +27,13 @@ public class PaymentHistoryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.payment_history_list_refresh);
+        refreshLayout.setColorSchemeResources(R.color.md_primary);
+        refreshLayout.setOnRefreshListener(() -> {
+            SyncScheduler.requestImmediateSync(requireContext().getApplicationContext());
+            view.postDelayed(() -> refreshLayout.setRefreshing(false), 800);
+        });
 
         PaymentHistoryViewModel viewModel = new ViewModelProvider(this,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))

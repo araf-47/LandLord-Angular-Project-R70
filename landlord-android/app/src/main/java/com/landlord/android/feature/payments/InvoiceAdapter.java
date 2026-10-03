@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class InvoiceAdapter extends ListAdapter<InvoiceEntity, InvoiceAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnInvoiceClick {
         void onClick(InvoiceEntity entity);
@@ -46,6 +49,7 @@ public class InvoiceAdapter extends ListAdapter<InvoiceEntity, InvoiceAdapter.VH
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         InvoiceEntity entity = getItem(position);
         holder.period.setText("Invoice" + (entity.period != null ? " - " + entity.period : " (generating...)"));
         String balanceText = entity.balance != null ? String.valueOf(entity.balance) : "?";

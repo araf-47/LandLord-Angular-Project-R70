@@ -10,9 +10,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.R.attr;
+import com.google.android.material.color.MaterialColors;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class MessageBubbleAdapter extends ListAdapter<MessageEntity, MessageBubbleAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public MessageBubbleAdapter() {
         super(new DiffUtil.ItemCallback<MessageEntity>() {
@@ -38,6 +43,7 @@ public class MessageBubbleAdapter extends ListAdapter<MessageEntity, MessageBubb
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         MessageEntity entity = getItem(position);
         boolean fromLandlord = "landlord".equals(entity.senderRole);
         holder.text.setText(entity.text + (entity.sync.syncState.name().startsWith("PENDING") ? " (sending...)" : ""));
@@ -45,6 +51,12 @@ public class MessageBubbleAdapter extends ListAdapter<MessageEntity, MessageBubb
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) holder.text.getLayoutParams();
         params.gravity = fromLandlord ? Gravity.END : Gravity.START;
         holder.text.setLayoutParams(params);
+
+        holder.text.setBackgroundResource(fromLandlord
+                ? R.drawable.bg_message_bubble_mine
+                : R.drawable.bg_message_bubble_theirs);
+        holder.text.setTextColor(MaterialColors.getColor(holder.text,
+                fromLandlord ? attr.colorOnPrimaryContainer : attr.colorOnSurface));
     }
 
     static class VH extends RecyclerView.ViewHolder {

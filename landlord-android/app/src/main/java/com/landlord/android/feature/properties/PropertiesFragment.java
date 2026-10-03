@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -12,10 +11,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.navigation.Navigation;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.landlord.android.R;
+import com.landlord.android.core.sync.SyncScheduler;
 
 public class PropertiesFragment extends Fragment {
 
@@ -37,8 +38,14 @@ public class PropertiesFragment extends Fragment {
                 .get(PropertiesViewModel.class);
 
         RecyclerView list = view.findViewById(R.id.properties_list);
-        TextView empty = view.findViewById(R.id.properties_empty);
+        View empty = view.findViewById(R.id.properties_empty);
         FloatingActionButton fab = view.findViewById(R.id.add_property_fab);
+        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.properties_refresh);
+        refreshLayout.setColorSchemeResources(R.color.md_primary);
+        refreshLayout.setOnRefreshListener(() -> {
+            SyncScheduler.requestImmediateSync(requireContext().getApplicationContext());
+            view.postDelayed(() -> refreshLayout.setRefreshing(false), 800);
+        });
 
         adapter = new PropertyAdapter(entity -> {
             Bundle args = new Bundle();

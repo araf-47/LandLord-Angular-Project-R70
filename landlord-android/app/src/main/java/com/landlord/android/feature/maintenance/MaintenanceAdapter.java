@@ -11,8 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class MaintenanceAdapter extends ListAdapter<MaintenanceTicketEntity, MaintenanceAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnTicketClick {
         void onClick(MaintenanceTicketEntity entity);
@@ -53,6 +56,7 @@ public class MaintenanceAdapter extends ListAdapter<MaintenanceTicketEntity, Mai
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         MaintenanceTicketEntity entity = getItem(position);
         holder.description.setText(entity.description);
         holder.status.setText(entity.status);

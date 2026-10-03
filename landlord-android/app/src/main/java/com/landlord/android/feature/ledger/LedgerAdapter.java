@@ -1,6 +1,5 @@
 package com.landlord.android.feature.ledger;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +8,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.R.attr;
+import com.google.android.material.color.MaterialColors;
 import com.landlord.android.R;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class LedgerAdapter extends ListAdapter<LedgerEntry, LedgerAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public LedgerAdapter() {
         super(new DiffUtil.ItemCallback<LedgerEntry>() {
@@ -37,11 +41,13 @@ public class LedgerAdapter extends ListAdapter<LedgerEntry, LedgerAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         LedgerEntry entry = getItem(position);
         holder.description.setText(entry.description);
         holder.type.setText(entry.type + (entry.syncBadge != null ? " - " + entry.syncBadge : ""));
         holder.amount.setText((entry.amount >= 0 ? "+" : "") + entry.amount);
-        holder.amount.setTextColor(entry.amount >= 0 ? Color.parseColor("#2E6F40") : Color.parseColor("#B3261E"));
+        holder.amount.setTextColor(MaterialColors.getColor(holder.amount,
+                entry.amount >= 0 ? attr.colorPrimary : attr.colorError));
     }
 
     static class VH extends RecyclerView.ViewHolder {

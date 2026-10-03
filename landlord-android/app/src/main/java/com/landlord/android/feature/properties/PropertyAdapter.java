@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
 import com.landlord.android.core.sync.SyncState;
+import com.landlord.android.core.ui.ListAnimations;
 
 public class PropertyAdapter extends ListAdapter<PropertyEntity, PropertyAdapter.VH> {
+
+    private final ListAnimations listAnimations = new ListAnimations();
 
     public interface OnPropertyClick {
         void onClick(PropertyEntity entity);
@@ -44,6 +47,7 @@ public class PropertyAdapter extends ListAdapter<PropertyEntity, PropertyAdapter
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        listAnimations.animate(holder.itemView, position);
         PropertyEntity entity = getItem(position);
         holder.name.setText(entity.name);
         holder.address.setText(entity.address);

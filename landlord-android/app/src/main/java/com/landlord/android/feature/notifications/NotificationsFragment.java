@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.landlord.android.R;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.landlord.android.core.sync.SyncScheduler;
 
 public class NotificationsFragment extends Fragment {
 
@@ -24,6 +26,13 @@ public class NotificationsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.notifications_list_refresh);
+        refreshLayout.setColorSchemeResources(R.color.md_primary);
+        refreshLayout.setOnRefreshListener(() -> {
+            SyncScheduler.requestImmediateSync(requireContext().getApplicationContext());
+            view.postDelayed(() -> refreshLayout.setRefreshing(false), 800);
+        });
 
         NotificationsViewModel viewModel = new ViewModelProvider(this,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))

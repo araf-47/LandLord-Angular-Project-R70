@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="32dp">
@@ -64,7 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:textColor="#B3261E"
+        android:textColor="?attr/colorError"
         android:visibility="gone"
         tools:text="Invalid credentials" />
 

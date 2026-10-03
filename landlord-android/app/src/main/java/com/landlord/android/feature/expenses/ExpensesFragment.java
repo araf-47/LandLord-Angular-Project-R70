@@ -21,6 +21,8 @@ import com.landlord.android.R;
 import com.landlord.android.feature.properties.PropertyEntity;
 import java.util.ArrayList;
 import java.util.List;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.landlord.android.core.sync.SyncScheduler;
 
 public class ExpensesFragment extends Fragment {
 
@@ -37,6 +39,13 @@ public class ExpensesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        SwipeRefreshLayout refreshLayout = view.findViewById(R.id.expenses_list_refresh);
+        refreshLayout.setColorSchemeResources(R.color.md_primary);
+        refreshLayout.setOnRefreshListener(() -> {
+            SyncScheduler.requestImmediateSync(requireContext().getApplicationContext());
+            view.postDelayed(() -> refreshLayout.setRefreshing(false), 800);
+        });
 
         viewModel = new ViewModelProvider(this,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
